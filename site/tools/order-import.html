@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ShopWorks Bulk Order Import | Eagle Graphics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Jost:wght@600;700;800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>:root{
+--g300:#b2dd79;--g400:#94cf4a;--g500:#76bd1d;--g600:#5f9a17;--g700:#4a7812;--g800:#365711;--g900:#20340a;
+--k100:#f0f1f2;--k200:#e1e3e4;--k300:#c5c8c9;--k400:#9ca0a2;--k500:#7d8183;--k600:#63676a;--k700:#53585a;--k800:#3a3e40;--k900:#2a2d2e;
+--danger:#b42318;--danger-bg:#fdecea;--warn:#8a5d0a;--warn-bg:#fdf3e1;--ok:#1f8a4c;--ok-bg:#e6f4ec;
+--display:"Jost","Century Gothic",system-ui,sans-serif;--body:"Open Sans","Helvetica Neue",Arial,sans-serif;--mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+--ease:cubic-bezier(.4,0,.2,1);--shadow-md:0 4px 12px rgba(42,45,46,.10),0 1px 3px rgba(42,45,46,.08)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--k100);color:var(--k700);font:400 15px/1.7 var(--body)}
+:focus-visible{outline:3px solid rgba(118,189,29,.4);outline-offset:2px}
+.c{max-width:1240px;margin:0 auto;padding:0 24px}
+h1,h2,h3{margin:0;font-family:var(--display);text-transform:uppercase;color:var(--k900);text-wrap:balance}
+.eyebrow{display:block;font:600 11px/1.4 var(--display);text-transform:uppercase;letter-spacing:.18em;color:var(--g700)}
+.bar{width:48px;height:3px;background:var(--g500);margin:12px 0 0}
+header.top{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--k200)}
+.top .c{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:64px}
+.brand{display:flex;align-items:center;gap:16px;text-decoration:none;color:var(--k700)}
+.brand svg{height:40px;width:auto;display:block}
+.brand span{border-left:1px solid var(--k300);padding-left:16px;font:700 13px/1.2 var(--display);text-transform:uppercase;letter-spacing:.14em;color:var(--k900)}
+.back{font:600 12px/1 var(--display);text-transform:uppercase;letter-spacing:.1em;color:var(--k700);text-decoration:none;padding:10px 0;border-bottom:3px solid transparent}
+.back:hover{color:var(--k900);border-color:var(--g600)}
+.hero{position:relative;overflow:hidden;background:var(--k900);padding:40px 0 36px}
+.hero .wm{position:absolute;right:-40px;top:50%;transform:translateY(-50%);width:420px;max-width:60%;opacity:.06;color:#fff;pointer-events:none}
+.hero .eyebrow{color:var(--g400)}
+.hero h1{color:#fff;font-size:clamp(28px,4vw,42px);font-weight:800;line-height:1.08;margin-top:8px}
+.hero p{max-width:640px;margin:14px 0 0;color:var(--k300)}
+main{padding:32px 0 64px}
+.layout{display:grid;grid-template-columns:400px minmax(0,1fr);gap:24px;align-items:start}
+@media(max-width:940px){.layout{grid-template-columns:minmax(0,1fr)}}
+.panel{background:#fff;border:1px solid var(--k200);border-radius:4px;padding:24px;min-width:0}
+.ph{position:relative;display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:14px;margin-bottom:20px;border-bottom:1px solid var(--k200)}
+.ph::after{content:"";position:absolute;left:0;bottom:-1px;width:48px;height:3px;background:var(--g500)}
+.ph h2{font-size:17px;font-weight:700;letter-spacing:.04em}
+.field{margin:0 0 18px;border:0;padding:0;min-width:0}
+.field>label,.field legend{display:block;padding:0;margin:0 0 6px;font:600 11px/1.5 var(--display);text-transform:uppercase;letter-spacing:.16em;color:var(--k700)}
+.hint{margin:6px 0 0;font-size:12.5px;line-height:1.5;color:var(--k600)}
+input[type=text],input[type=number]{width:100%;min-height:42px;padding:8px 12px;font:400 14px/1.5 var(--body);color:var(--k900);background:#fff;border:1px solid var(--k300);border-radius:3px;transition:border-color 140ms var(--ease)}
+input[type=text]:focus-visible,input[type=number]:focus-visible{border-color:var(--g600);outline-offset:0}
+input.mono{font-family:var(--mono)}
+.drop{position:relative;display:flex;align-items:center;gap:14px;padding:16px;border:1px dashed var(--k400);border-radius:4px;background:var(--k100);cursor:pointer;transition:border-color 140ms var(--ease),background 140ms var(--ease)}
+.drop:hover,.drop.over{border-color:var(--g600);background:#f6fbef}
+.drop input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.drop svg{width:28px;height:28px;flex:none;color:var(--g600)}
+.drop b{display:block;font:600 14px/1.4 var(--body);color:var(--k900);overflow-wrap:anywhere}
+.drop small{display:block;font-size:12.5px;color:var(--k600)}
+.radios{display:flex;flex-direction:column;gap:6px}
+.radios label,.checks label{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--k800);cursor:pointer}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px}
+input[type=radio],input[type=checkbox]{width:18px;height:18px;margin:0;accent-color:var(--g700)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:3px;border:1px solid var(--k500);background:#fff;color:var(--k800);font:700 12px/1 var(--display);text-transform:uppercase;letter-spacing:.1em;cursor:pointer;text-decoration:none;transition:background 140ms var(--ease),border-color 140ms var(--ease),color 140ms var(--ease)}
+.btn:hover{background:var(--g700);border-color:var(--g700);color:#fff}
+.btn:active{background:var(--g900);border-color:var(--g900);color:#fff;transform:translateY(1px)}
+.btn:disabled{background:var(--k200);border-color:var(--k200);color:var(--k400);cursor:not-allowed;transform:none}
+.btn.primary{width:100%;min-height:52px;font-size:14px;background:var(--g700);border-color:var(--g700);color:#fff}
+.btn.primary:hover{background:var(--g800);border-color:var(--g800)}
+.btn.primary:active{background:var(--g900);border-color:var(--g900)}
+.btn svg{width:16px;height:16px}
+.linkbtn{background:none;border:0;padding:0;font:600 12.5px/1.5 var(--body);color:var(--g700);text-decoration:underline;cursor:pointer}
+.linkbtn:hover{color:var(--g800)}
+.msg{margin:0 0 16px;padding:10px 12px;border-radius:3px;font-size:13.5px;line-height:1.5;border:1px solid}
+.msg.err{color:var(--danger);background:var(--danger-bg);border-color:#f4b4ac}
+.msg.warn{color:var(--warn);background:var(--warn-bg);border-color:#f0d39a}
+.msg.ok{color:var(--ok);background:var(--ok-bg);border-color:#a9d9bd}
+.msg ul{margin:6px 0 0;padding-left:18px}
+.status{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:3px;background:var(--k100);font-size:13px;line-height:1.5}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--k400);flex:none;margin-top:6px}
+.dot.ok{background:var(--ok)}.dot.err{background:var(--danger)}.dot.busy{background:#c98a12}
+.empty{position:relative;overflow:hidden;padding:40px 32px;color:var(--k600)}
+.empty strong{display:block;font:700 18px/1.3 var(--display);text-transform:uppercase;letter-spacing:.04em;color:var(--k900);margin-bottom:6px}
+.empty .wm{position:absolute;right:-24px;bottom:-34px;width:300px;max-width:70%;opacity:.05;color:var(--k700);pointer-events:none}
+.stats{display:flex;flex-wrap:wrap;gap:12px 32px;margin-bottom:20px}
+.stat b{display:block;font:800 28px/1 var(--display);color:var(--g700)}
+.stat small{font:600 11px/1.4 var(--display);text-transform:uppercase;letter-spacing:.14em;color:var(--k600)}
+.acts{display:flex;flex-wrap:wrap;gap:8px}
+pre.out,.codes{margin:0;max-height:560px;overflow:auto;padding:16px;background:var(--k100);border:1px solid var(--k200);border-radius:3px;font:400 12.5px/1.6 var(--mono);color:var(--k900);white-space:pre;tab-size:4}
+.fname{font:500 12.5px/1.4 var(--mono);color:var(--k600);overflow-wrap:anywhere}
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--k200);margin:-4px 0 20px}
+.tabs button{flex:1;background:none;border:0;border-bottom:3px solid transparent;margin-bottom:-1px;padding:10px 8px;font:700 12px/1 var(--display);text-transform:uppercase;letter-spacing:.12em;color:var(--k600);cursor:pointer;transition:color 140ms var(--ease),border-color 140ms var(--ease)}
+.tabs button:hover{color:var(--k900)}
+.tabs button[aria-selected=true]{color:var(--k900);border-color:var(--g600)}
+.guide{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:0;padding:12px 14px;background:var(--k100);border-radius:3px;font-size:13px;line-height:1.5}
+.guide dt{font:500 13px/1.5 var(--mono);color:var(--g700)}
+.guide dd{margin:0;color:var(--k700)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(12px);opacity:0;background:var(--k900);color:#fff;padding:10px 16px;border-radius:3px;font-size:13.5px;box-shadow:var(--shadow-md);transition:opacity 200ms var(--ease),transform 200ms var(--ease);pointer-events:none;z-index:50}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+[hidden]{display:none!important}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}.btn:active{transform:none}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><symbol id="eg-head" viewBox="0 0 345.92 190.33"><path fill="currentColor" d="M0,35.87s40.31,39.02,168.4,35.17c128.09-3.85,173.84,81.37,173.84,81.37,0,0-74.93-65.41-159.94-67.51C97.28,82.82,42.68,80.09,0,35.87Z"></path><path fill="#76BD1D" d="M117.53,66.85s32.58,2.27,51.76,1.04c0,0-56.52-7.19-96.09-32.78,0,0,14.51,21.14,44.32,31.74Z"></path><path fill="#76BD1D" d="M35.04,67.24s29.79,14.84,67.38,17.07c0,0,22.57,11.59,69.71,12.64,0,0-93.43,12.5-137.09-29.71Z"></path><path fill="currentColor" d="M280.75,118.26c16.38,6.72,30.68,16.31,43.84,26,0,0-67.91-32.46-155.72-21.97,0,0,14.02,6.15,29.4,5.62,0,0-77.9,27.39-155-31.67,0,0,64.1,23.91,128.05,13.89,63.94-10.02,93.06,1.41,109.44,8.13Z"></path><path fill="#76BD1D" d="M105.34,0s47.37,33.91,104.14,45.98c40.57,8.63,79.09,41.54,79.09,41.54,0,0-16.5-3.62-21.25-.52,0,0-13.28-6.59-24.33-9.52,0,0-15.55-19.85-60.21-28.09C143.43,42.13,105.34,0,105.34,0Z"></path><path fill="currentColor" d="M114.48,12.34s23.44,21.93,39.54,29.83c0,0,2.34,9.44,23.54,18.46,0,0-43.44-12.15-63.07-48.29Z"></path><path fill="#76BD1D" d="M233.75,123.37s81.99,27.82,105.78,29.46c0,0,14.46,9.46-.11,37.5,0,0-.17-23.52-30.07-32.97-29.89-9.45-67.78-28.42-75.6-33.99Z"></path></symbol><symbol id="eg-lockup" viewBox="0 0 406.37 276.69"><path fill="currentColor" d="M25.5,237.31v-96.78h51.99v17.15h-34.05v22.79h32.61v17.15h-32.61v22.53h34.05v17.15H25.5Z"></path><path fill="currentColor" d="M160.91,237.31l-10.34-25.01h-34.44l-10.74,25.01h-19.77l40.33-96.78h14.15l40.59,96.78h-19.77ZM133.02,165.8l-10.35,29.33h20.69l-10.34-29.33Z"></path><path fill="currentColor" d="M233.6,239.01c-29.73,0-52.64-22-52.64-50.29s22.66-49.9,50.94-49.9c21.08,0,40.99,12.7,47.27,30.12h-21.09c-6.02-8.38-15.32-12.83-26.58-12.83-19.12,0-32.48,14.67-32.48,32.87s14.54,32.74,33.53,32.74c12.7,0,23.18-6.28,28.42-17.02h-40.07v-16.76h63.25v2.36c0,26.32-22,48.72-50.55,48.72Z"></path><path fill="currentColor" d="M353.56,237.31v-96.78h51.99v17.15h-34.05v22.79h32.61v17.15h-32.61v22.53h34.05v17.15h-51.99Z"></path><path fill="#76BD1D" d="M25.67,251.52c0-1.05.28-1.9.85-2.53.57-.63,1.42-.95,2.56-.95h8.2l.99,5.33h-6.3c-.34,0-.52.18-.52.55v16.99c0,.37.17.55.52.55h2.61v-11.3h5.59v16.52h-10.02c-1.66,0-2.83-.34-3.49-1.03-.66-.69-.99-1.82-.99-3.4v-20.74Z"></path><path fill="#76BD1D" d="M94.45,265.03c0,.63-.22,1.21-.65,1.74-.44.53-1.08.79-1.92.79l3.01,9.13h-5.94l-2.77-9.13h-.75v9.13h-5.75v-28.65h10.9c1.35,0,2.33.34,2.95,1.01.62.67.93,1.57.93,2.71v13.28ZM85.42,253.06v9.88h2.81c.37,0,.56-.2.56-.59v-8.69c0-.39-.19-.59-.56-.59h-2.81Z"></path><path fill="#76BD1D" d="M139.39,273.13l-.52,3.56h-5.79l5.19-28.65h6.14l5.19,28.65h-5.78l-.52-3.56h-3.92ZM140.02,268.59h2.65l-1.31-10.15-1.35,10.15Z"></path><path fill="#76BD1D" d="M199.73,248.04c1.14,0,1.99.32,2.56.95.57.63.85,1.48.85,2.53v13.71c0,.55-.06,1.06-.18,1.52-.12.46-.34.86-.65,1.21-.32.34-.74.61-1.27.81-.53.2-1.19.3-1.98.3h-4.91v7.63h-5.71v-28.65h11.29ZM194.15,253.06v11.26h2.85c.24,0,.39-.04.46-.14.07-.09.1-.24.1-.45v-10.11c0-.37-.17-.55-.52-.55h-2.89Z"></path><path fill="#76BD1D" d="M257.5,276.69h-5.86v-11.46h-3.13v11.46h-5.86v-28.65h5.86v12.25h3.13v-12.25h5.86v28.65Z"></path><path fill="#76BD1D" d="M297.13,248.04h5.75v28.65h-5.75v-28.65Z"></path><path fill="#76BD1D" d="M346.97,276.69c-1.66,0-2.83-.34-3.49-1.03-.66-.69-.99-1.82-.99-3.4v-20.7c0-1.13.32-2,.97-2.61.65-.6,1.45-.91,2.4-.91h7.57l.99,5.33h-5.51c-.34,0-.52.18-.52.55v16.87c0,.37.17.55.52.55h5.51l-1.03,5.33h-6.42Z"></path><path fill="#76BD1D" d="M394.88,276.69l-1.03-5.33h6.18c.45,0,.67-.2.67-.59v-5.22c0-.39-.08-.63-.24-.71-.16-.08-.44-.12-.83-.12h-2.97c-.42,0-.82-.03-1.21-.1-.38-.07-.73-.22-1.03-.45-.3-.24-.54-.57-.71-.99-.17-.42-.26-.99-.26-1.7v-9.72c0-1.13.31-2.03.93-2.71.62-.67,1.61-1.01,2.95-1.01h7.93l.99,5.33h-6.5c-.47,0-.71.21-.71.63v5.21c0,.29.07.49.22.59.14.11.36.16.65.16h3.61c.92,0,1.63.22,2.12.65.49.43.73,1.19.73,2.27v9.44c0,1.58-.32,2.7-.97,3.36-.65.66-1.79.99-3.43.99h-7.09Z"></path><polygon fill="currentColor" points="313.88 220.15 313.88 158.64 295.94 148.79 295.94 237.31 343.48 237.31 343.48 220.15 313.88 220.15"></polygon><path fill="currentColor" d="M0,35.87s40.31,39.02,168.4,35.17c128.09-3.85,173.84,81.37,173.84,81.37,0,0-74.93-65.41-159.94-67.51C97.28,82.82,42.68,80.09,0,35.87Z"></path><path fill="#76BD1D" d="M117.53,66.85s32.58,2.27,51.76,1.04c0,0-56.52-7.19-96.09-32.78,0,0,14.51,21.14,44.32,31.74Z"></path><path fill="#76BD1D" d="M35.04,67.24s29.79,14.84,67.38,17.07c0,0,22.57,11.59,69.71,12.64,0,0-93.43,12.5-137.09-29.71Z"></path><path fill="currentColor" d="M280.75,118.26c16.38,6.72,30.68,16.31,43.84,26,0,0-67.91-32.46-155.72-21.97,0,0,14.02,6.15,29.4,5.62,0,0-77.9,27.39-155-31.67,0,0,64.1,23.91,128.05,13.89,63.94-10.02,93.06,1.41,109.44,8.13Z"></path><path fill="#76BD1D" d="M105.34,0s47.37,33.91,104.14,45.98c40.57,8.63,79.09,41.54,79.09,41.54,0,0-16.5-3.62-21.25-.52,0,0-13.28-6.59-24.33-9.52,0,0-15.55-19.85-60.21-28.09C143.43,42.13,105.34,0,105.34,0Z"></path><path fill="currentColor" d="M114.48,12.34s23.44,21.93,39.54,29.83c0,0,2.34,9.44,23.54,18.46,0,0-43.44-12.15-63.07-48.29Z"></path><path fill="#76BD1D" d="M233.75,123.37s81.99,27.82,105.78,29.46c0,0,14.46,9.46-.11,37.5,0,0-.17-23.52-30.07-32.97-29.89-9.45-67.78-28.42-75.6-33.99Z"></path></symbol></defs></svg>
+<header class="top"><div class="c">
+  <a class="brand" href="/" aria-label="Back to Project Hub"><svg viewBox="0 0 406.37 276.69" style="color:#53585a" role="img" aria-label="Eagle Graphics"><use href="#eg-lockup"/></svg><span>Project Hub</span></a>
+  <a class="back" href="/">All Tools</a>
+</div></header>
+
+<div class="hero"><div class="c">
+  <svg class="wm" viewBox="0 0 345.92 190.33" aria-hidden="true"><use href="#eg-head"/></svg>
+  <span class="eyebrow">Order Entry</span>
+  <h1>ShopWorks Bulk Order Import</h1>
+  <div class="bar"></div>
+  <p>Turn a bulk order CSV into a ShopWorks import file. Rows are grouped into orders by order type and design, sizes are mapped from the shared translation sheet, and the file downloads straight to your computer.</p>
+</div></div>
+
+<main><div class="c layout">
+  <form class="panel" id="form" novalidate>
+    <div class="ph"><h2>Order Details</h2></div>
+    <p class="msg err" id="err" role="alert" hidden></p>
+
+    <div class="field">
+      <label for="file">Input File</label>
+      <div class="drop" id="drop">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M8 13h2"/><path d="M14 13h2"/><path d="M8 17h2"/><path d="M14 17h2"/></svg>
+        <div><b id="fileName">Choose a CSV or drop it here</b><small id="fileMeta">Columns from the GUI order template</small></div>
+        <input type="file" id="file" accept=".csv,text/csv">
+      </div>
+      <p class="hint">Need the layout? <a href="/downloads/GUITemplate.csv" download>Download the CSV template</a>.</p>
+    </div>
+
+    <div class="field">
+      <label for="cid">Customer ID</label>
+      <input type="text" id="cid" autocomplete="off" placeholder="e.g. 12345">
+    </div>
+    <div class="field">
+      <label for="po">Customer Purchase Order</label>
+      <input type="text" id="po" autocomplete="off" placeholder="Optional">
+    </div>
+
+    <fieldset class="field">
+      <legend>Bulk Option</legend>
+      <div class="radios">
+        <label><input type="radio" name="src" value="OMG Bulk" checked> OMG Bulk</label>
+        <label><input type="radio" name="src" value="Brightsites Bulk"> Brightsites Bulk</label>
+        <label><input type="radio" name="src" value="Generic Bulk"> Generic Bulk</label>
+      </div>
+    </fieldset>
+
+    <div class="field">
+      <label>Size Translation Table</label>
+      <div class="status"><span class="dot busy" id="tDot"></span><div><span id="tText">Loading from the shared Google Sheet…</span><br><button type="button" class="linkbtn" id="tPick">Use a CSV file instead</button><input type="file" id="tFile" accept=".csv,text/csv" hidden></div></div>
+    </div>
+
+    <button class="btn primary" type="submit" id="run">Create Import File</button>
+  </form>
+
+  <section id="out" aria-live="polite">
+    <div class="panel empty" id="empty">
+      <svg class="wm" viewBox="0 0 345.92 190.33" aria-hidden="true"><use href="#eg-head"/></svg>
+      <strong>No File Yet</strong>
+      Pick your CSV, enter the customer ID and click Create Import File. You'll see a preview here before you download.
+    </div>
+    <div class="panel" id="result" hidden>
+      <div class="ph"><h2>Import File Ready</h2><span class="fname" id="rName"></span></div>
+      <div class="stats" id="rStats"></div>
+      <div id="rWarn"></div>
+      <div class="acts" style="margin-bottom:16px">
+        <button class="btn primary" type="button" id="dl" style="width:auto;min-height:44px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>Download .txt</button>
+        <button class="btn" type="button" id="copy">Copy Text</button>
+        <button class="btn" type="button" id="again">Enter New Order</button>
+      </div>
+      <pre class="out" id="rText"></pre>
+    </div>
+  </section>
+</div></main>
+<div class="toast" id="toast" role="status"></div>
+
+<script>/* ShopWorks bulk order import: a line-for-line port of GUI_V2's app.py. */
+const OrderCore = (() => {
+  const TRANSLATION_TABLE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRs-VR8_PxTNo9kQpny0K9zjhJz347zUggBa6cDqQ6BYVFDNzoOyQZq2M3E15GMlDU0UeHts_Sr6NnJ/pub?output=csv";
+  const CUSTOM_PACKAGE_ID = "23804";
+
+  /* RFC 4180 CSV parser, matching Python's csv module for normal input. */
+  function parseCSV(text) {
+    if (text.charCodeAt(0) === 0xfeff) text = text.slice(1);
+    const rows = []; let row = [], f = "", i = 0, q = false;
+    while (i < text.length) {
+      const ch = text[i];
+      if (q) {
+        if (ch === '"') { if (text[i + 1] === '"') { f += '"'; i += 2; continue; } q = false; i++; continue; }
+        f += ch; i++; continue;
+      }
+      if (ch === '"') { q = true; i++; continue; }
+      if (ch === ",") { row.push(f); f = ""; i++; continue; }
+      if (ch === "\r" || ch === "\n") {
+        row.push(f); f = ""; rows.push(row); row = [];
+        if (ch === "\r" && text[i + 1] === "\n") i++;
+        i++; continue;
+      }
+      f += ch; i++;
+    }
+    if (f !== "" || row.length) { row.push(f); rows.push(row); }
+    return rows;
+  }
+  /* Like csv.DictReader: first row is the header, blank lines skipped. */
+  function dictRows(text) {
+    const rows = parseCSV(text).filter(r => !(r.length === 1 && r[0] === "") && r.length);
+    if (!rows.length) return { fields: [], data: [] };
+    const fields = rows[0];
+    const data = rows.slice(1).map(r => { const o = {}; fields.forEach((k, j) => { o[k] = r[j] ?? ""; }); return o; });
+    return { fields, data };
+  }
+  const g = (row, k) => (row[k] ?? "");
+
+  function parseTranslationTable(text) {
+    const { fields, data } = dictRows(text);
+    const req = ["Webstore Size", "sku_modifier", "size"];
+    if (!req.every(c => fields.includes(c)))
+      throw new Error(`Missing required columns in translation table CSV. Expected: ${req.join(", ")}. Found: ${fields.join(", ")}`);
+    const table = {};
+    for (const row of data) {
+      const key = g(row, "Webstore Size").replaceAll("'", "").trim().toLowerCase();
+      table[key] = { sku_modifier: g(row, "sku_modifier"), size_req_name: g(row, "size") };
+    }
+    return table;
+  }
+
+  function parseDesign(s) {
+    if (!s || s.trim() === "") return null;
+    const t = s.trim(), k = t.indexOf("-");
+    const id = (k < 0 ? t : t.slice(0, k)).trim();
+    const color = k < 0 ? null : t.slice(k + 1).trim();
+    return id ? { id, color } : null;
+  }
+  function parseLocation(s) { const t = s.trim(); return t ? { id: "", name: t } : null; }
+  function getPrice(p) {
+    if (!p) return "0.00";
+    const c = p.replaceAll("$", "").replaceAll("€", "").replaceAll("£", "").replaceAll("Â£", "").replaceAll(",", "").trim();
+    if (c === "" || !/^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$/.test(c)) return "0.00";
+    const x = Number(c);
+    if (!isFinite(x)) return "0.00";
+    /* Python rounds exact halves to even (0.125 -> 0.12); toFixed rounds them up. */
+    const t3 = x.toFixed(3);
+    if (/5$/.test(t3) && x.toFixed(20) === t3 + "0".repeat(17)) {
+      const cents = Math.trunc(Math.abs(x) * 100);
+      const r = (cents % 2 === 0 ? cents : cents + 1) / 100;
+      return (x < 0 ? -r : r).toFixed(2);
+    }
+    return x.toFixed(2);
+  }
+  const pad = (n, w = 2) => String(n).padStart(w, "0");
+  const sizeKey = j => `Size${pad(j)}_Req`;
+
+  function groupOrders(data, table, customerPO, now, randInt) {
+    const orders = new Map(), warnings = [];
+    const stamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}${pad(now.getMilliseconds() * 1000, 6)}`;
+    const dateExt = `${pad(now.getMonth() + 1)}/${pad(now.getDate())}/${pad(now.getFullYear() % 100)}`;
+    data.forEach((row, idx) => {
+      const line = idx + 2;
+      const item = g(row, "Style").trim();
+      const qtyRaw = g(row, "Quantity").trim();
+      const orderType = g(row, "OrderType").trim();
+      const priceRaw = g(row, "UnitPrice");
+      if (!item) return;
+      if (qtyRaw && /^\d+$/.test(qtyRaw) && parseInt(qtyRaw, 10) <= 0) return;
+      if (!orderType) { warnings.push(`Row ${line}: skipped, no OrderType.`); return; }
+      if (!/^\d+$/.test(qtyRaw)) { warnings.push(`Row ${line}: skipped, Quantity "${qtyRaw}" is not a whole number.`); return; }
+
+      const keyParts = [orderType];
+      for (let j = 1; j < 4; j++) {
+        const d = parseDesign(g(row, "Design" + j)), l = parseLocation(g(row, "Location" + j));
+        keyParts.push(d ? d.id : "", l ? l.name : "");
+      }
+      const key = JSON.stringify(keyParts);
+      if (!orders.has(key)) orders.set(key, {
+        ext_order_id: `${stamp}${randInt(1000, 9999)}`, date_external: dateExt, id_order_type: orderType,
+        customer_purchase_order: customerPO.trim(), designs: [], products: new Map(), first_row: row
+      });
+      const o = orders.get(key);
+
+      ["Design1", "Design2", "Design3"].forEach((df, fi) => {
+        const d = parseDesign(g(row, df).trim());
+        if (!d) return;
+        const loc = g(row, "Location" + (fi + 1)).trim() || "N/A";
+        const comp = { id: d.id, color: d.color || null, location_name: loc, design_index: fi };
+        if (!o.designs.some(x => x.id === comp.id && x.location_name === comp.location_name)) o.designs.push(comp);
+      });
+      if (!o.designs.some(x => x.id === CUSTOM_PACKAGE_ID))
+        o.designs.push({ id: CUSTOM_PACKAGE_ID, color: "ALL", location_name: "custom package", design_index: 99 });
+
+      const partColor = g(row, "Color").trim() || "N/A";
+      const price = getPrice(priceRaw);
+      let part = item, sizeReq = null;
+      const qty = parseInt(qtyRaw, 10);
+      const sizeRaw = g(row, "Size").trim();
+      if (sizeRaw) {
+        const t = table[sizeRaw.replaceAll("'", "").toLowerCase()];
+        if (t) {
+          sizeReq = t.size_req_name;
+          if (t.sku_modifier && t.sku_modifier.trim() !== "") part = `${part}${t.sku_modifier.trim()}`;
+        } else {
+          sizeReq = "Size01_Req";
+          warnings.push(`Row ${line}: size "${sizeRaw}" isn't in the translation table, so it went to Size01_Req.`);
+        }
+      } else sizeReq = "Size01_Req";
+
+      const pk = JSON.stringify([part, partColor, price]);
+      if (!o.products.has(pk)) {
+        const sizes = {}; for (let j = 1; j < 7; j++) sizes[sizeKey(j)] = 0;
+        o.products.set(pk, { part_number: part, part_color: partColor, unit_price_user_entered: price, sizes });
+      }
+      if (!sizeReq) return;
+      if (qty > 0) {
+        const p = o.products.get(pk);
+        if (!(sizeReq in p.sizes)) warnings.push(`Row ${line}: size slot "${sizeReq}" is outside Size01–Size06 and was left out.`);
+        p.sizes[sizeReq] = (p.sizes[sizeReq] || 0) + qty;
+      }
+    });
+    return { orders: [...orders.values()], warnings };
+  }
+
+  const ORDER = "---- Start Order ----\n\nExtOrderID: {ext_order_id} \nExtSource: {ext_source}\n\ndate_External: {date_external}\nid_OrderType: {id_order_type}\n\nCustomerPurchaseOrder: {customer_purchase_order}\nsts_CommishAllow: 1 \n\ndate_External: {date_external}\n\nNotesToArt: {notes_to_art}\nNotestoShipping:\n\n---- End Order ----\n";
+  const CUSTOMER = "---- Start Customer ----\n\nid_Customer: {id_customer}\n\n---- End Customer ----\n";
+  const DESIGN = "---- Start Design ----\n\nid_Design: {id_design}\n\n---- Start Location ----\n\nLocation: {location_name}\n\n{color_line}\n\n---- End Location ----\n\n---- End Design ----\n";
+  const PRODUCT = "\n---- Start Product ----\n\nPartNumber: {part_number}\nPartColor: {part_color}\ncur_UnitPriceUserEntered: {unit_price_user_entered}\n\n{size_req_lines}\n\n---- End Product ----\n";
+  const fill = (t, v) => t.replace(/\{(\w+)\}/g, (_, k) => String(v[k]));
+
+  /* Returns { text (LF line endings), filename, orders, products, warnings }. */
+  function convert(csvText, table, customerId, customerPO, extSource, now = new Date(),
+                   randInt = (a, b) => a + Math.floor(Math.random() * (b - a + 1))) {
+    const { data } = dictRows(csvText);
+    const { orders, warnings } = groupOrders(data, table, customerPO, now, randInt);
+    const out = []; let productCount = 0;
+    orders.forEach((o, i) => {
+      if (i > 0) out.push('\n"\n"\n\n\n');
+      const notes = [];
+      [["Design1", "Location1"], ["Design2", "Location2"], ["Design3", "Location3"]].forEach(([df, lf]) => {
+        const d = g(o.first_row, df).trim(), l = g(o.first_row, lf).trim();
+        if (d && l) notes.push(`${l}: ${d}`);
+      });
+      out.push(fill(ORDER, { ext_order_id: o.ext_order_id, ext_source: extSource, date_external: o.date_external,
+        id_order_type: o.id_order_type, customer_purchase_order: customerPO, notes_to_art: notes.join(", ") }));
+      out.push(fill(CUSTOMER, { id_customer: customerId }));
+      const designs = o.designs.map((d, k) => [d, k]).sort((a, b) => {
+        const ka = a[0].id !== CUSTOM_PACKAGE_ID ? (a[0].design_index ?? 99) : 99;
+        const kb = b[0].id !== CUSTOM_PACKAGE_ID ? (b[0].design_index ?? 99) : 99;
+        return ka - kb || a[1] - b[1];
+      }).map(x => x[0]);
+      for (const d of designs)
+        out.push(fill(DESIGN, { id_design: d.id, location_name: d.location_name || "N/A", color_line: d.color ? `Color: ${d.color}` : "" }));
+      const prods = [...o.products.values()].map((p, k) => [p, k])
+        .sort((a, b) => (a[0].part_number < b[0].part_number ? -1 : a[0].part_number > b[0].part_number ? 1 : a[1] - b[1]))
+        .map(x => x[0]);
+      for (const p of prods) {
+        const lines = [];
+        for (let j = 1; j < 7; j++) { const q = p.sizes[sizeKey(j)] || 0; lines.push(q > 0 ? `${sizeKey(j)}: ${q}` : `${sizeKey(j)}: `); }
+        out.push(fill(PRODUCT, { part_number: p.part_number, part_color: p.part_color, unit_price_user_entered: p.unit_price_user_entered, size_req_lines: lines.join("\n") }));
+        productCount++;
+      }
+    });
+    const ts = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+    return { text: '"\n' + out.join("") + '"', filename: `${customerId}-${ts}.txt`, orders: orders.length, products: productCount, warnings, rows: data.length };
+  }
+
+  return { TRANSLATION_TABLE_URL, parseTranslationTable, convert, dictRows };
+})();
+// = OrderCore;
+</script>
+<script>
+const $ = id => document.getElementById(id);
+let table = null, tableSource = "", csvText = null, csvName = "", result = null;
+
+function toast(t){const e=$("toast");e.textContent=t;e.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("on"),1800)}
+function setTable(t, src, ok, msg){
+  table = t; tableSource = src;
+  $("tDot").className = "dot " + (ok ? "ok" : "err");
+  $("tText").textContent = msg;
+}
+async function loadTable(){
+  try{
+    const r = await fetch(OrderCore.TRANSLATION_TABLE_URL, {cache:"no-store"});
+    if(!r.ok) throw new Error("HTTP " + r.status);
+    const t = OrderCore.parseTranslationTable(await r.text());
+    setTable(t, "sheet", true, `Loaded ${Object.keys(t).length} sizes from the shared Google Sheet.`);
+  }catch(e){
+    setTable(null, "", false, "Couldn't reach the shared Google Sheet. Download it as CSV (File > Download > CSV) and load it here.");
+  }
+}
+const readText = f => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => rej(r.error); r.readAsText(f); });
+
+$("tPick").onclick = () => $("tFile").click();
+$("tFile").onchange = async e => {
+  const f = e.target.files[0]; if(!f) return;
+  try{ const t = OrderCore.parseTranslationTable(await readText(f)); setTable(t, "file", true, `Loaded ${Object.keys(t).length} sizes from ${f.name}.`); }
+  catch(err){ setTable(null, "", false, err.message); }
+};
+
+async function takeFile(f){
+  if(!f) return;
+  csvText = await readText(f); csvName = f.name;
+  const n = OrderCore.dictRows(csvText).data.length;
+  $("fileName").textContent = f.name;
+  $("fileMeta").textContent = `${n} row${n===1?"":"s"}`;
+}
+$("file").onchange = e => takeFile(e.target.files[0]);
+const drop = $("drop");
+["dragenter","dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
+["dragleave","drop"].forEach(ev => drop.addEventListener(ev, () => drop.classList.remove("over")));
+drop.addEventListener("drop", e => { e.preventDefault(); takeFile(e.dataTransfer.files[0]); });
+
+function showErr(t){ const e=$("err"); e.textContent=t; e.hidden=!t; }
+
+$("form").onsubmit = e => {
+  e.preventDefault();
+  const missing = [];
+  if(!csvText) missing.push("an input file");
+  if(!$("cid").value.trim()) missing.push("a customer ID");
+  if(!table) missing.push("the size translation table");
+  if(missing.length){ showErr("Still needed: " + missing.join(", ") + "."); return; }
+  showErr("");
+  const src = document.querySelector("input[name=src]:checked").value;
+  try{
+    result = OrderCore.convert(csvText, table, $("cid").value.trim(), $("po").value, src);
+  }catch(err){ showErr("Processing failed: " + err.message); return; }
+  if(!result.orders){ showErr("No orders were found in that file. Check that it has Style, Quantity and OrderType filled in."); return; }
+  $("empty").hidden = true; $("result").hidden = false;
+  $("rName").textContent = result.filename;
+  $("rStats").innerHTML = `<div class="stat"><b>${result.orders}</b><small>Orders</small></div><div class="stat"><b>${result.products}</b><small>Products</small></div><div class="stat"><b>${result.rows}</b><small>CSV Rows</small></div>`;
+  const w = result.warnings;
+  $("rWarn").innerHTML = w.length ? `<div class="msg warn"><b>${w.length} row${w.length===1?"":"s"} need a look:</b><ul>${w.slice(0,25).map(x=>`<li>${x.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))}</li>`).join("")}${w.length>25?`<li>…and ${w.length-25} more</li>`:""}</ul></div>` : "";
+  $("rText").textContent = result.text;
+  if(innerWidth < 940) $("result").scrollIntoView({behavior:"smooth"});
+};
+
+/* Windows line endings, matching what the desktop GUI wrote. */
+$("dl").onclick = () => {
+  const blob = new Blob([result.text.replace(/\n/g, "\r\n")], {type:"text/plain"});
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = result.filename;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+  toast("Downloaded " + result.filename);
+};
+$("copy").onclick = async () => {
+  try{ await navigator.clipboard.writeText(result.text); toast("Copied to clipboard"); }
+  catch{ const t=document.createElement("textarea"); t.value=result.text; document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove(); toast("Copied to clipboard"); }
+};
+$("again").onclick = () => {
+  csvText = null; result = null; $("file").value = ""; $("cid").value = ""; $("po").value = "";
+  $("fileName").textContent = "Choose a CSV or drop it here"; $("fileMeta").textContent = "Columns from the GUI order template";
+  document.querySelector("input[value='OMG Bulk']").checked = true;
+  $("result").hidden = true; $("empty").hidden = false; showErr(""); scrollTo({top:0,behavior:"smooth"});
+};
+loadTable();
+</script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Random Code Generator | Eagle Graphics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Jost:wght@600;700;800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>{{CSS}}
+.codes{white-space:pre;min-height:120px}
+</style>
+</head>
+<body>
+{{SYMBOLS}}
+<header class="top"><div class="c">
+  <a class="brand" href="/" aria-label="Back to Project Hub"><svg viewBox="0 0 406.37 276.69" style="color:#53585a" role="img" aria-label="Eagle Graphics"><use href="#eg-lockup"/></svg><span>Project Hub</span></a>
+  <a class="back" href="/">All Tools</a>
+</div></header>
+
+<div class="hero"><div class="c">
+  <svg class="wm" viewBox="0 0 345.92 190.33" aria-hidden="true"><use href="#eg-head"/></svg>
+  <span class="eyebrow">Promos &amp; Rewards</span>
+  <h1>Random Code Generator</h1>
+  <div class="bar"></div>
+  <p>Make batches of unique codes for promos, rewards and store redemptions. Every code in a batch is unique, and the CSV export keeps leading zeros intact in Excel.</p>
+</div></div>
+
+<main><div class="c layout">
+  <form class="panel" id="form" novalidate>
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" id="tabR" aria-selected="true" aria-controls="paneR">Random</button>
+      <button type="button" role="tab" id="tabP" aria-selected="false" aria-controls="paneP">Pattern</button>
+    </div>
+    <p class="msg err" id="err" role="alert" hidden></p>
+
+    <div id="paneR" role="tabpanel" aria-labelledby="tabR">
+      <div class="row2">
+        <div class="field"><label for="rCount">Number of Codes</label><input type="text" inputmode="numeric" id="rCount" value="10"></div>
+        <div class="field"><label for="rLen">Code Length</label><input type="text" inputmode="numeric" id="rLen" value="8"></div>
+      </div>
+      <fieldset class="field">
+        <legend>Characters</legend>
+        <div class="checks">
+          <label><input type="checkbox" id="cUp" checked> Uppercase</label>
+          <label><input type="checkbox" id="cLo" checked> Lowercase</label>
+          <label><input type="checkbox" id="cDig" checked> Digits</label>
+          <label><input type="checkbox" id="cSpec"> Special</label>
+          <label><input type="checkbox" id="cPun"> Punctuation</label>
+          <label><input type="checkbox" id="cBr"> Brackets</label>
+          <label><input type="checkbox" id="cSp"> Space</label>
+        </div>
+      </fieldset>
+    </div>
+
+    <div id="paneP" role="tabpanel" aria-labelledby="tabP" hidden>
+      <div class="row2">
+        <div class="field"><label for="pCount">Number of Codes</label><input type="text" inputmode="numeric" id="pCount" value="10"></div>
+        <div class="field"><label for="pat">Pattern</label><input type="text" class="mono" id="pat" value="X9x" spellcheck="false" autocomplete="off"></div>
+      </div>
+      <p class="hint" id="pPrev" style="margin:-8px 0 14px"></p>
+      <div class="field"><label>Pattern Guide</label><dl class="guide" id="guide"></dl></div>
+    </div>
+
+    <div class="field">
+      <label for="ex">Exclude Characters</label>
+      <input type="text" class="mono" id="ex" value="Il1|0O" spellcheck="false" autocomplete="off">
+      <p class="hint">Defaults leave out look-alikes (I, l, 1, |, 0, O) so codes are easy to read and type.</p>
+    </div>
+
+    <button class="btn primary" type="submit" id="go">Generate Codes</button>
+    <div style="text-align:center;margin-top:12px"><button type="button" class="linkbtn" id="reset">Reset to defaults</button></div>
+  </form>
+
+  <section aria-live="polite">
+    <div class="panel">
+      <div class="ph"><h2 id="rTitle">Your Codes</h2>
+        <div class="acts">
+          <button class="btn" type="button" id="copy" disabled>Copy All</button>
+          <button class="btn" type="button" id="csv" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>Export CSV</button>
+        </div>
+      </div>
+      <div id="warn"></div>
+      <pre class="codes" id="codes">Generated codes will appear here.</pre>
+    </div>
+  </section>
+</div></main>
+<div class="toast" id="toast" role="status"></div>
+
+<script>{{CORE}}</script>
+<script>
+const $ = id => document.getElementById(id);
+let mode = "random", codes = [];
+const esc = s => s.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function toast(t){const e=$("toast");e.textContent=t;e.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("on"),1800)}
+$("guide").innerHTML = CodeCore.GUIDE.map(([k,v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("");
+
+function setMode(m){
+  mode = m;
+  $("tabR").setAttribute("aria-selected", m === "random"); $("tabP").setAttribute("aria-selected", m === "pattern");
+  $("paneR").hidden = m !== "random"; $("paneP").hidden = m !== "pattern";
+  showErr("");
+}
+$("tabR").onclick = () => setMode("random"); $("tabP").onclick = () => setMode("pattern");
+document.querySelector(".tabs").addEventListener("keydown", e => {
+  if(e.key === "ArrowRight" || e.key === "ArrowLeft"){ const m = mode === "random" ? "pattern" : "random"; setMode(m); $(m === "random" ? "tabR" : "tabP").focus(); }
+});
+
+function previewPattern(){
+  try{ const r = CodeCore.pattern({count:1, pattern:$("pat").value, exclude:$("ex").value}); $("pPrev").textContent = "Example: " + r.codes[0]; }
+  catch(e){ $("pPrev").textContent = ""; }
+}
+$("pat").addEventListener("input", previewPattern); $("ex").addEventListener("input", previewPattern);
+
+function showErr(t){ const e=$("err"); e.textContent=t; e.hidden=!t; }
+function render(r){
+  codes = r.codes;
+  $("codes").textContent = codes.join("\n");
+  $("rTitle").textContent = `${codes.length.toLocaleString()} Code${codes.length===1?"":"s"}`;
+  $("warn").innerHTML = r.warnings.map(w => `<p class="msg warn">${esc(w)}</p>`).join("");
+  $("copy").disabled = $("csv").disabled = !codes.length;
+}
+$("form").onsubmit = e => {
+  e.preventDefault(); showErr("");
+  try{
+    const r = mode === "random"
+      ? CodeCore.random({count:$("rCount").value, length:$("rLen").value, upper:$("cUp").checked, lower:$("cLo").checked, digits:$("cDig").checked, special:$("cSpec").checked, punctuation:$("cPun").checked, brackets:$("cBr").checked, space:$("cSp").checked, exclude:$("ex").value})
+      : CodeCore.pattern({count:$("pCount").value, pattern:$("pat").value, exclude:$("ex").value});
+    render(r);
+    if(innerWidth < 940) $("codes").scrollIntoView({behavior:"smooth", block:"center"});
+  }catch(err){ showErr(err.message); }
+};
+$("copy").onclick = async () => {
+  const t = codes.join("\n");
+  try{ await navigator.clipboard.writeText(t); }
+  catch{ const a=document.createElement("textarea"); a.value=t; document.body.appendChild(a); a.select(); document.execCommand("copy"); a.remove(); }
+  toast(`Copied ${codes.length.toLocaleString()} codes`);
+};
+$("csv").onclick = () => {
+  const d = new Date(), p = n => String(n).padStart(2,"0");
+  const name = `generated_codes_${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}.csv`;
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([CodeCore.toCSV(codes)], {type:"text/csv"})); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+  toast("Downloaded " + name);
+};
+$("reset").onclick = () => {
+  $("rCount").value = "10"; $("rLen").value = "8"; $("pCount").value = "10"; $("pat").value = "X9x"; $("ex").value = "Il1|0O";
+  [["cUp",1],["cLo",1],["cDig",1],["cSpec",0],["cPun",0],["cBr",0],["cSp",0]].forEach(([id,v]) => $(id).checked = !!v);
+  codes = []; $("codes").textContent = "Generated codes will appear here."; $("rTitle").textContent = "Your Codes";
+  $("warn").innerHTML = ""; $("copy").disabled = $("csv").disabled = true; showErr(""); previewPattern();
+};
+previewPattern();
+</script>
+</body>
+</html>

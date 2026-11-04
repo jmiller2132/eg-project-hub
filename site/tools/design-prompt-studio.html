@@ -1,0 +1,356 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Design Prompt Studio 2.0</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Jost:wght@500;600;700;800&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+/* Eagle Graphics tokens on dark surfaces. Layout: sticky brand bar, lockup header, 340px input rail beside the concept column. */
+--eg-green-300:#b2dd79;--eg-green-400:#94cf4a;--eg-green-500:#76bd1d;--eg-green-600:#5f9a17;--eg-green-700:#4a7812;--eg-green-800:#365711;--eg-green-900:#20340a;
+--eg-grey-100:#f0f1f2;--eg-grey-200:#e1e3e4;--eg-grey-300:#c5c8c9;--eg-grey-400:#9ca0a2;--eg-grey-500:#7d8183;--eg-grey-600:#63676a;--eg-grey-700:#53585a;--eg-grey-800:#3a3e40;--eg-grey-900:#2a2d2e;
+--danger:#c0392b;--danger-bg:#fae6e3;
+--page:var(--eg-grey-900);--card:var(--eg-grey-800);--inset:var(--eg-grey-900);
+--line:var(--eg-grey-700);--line-strong:var(--eg-grey-600);
+--text-h:#ffffff;--text:var(--eg-grey-200);--text-muted:var(--eg-grey-300);--text-code:var(--eg-grey-100);
+--fill:var(--eg-green-700);--fill-hover:var(--eg-green-800);--fill-press:var(--eg-green-900);--ring:rgba(118,189,29,.7);
+--font-display:"Jost","Century Gothic","Futura",system-ui,sans-serif;
+--font-body:"Open Sans","Helvetica Neue",Arial,sans-serif;
+--font-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+--ease:cubic-bezier(.4,0,.2,1);
+color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--text);font:400 15px/1.7 var(--font-body)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--eg-grey-800)}
+.gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button,input,textarea,select{font-family:inherit}
+:focus-visible{outline:3px solid var(--ring);outline-offset:2px}
+h1,h2{margin:0;font-family:var(--font-display);text-transform:uppercase;color:var(--text-h);text-wrap:balance}
+h2{font-size:18px;font-weight:700;line-height:1.3;letter-spacing:.04em}
+.sub{margin:0;color:var(--text-muted);font-size:13px;line-height:1.5}
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--eg-grey-800);border-bottom:1px solid var(--line)}
+.navin{max-width:1240px;margin:0 auto;padding-block:10px;display:flex;flex-wrap:wrap;gap:10px 24px;align-items:center;justify-content:space-between}
+.nb{display:flex;gap:12px;align-items:center;min-width:0}
+.mark{height:30px;width:auto;flex:none;display:block}
+.nb b{display:block;font:700 15px/1.2 var(--font-display);text-transform:uppercase;letter-spacing:.08em;color:var(--text-h)}
+.nb small{display:block;font-size:12px;line-height:1.4;color:var(--text-muted)}
+.presets{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.presets>span{font:600 11px/1.5 var(--font-body);text-transform:uppercase;letter-spacing:.12em;color:var(--text-muted);margin-right:4px}
+.wrap{max-width:1240px;margin:0 auto;padding-block:32px 64px}
+.ph0{display:flex;flex-wrap:wrap;align-items:center;gap:24px 36px;padding-bottom:36px}
+.lockup{width:150px;height:auto;flex:none;display:block}
+.hd{border-left:1px solid var(--line-strong);padding-left:36px;min-width:0}
+@media (max-width:600px){.hd{border-left:0;padding-left:0}}
+.hd h1{font-size:clamp(28px,4.4vw,40px);font-weight:800;line-height:1.1;letter-spacing:-.01em}
+.bar{width:48px;height:3px;background:var(--eg-green-500);margin:14px 0 12px}
+.hd .sub{font-size:14px;line-height:1.7}
+.pill{display:inline-block;font:600 11px/1 var(--font-body);text-transform:uppercase;letter-spacing:.1em;color:var(--eg-green-300);border:1px solid var(--eg-green-600);border-radius:2px;padding:5px 8px;vertical-align:middle;margin-left:10px}
+.hd .pill{margin:14px 0 0}
+.grid{display:grid;grid-template-columns:340px minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:20px;min-width:0}
+.ph{position:relative;display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:14px;margin-bottom:20px;border-bottom:1px solid var(--line)}
+.ph::after{content:"";position:absolute;left:0;bottom:-1px;width:48px;height:3px;background:var(--eg-green-500)}
+fieldset{border:0;padding:0;margin:0 0 20px;min-width:0}
+.step{margin:0 0 16px}
+.step.next{margin-top:28px;padding-top:24px;border-top:1px solid var(--line)}
+.step .eyebrow{display:block;font:600 11px/1.4 var(--font-display);text-transform:uppercase;letter-spacing:.18em;color:var(--eg-green-400)}
+.step h3{margin:3px 0 4px;font:700 15px/1.3 var(--font-display);text-transform:uppercase;letter-spacing:.04em;color:var(--text-h)}
+.step .sub{font-size:11.5px;line-height:1.5}
+legend{padding:0;margin-bottom:8px;font:600 11px/1.5 var(--font-display);text-transform:uppercase;letter-spacing:.18em;color:var(--text-muted)}
+input[type=text],textarea{width:100%;min-height:38px;padding:7px 12px;font:400 13px/1.5 var(--font-body);color:var(--text-h);background:var(--inset);border:1px solid var(--line-strong);border-radius:3px;transition:border-color 140ms var(--ease),box-shadow 140ms var(--ease)}
+textarea{resize:vertical;min-height:80px}
+input::placeholder,textarea::placeholder{color:var(--eg-grey-400)}
+input[type=text]:focus-visible,textarea:focus-visible{border-color:var(--eg-green-500);outline:3px solid var(--ring);outline-offset:0}
+input[type=range]{width:100%;margin:6px 0 0;accent-color:var(--eg-green-500)}
+.ticks{display:flex;justify-content:space-between;padding:0 6px;font-size:11px;color:var(--text-muted)}
+.rd{margin-top:4px;font:700 12px/1.4 var(--font-display);letter-spacing:.04em;text-transform:uppercase;color:var(--eg-green-400)}
+.chips{display:flex;flex-wrap:wrap;gap:8px 6px;margin-top:8px}
+.chips:empty{display:none}
+.chip{font:500 11.5px/1.35 var(--font-body);color:var(--text);background:var(--inset);border:1px solid var(--line-strong);border-radius:3px;padding:3px 10px;cursor:pointer;transition:background 140ms var(--ease),border-color 140ms var(--ease),color 140ms var(--ease)}
+.chip:hover{border-color:var(--eg-green-500);color:var(--text-h)}
+.chip.on{background:var(--fill);border-color:var(--eg-green-500);color:#fff;font-weight:600}
+.go,.rst,.btn,.pre{cursor:pointer;border-radius:3px;transition:background 140ms var(--ease),border-color 140ms var(--ease),transform 140ms var(--ease)}
+.go{width:100%;min-height:52px;border:1px solid var(--fill);background:var(--fill);color:#fff;font:700 14px/1 var(--font-display);text-transform:uppercase;letter-spacing:.1em}
+.go:hover{background:var(--fill-hover);border-color:var(--fill-hover)}
+.go:active{background:var(--fill-press);border-color:var(--fill-press);transform:translateY(1px);box-shadow:inset 0 1px 0 rgba(255,255,255,.14)}
+.rst,.btn,.pre{background:transparent;color:var(--text);border:1px solid var(--eg-grey-500);font:600 12px/1 var(--font-body);min-height:32px;padding:0 14px;white-space:nowrap}
+.rst{width:100%;min-height:42px;margin-top:10px;font-size:13px}
+.rst:hover,.btn:hover,.pre:hover{background:var(--fill);border-color:var(--fill);color:#fff}
+.rst:active,.btn:active,.pre:active{background:var(--fill-press);border-color:var(--fill-press);color:#fff;transform:translateY(1px)}
+.err:not(:empty){margin:12px 0 0;padding:10px 12px;font-size:13px;line-height:1.5;font-weight:600;color:var(--danger-bg);background:rgba(192,57,43,.18);border:1px solid var(--danger);border-radius:3px}
+.rh{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;margin-bottom:20px}
+.rh h2::after{content:"";display:block;width:48px;height:3px;background:var(--eg-green-500);margin:10px 0 12px}
+.rh .acts{display:flex;gap:8px;flex-wrap:wrap}
+.empty{position:relative;overflow:hidden;background:var(--card);border:1px solid var(--line);border-radius:4px;padding:32px;color:var(--text-muted)}
+.empty strong{display:block;font:700 18px/1.3 var(--font-display);text-transform:uppercase;letter-spacing:.04em;color:var(--text-h);margin-bottom:6px}
+.empty .wm{position:absolute;right:-24px;bottom:-34px;width:320px;max-width:70%;opacity:.06;pointer-events:none}
+.empty strong,.empty{z-index:0}
+.card{margin-bottom:16px}
+.ct{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--line)}
+.num{width:28px;height:28px;border-radius:3px;display:grid;place-items:center;flex:none;font:700 13px/1 var(--font-display);color:var(--eg-green-300);border:1px solid var(--eg-green-600)}
+.tt{flex:1;min-width:0}
+.ctitle{font:700 16px/1.3 var(--font-display);text-transform:uppercase;letter-spacing:.03em;color:var(--text-h);overflow-wrap:anywhere}
+.tt .sub{margin-top:2px}
+.lbl{display:flex;justify-content:space-between;gap:10px;font:600 11px/1.5 var(--font-body);text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:8px}
+.tagc{color:var(--eg-green-400)}
+.code{font:400 12.5px/1.65 var(--font-mono);color:var(--text-code);background:var(--inset);border:1px solid var(--line);border-radius:3px;padding:12px 14px;max-height:124px;overflow:auto;overflow-wrap:anywhere}
+.meta{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+@media (max-width:560px){.meta{grid-template-columns:minmax(0,1fr)}}
+.box{background:var(--inset);border:1px solid var(--line);border-radius:3px;padding:10px 12px;font-size:13px;line-height:1.6;min-width:0}
+.bt{display:flex;align-items:center;gap:6px;font:600 11px/1.5 var(--font-body);text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:4px}
+.bt svg{width:16px;height:16px;flex:none;fill:none;stroke:var(--eg-green-500);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}.go:active,.rst:active,.btn:active,.pre:active{transform:none}}
+</style>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><symbol id="eg-head" viewBox="0 0 345.92 190.33"><path fill="#FFFFFF" d="M0,35.87s40.31,39.02,168.4,35.17c128.09-3.85,173.84,81.37,173.84,81.37,0,0-74.93-65.41-159.94-67.51C97.28,82.82,42.68,80.09,0,35.87Z"></path><path fill="#76BD1D" d="M117.53,66.85s32.58,2.27,51.76,1.04c0,0-56.52-7.19-96.09-32.78,0,0,14.51,21.14,44.32,31.74Z"></path><path fill="#76BD1D" d="M35.04,67.24s29.79,14.84,67.38,17.07c0,0,22.57,11.59,69.71,12.64,0,0-93.43,12.5-137.09-29.71Z"></path><path fill="#FFFFFF" d="M280.75,118.26c16.38,6.72,30.68,16.31,43.84,26,0,0-67.91-32.46-155.72-21.97,0,0,14.02,6.15,29.4,5.62,0,0-77.9,27.39-155-31.67,0,0,64.1,23.91,128.05,13.89,63.94-10.02,93.06,1.41,109.44,8.13Z"></path><path fill="#76BD1D" d="M105.34,0s47.37,33.91,104.14,45.98c40.57,8.63,79.09,41.54,79.09,41.54,0,0-16.5-3.62-21.25-.52,0,0-13.28-6.59-24.33-9.52,0,0-15.55-19.85-60.21-28.09C143.43,42.13,105.34,0,105.34,0Z"></path><path fill="#FFFFFF" d="M114.48,12.34s23.44,21.93,39.54,29.83c0,0,2.34,9.44,23.54,18.46,0,0-43.44-12.15-63.07-48.29Z"></path><path fill="#76BD1D" d="M233.75,123.37s81.99,27.82,105.78,29.46c0,0,14.46,9.46-.11,37.5,0,0-.17-23.52-30.07-32.97-29.89-9.45-67.78-28.42-75.6-33.99Z"></path></symbol><symbol id="eg-lockup" viewBox="0 0 406.37 276.69"><path fill="#FFFFFF" d="M25.5,237.31v-96.78h51.99v17.15h-34.05v22.79h32.61v17.15h-32.61v22.53h34.05v17.15H25.5Z"></path><path fill="#FFFFFF" d="M160.91,237.31l-10.34-25.01h-34.44l-10.74,25.01h-19.77l40.33-96.78h14.15l40.59,96.78h-19.77ZM133.02,165.8l-10.35,29.33h20.69l-10.34-29.33Z"></path><path fill="#FFFFFF" d="M233.6,239.01c-29.73,0-52.64-22-52.64-50.29s22.66-49.9,50.94-49.9c21.08,0,40.99,12.7,47.27,30.12h-21.09c-6.02-8.38-15.32-12.83-26.58-12.83-19.12,0-32.48,14.67-32.48,32.87s14.54,32.74,33.53,32.74c12.7,0,23.18-6.28,28.42-17.02h-40.07v-16.76h63.25v2.36c0,26.32-22,48.72-50.55,48.72Z"></path><path fill="#FFFFFF" d="M353.56,237.31v-96.78h51.99v17.15h-34.05v22.79h32.61v17.15h-32.61v22.53h34.05v17.15h-51.99Z"></path><path fill="#76BD1D" d="M25.67,251.52c0-1.05.28-1.9.85-2.53.57-.63,1.42-.95,2.56-.95h8.2l.99,5.33h-6.3c-.34,0-.52.18-.52.55v16.99c0,.37.17.55.52.55h2.61v-11.3h5.59v16.52h-10.02c-1.66,0-2.83-.34-3.49-1.03-.66-.69-.99-1.82-.99-3.4v-20.74Z"></path><path fill="#76BD1D" d="M94.45,265.03c0,.63-.22,1.21-.65,1.74-.44.53-1.08.79-1.92.79l3.01,9.13h-5.94l-2.77-9.13h-.75v9.13h-5.75v-28.65h10.9c1.35,0,2.33.34,2.95,1.01.62.67.93,1.57.93,2.71v13.28ZM85.42,253.06v9.88h2.81c.37,0,.56-.2.56-.59v-8.69c0-.39-.19-.59-.56-.59h-2.81Z"></path><path fill="#76BD1D" d="M139.39,273.13l-.52,3.56h-5.79l5.19-28.65h6.14l5.19,28.65h-5.78l-.52-3.56h-3.92ZM140.02,268.59h2.65l-1.31-10.15-1.35,10.15Z"></path><path fill="#76BD1D" d="M199.73,248.04c1.14,0,1.99.32,2.56.95.57.63.85,1.48.85,2.53v13.71c0,.55-.06,1.06-.18,1.52-.12.46-.34.86-.65,1.21-.32.34-.74.61-1.27.81-.53.2-1.19.3-1.98.3h-4.91v7.63h-5.71v-28.65h11.29ZM194.15,253.06v11.26h2.85c.24,0,.39-.04.46-.14.07-.09.1-.24.1-.45v-10.11c0-.37-.17-.55-.52-.55h-2.89Z"></path><path fill="#76BD1D" d="M257.5,276.69h-5.86v-11.46h-3.13v11.46h-5.86v-28.65h5.86v12.25h3.13v-12.25h5.86v28.65Z"></path><path fill="#76BD1D" d="M297.13,248.04h5.75v28.65h-5.75v-28.65Z"></path><path fill="#76BD1D" d="M346.97,276.69c-1.66,0-2.83-.34-3.49-1.03-.66-.69-.99-1.82-.99-3.4v-20.7c0-1.13.32-2,.97-2.61.65-.6,1.45-.91,2.4-.91h7.57l.99,5.33h-5.51c-.34,0-.52.18-.52.55v16.87c0,.37.17.55.52.55h5.51l-1.03,5.33h-6.42Z"></path><path fill="#76BD1D" d="M394.88,276.69l-1.03-5.33h6.18c.45,0,.67-.2.67-.59v-5.22c0-.39-.08-.63-.24-.71-.16-.08-.44-.12-.83-.12h-2.97c-.42,0-.82-.03-1.21-.1-.38-.07-.73-.22-1.03-.45-.3-.24-.54-.57-.71-.99-.17-.42-.26-.99-.26-1.7v-9.72c0-1.13.31-2.03.93-2.71.62-.67,1.61-1.01,2.95-1.01h7.93l.99,5.33h-6.5c-.47,0-.71.21-.71.63v5.21c0,.29.07.49.22.59.14.11.36.16.65.16h3.61c.92,0,1.63.22,2.12.65.49.43.73,1.19.73,2.27v9.44c0,1.58-.32,2.7-.97,3.36-.65.66-1.79.99-3.43.99h-7.09Z"></path><polygon fill="#FFFFFF" points="313.88 220.15 313.88 158.64 295.94 148.79 295.94 237.31 343.48 237.31 343.48 220.15 313.88 220.15"></polygon><path fill="#FFFFFF" d="M0,35.87s40.31,39.02,168.4,35.17c128.09-3.85,173.84,81.37,173.84,81.37,0,0-74.93-65.41-159.94-67.51C97.28,82.82,42.68,80.09,0,35.87Z"></path><path fill="#76BD1D" d="M117.53,66.85s32.58,2.27,51.76,1.04c0,0-56.52-7.19-96.09-32.78,0,0,14.51,21.14,44.32,31.74Z"></path><path fill="#76BD1D" d="M35.04,67.24s29.79,14.84,67.38,17.07c0,0,22.57,11.59,69.71,12.64,0,0-93.43,12.5-137.09-29.71Z"></path><path fill="#FFFFFF" d="M280.75,118.26c16.38,6.72,30.68,16.31,43.84,26,0,0-67.91-32.46-155.72-21.97,0,0,14.02,6.15,29.4,5.62,0,0-77.9,27.39-155-31.67,0,0,64.1,23.91,128.05,13.89,63.94-10.02,93.06,1.41,109.44,8.13Z"></path><path fill="#76BD1D" d="M105.34,0s47.37,33.91,104.14,45.98c40.57,8.63,79.09,41.54,79.09,41.54,0,0-16.5-3.62-21.25-.52,0,0-13.28-6.59-24.33-9.52,0,0-15.55-19.85-60.21-28.09C143.43,42.13,105.34,0,105.34,0Z"></path><path fill="#FFFFFF" d="M114.48,12.34s23.44,21.93,39.54,29.83c0,0,2.34,9.44,23.54,18.46,0,0-43.44-12.15-63.07-48.29Z"></path><path fill="#76BD1D" d="M233.75,123.37s81.99,27.82,105.78,29.46c0,0,14.46,9.46-.11,37.5,0,0-.17-23.52-30.07-32.97-29.89-9.45-67.78-28.42-75.6-33.99Z"></path></symbol></defs></svg>
+<nav class="nav gut"><div class="navin">
+  <div class="nb"><svg class="mark" viewBox="0 0 345.92 190.33" role="img" aria-label="Eagle Graphics"><use href="#eg-head"/></svg><span><b>Eagle Graphics</b><small>Design Prompt Studio 2.0</small></span></div>
+  <div class="presets" id="presets"><span>Presets</span></div>
+</div></nav>
+<div class="wrap gut">
+  <header class="ph0">
+    <svg class="lockup" viewBox="0 0 406.37 276.69" role="img" aria-label="Eagle Graphics"><use href="#eg-lockup"/></svg>
+    <div class="hd"><h1>Design Prompt Studio 2.0</h1><div class="bar"></div><p class="sub">Generate screen-print-ready vector prompts tailored by niche &amp; personality.</p><span class="pill">1–24 Concept Batch Engine</span></div>
+  </header>
+  <div class="grid">
+    <form class="panel" id="form" novalidate>
+      <div class="ph"><h2>Campaign Inputs</h2><button class="btn reset" type="button">Reset Form</button></div>
+      <div id="fields"></div>
+      <button class="go" type="submit">Generate Graphic Concepts</button>
+      <button class="rst reset" type="button">Reset Form</button>
+      <p class="err" id="err" role="alert"></p>
+    </form>
+    <section id="out" aria-live="polite"></section>
+  </div>
+</div>
+<script>
+const NICHES={
+"Outdoor lovers":["Trail runners","Weekend campers","Fly fishermen","Backcountry hikers","Kayak paddlers","Bird watchers"],
+"Foodies":["Supper club regulars","Friday fish fry fans","Hot sauce collectors","Sourdough bakers","Taco truck chasers","Cast iron cooks"],
+"Coffee & tea drinkers":["Espresso nerds","Pour-over purists","Cold brew devotees","Loose-leaf tea snobs","Latte art hobbyists","Cafe hoppers"],
+"Beer & cocktail lovers":["Homebrewers","Craft beer tasters","Natural wine fans","Old fashioned purists","Brewery tour crews","Bourbon collectors"],
+"Pet owners":["Dog park regulars","Cat people","Rescue pet advocates","Doodle dog owners","Reptile keepers","Backyard chicken keepers"],
+"Gamers":["Board game nights","Dungeons & Dragons groups","Retro console collectors","Speedrunners","Cozy game players","Miniature painters"],
+"Fitness & gym":["Powerlifters","Marathon runners","Yoga regulars","CrossFit crews","Early morning gym crowd","Spin class devotees"],
+"Sports fans":["Tailgate regulars","Fantasy football leagues","Pickleball players","Disc golfers","Youth sports parents","Rec league softball"],
+"Sports":["Football","Basketball","Softball","Baseball","Cross country","Track & field","Soccer","Volleyball","Wrestling","Hockey","Swimming & diving","Golf","Tennis","Lacrosse"],
+"Parents":["New parents","Dad joke champions","Sideline sports parents","Homeschool families","Minivan road-trippers","Grandparents"],
+"Music fans":["Vinyl collectors","Festival-goers","Country concert crowd","Punk basement shows","Jazz club regulars","Garage band hobbyists"],
+"Small-town locals":["Friday fish fry crowd","County fair regulars","High school football nights","Up north cabin crowd","Lake town summer people","Snowmobile trail riders"],
+"Up north":["Lake cabin crew","Friday-traffic escapees","Campfire & bonfire people","Deer camp regulars","Ice fishing shanty crowd","Supper club & fish fry fans","Northwoods nostalgia","Weekend-only northerners","Pontoon & dock life","Snowmobile & ATV trail riders"],
+"Resort wear":["Country club casual","Poolside lounge crowd","Golf resort weekenders","Lake resort lodge style","Supper club dressy-casual","Spa weekend getaways","Boat club & marina set","Brunch-on-the-patio crowd","Quiet luxury minimalists","Vintage resort sign collectors"],
+"Vacation":["Beach bums","Cruise ship regulars","Girls' trip & guys' trip crews","Family road trip crews","Cabin rental weekenders","Resort all-inclusive crowd","National park hoppers","Lake week family reunions","Airport-outfit travelers","Souvenir-shirt collectors"],
+"Travelers":["Road trip planners","National park collectors","Van lifers","Cruise regulars","Backpackers","Weekend city explorers"],
+"Crafters & makers":["Knitters","Woodworkers","Pottery studio regulars","Candle makers","Embroidery hobbyists","Sewists"],
+"Gardeners":["Tomato growers","Houseplant collectors","Pollinator garden fans","Backyard beekeepers","Succulent collectors","Farmers market vendors"],
+"Readers & writers":["Book club members","Romance readers","Sci-fi fans","Mystery novel junkies","Journalers","Poetry open mic regulars"],
+"Car & motorcycle people":["Classic muscle car owners","Truck enthusiasts","Weekend motorcyclists","Cars and coffee crowd","Off-roaders","Garage tinkerers"],
+"Nurses & healthcare":["Night shift nurses","ER crews","Nursing students","Paramedics","Pharmacy techs","Med-surg crews"],
+"Teachers & educators":["Elementary teachers","Band directors","Special ed teachers","School librarians","Coaches","Substitute teachers"],
+"Skilled trades":["Electricians","Welders","Carpenters","Plumbers","Linemen","Diesel mechanics"],
+"Remote workers & techies":["Software engineers","Spreadsheet wizards","Work-from-home crew","Startup founders","Cybersecurity folks","Data nerds"],
+"Small business owners":["Etsy sellers","Food truck owners","Salon owners","Side hustlers","Local shop owners","Market vendors"],
+"Wedding & party crews":["Bachelorette parties","Bachelor trips","Family reunions","Birthday squads","Bridal parties","Lake weekend crews"],
+"Pop culture fans":["True crime listeners","Reality TV watchers","Movie night crowd","Anime fans","Podcast addicts","Cosplayers"],
+"Veterans & first responders":["Firefighters","Volunteer EMTs","Military spouses","Veteran reunion groups","Veteran-owned business fans","Dispatchers"],
+"Faith & community":["Church potluck crews","Youth group leaders","Choir members","Volunteer groups","Bible study friends","Charity run organizers"]
+};
+const NK={};Object.keys(NICHES).forEach(k=>NK[k.toLowerCase()]=NICHES[k]);
+const FIELDS=[
+ {k:"place",step:["The Placement","Where the graphic sits on the shirt."],label:"Print placement",ph:"Pick below or type your own, e.g. Back (12×16 in)",opts:["Left Chest (4×4 in)","Full Front (12×12 in)"]},
+ {k:"age",step:["The Customer","Who wears it and what they care about."],label:"Target age group",hint:"Who wears it?",ph:"Or type your own, e.g. 28–40",opts:["13–17","18–24","25–34","35–44","45–54","55+"]},
+ {k:"aud",multi:1,label:"Target audience",hint:"The broader crowd.",ph:"Or type your own, e.g. weekend anglers",opts:Object.keys(NICHES)},
+ {k:"niche",multi:1,label:"Micro-niche",hint:"The specific thing they’re obsessed with.",ph:"Or type your own, e.g. sourdough bakers",opts:["Trail runners","Home bakers","Vinyl collectors","Weekend campers","Board game nights","Backyard beekeepers"]},
+ {k:"pers",multi:1,step:["The Style","How the artwork should look and feel."],label:"Design personality",hint:"The attitude of the artwork.",ph:"Or type your own, e.g. dry humor, a little fancy",opts:["Funny & witty","Premium + Relatable","Bold & edgy","Wholesome","Retro nostalgic","Minimalist & clean","Rugged outdoorsy","Playful & quirky","Sarcastic & deadpan","Cozy & hygge","Vintage Americana","Gritty & distressed","Elegant & refined","Sporty & athletic","Nerdy & clever","Proud & patriotic","Whimsical & dreamy","Rebellious punk","Tropical & laid-back","Heartfelt & sentimental"]},
+ {k:"custom",label:"Custom details (optional)",area:1,optional:1,ph:"e.g. must say “Lake Life”, use teal and gold, no skulls",opts:[]},
+ {k:"colors",step:["The Ink","How many colors the print can use."],label:"Number of colors",hint:"Ink colors per design.",slider:1,min:1,max:8,def:2,unit:"spot color",ph:"",opts:[]},
+ {k:"count",step:["The Batch","How many concepts to generate."],label:"Number of prompts",slider:1,min:1,max:24,def:12,unit:"prompt",ph:"",opts:[]}
+];
+const PERS={
+ "funny & witty":"dry, witty, clever visual pun, confident humor",
+ "premium + relatable":"premium craftsmanship with an approachable, down-to-earth feel, tasteful detail",
+ "bold & edgy":"bold, high-contrast, attitude-forward, sharp edges",
+ "wholesome":"warm, friendly, hand-drawn, feel-good",
+ "retro nostalgic":"vintage, nostalgic, aged print feel",
+ "minimalist & clean":"minimalist, clean, generous negative space, restrained detail",
+ "rugged outdoorsy":"rugged, weathered, earthy, field-guide feel",
+ "playful & quirky":"playful, quirky, offbeat charm, expressive shapes",
+ "sarcastic & deadpan":"deadpan, sarcastic, understated punchline energy",
+ "cozy & hygge":"cozy, soft, warm, comforting hand-drawn charm",
+ "vintage americana":"vintage Americana, classic workwear and roadside-sign influence",
+ "gritty & distressed":"gritty, heavily distressed, worn-in texture, raw energy",
+ "elegant & refined":"elegant, refined, fine linework, luxe restraint",
+ "sporty & athletic":"sporty, athletic, dynamic motion, team-graphic energy",
+ "nerdy & clever":"nerdy, clever, insider reference, diagram-like precision",
+ "proud & patriotic":"proud, patriotic, heritage-driven, strong symmetrical forms",
+ "whimsical & dreamy":"whimsical, dreamy, storybook illustration, gentle surreal touches",
+ "rebellious punk":"rebellious punk, cut-and-paste zine look, raw and loud",
+ "tropical & laid-back":"tropical, laid-back, sun-faded, breezy shapes",
+ "heartfelt & sentimental":"heartfelt, sentimental, nostalgic keepsake feel"};
+const AGE={
+ "13–17":"trend-aware, meme-literate, loud and graphic",
+ "18–24":"current streetwear influence, irreverent, collectible-feeling",
+ "25–34":"understated nostalgia, design-literate, shareable with friends",
+ "35–44":"refined but relaxed, inside-joke humor, quality-first",
+ "45–54":"classic, confident, easy to read at a glance",
+ "55+":"timeless, high legibility, proud and uncluttered"};
+const PALS={
+1:["exactly one color: black ink","exactly one color: white ink (for dark shirts)","exactly one color: navy ink","exactly one color: forest green ink","exactly one color: red ink","exactly one color: cream ink"],
+2:["exactly two colors: navy and mustard","exactly two colors: black and red","exactly two colors: forest green and cream","exactly two colors: teal and coral","exactly two colors: charcoal and orange","exactly two colors: plum and gold"],
+3:["exactly three colors: forest green, cream and rust","exactly three colors: teal, tan and brick red","exactly three colors: navy, cream and mustard","exactly three colors: black, white and red","exactly three colors: olive, sand and charcoal","exactly three colors: mint, peach and navy"],
+4:["exactly four colors: coral, plum, gold and cream","exactly four colors: navy, mustard, rust and cream","exactly four colors: forest green, tan, burnt orange and off-white","exactly four colors: black, white, red and yellow","exactly four colors: teal, pink, yellow and navy","exactly four colors: charcoal, sky blue, sand and orange"],
+5:["exactly five colors: navy, mustard, rust, cream and teal","exactly five colors: black, white, red, yellow and gray","exactly five colors: forest green, tan, burnt orange, cream and brown","exactly five colors: plum, coral, gold, mint and navy"],
+6:["exactly six colors: navy, mustard, rust, cream, teal and brown","exactly six colors: black, white, red, yellow, blue and gray","exactly six colors: forest green, tan, orange, cream, brown and sky blue","exactly six colors: plum, coral, gold, mint, navy and pink"],
+7:["exactly seven colors: navy, mustard, rust, cream, teal, brown and olive","exactly seven colors: black, white, red, yellow, blue, green and gray","exactly seven colors: plum, coral, gold, mint, navy, pink and tan"],
+8:["exactly eight colors: navy, mustard, rust, cream, teal, brown, olive and pink","exactly eight colors: black, white, red, yellow, blue, green, orange and gray","exactly eight colors: plum, coral, gold, mint, navy, pink, tan and charcoal"]};
+const palFor=c=>PALS[parseInt(c,10)]||[`exactly ${c} flat spot colors`];
+const SUFFIX="t-shirt graphic, centered composition, isolated on plain background, no mockup, no shirt, vector style, crisp edges, print-ready, flat spot colors for screen printing, no gradients";
+const cap=s=>s.replace(/\b\w/g,c=>c.toUpperCase());
+const ideas=[
+ ["Vintage badge",c=>`Circular vintage badge for ${c.n}, one iconic object of the hobby at center, curved text reading "${cap(c.n)}" above and "Made for ${c.u}" below, rope or laurel border`],
+ ["Typographic stack",c=>`Bold stacked typography graphic spelling "${cap(c.n)}" in custom lettering, tight leading, one small illustrated icon replacing a letter`],
+ ["Club crest",c=>`Heraldic crest for the "${cap(c.n)} Society", shield with two crossed tools of the trade, ribbon banner reading "Members Only"`],
+ ["Minimal line icon",c=>`Single continuous-line illustration of the most recognizable object tied to ${c.n}, small tagline underneath: "Just ${c.n}."`],
+ ["Retro sunset scene",c=>`Retro sunset landscape with a stylized silhouette of ${c.n} in the foreground, horizontal stripe sun, arched text "${cap(c.n)} Season"`],
+ ["Mascot character",c=>`Friendly cartoon mascot character who is clearly obsessed with ${c.n}, holding a signature prop, bold outline, sticker-style white border`],
+ ["Fake product label",c=>`Parody product label for "${cap(c.n)}: Small Batch", ingredient and warning text as jokes only ${c.u} would get, vintage packaging layout`],
+ ["Map or coordinates",c=>`Stylized topographic-style map with a pin marking the "home turf" of ${c.n}, coordinates and the line "You Are Here" in clean type`],
+ ["Pocket-size chest logo",c=>`Small left-chest logo mark: tiny monogram emblem for ${c.n}, simple geometric shape, designed to be a subtle insider nod`],
+ ["Distressed stamp",c=>`Rubber-stamp style seal reading "Certified ${cap(c.n)} Enthusiast", slightly tilted, ink-bleed edges, star accents`],
+ ["Schedule or menu board",c=>`Retro menu-board or weekly schedule graphic listing days and "specials" all about ${c.n}, hand-lettered, chalkboard-inspired but in print colors`],
+ ["Illustrated pattern tile",c=>`Large central cluster of illustrated objects from the world of ${c.n}, arranged as a dense sticker-bomb collage with one hero item in the middle`],
+ ["Back-print oversized",c=>`Oversized back-print poster: huge arched headline "${cap(c.n)}" with a detailed illustration beneath and tiny fine-print line "Since Forever, for ${c.u}"`],
+ ["Vintage ad parody",c=>`Mid-century magazine-ad style illustration promoting ${c.n} as if it were a miracle lifestyle, bold tagline "Nine out of ten ${c.u} agree"`],
+ ["Patch set",c=>`Set of three embroidered-patch style icons relating to ${c.n}, arranged in a triangle, stitched border look, each with a one-word label`],
+ ["Monoline script",c=>`Flowing hand-lettered script phrase about loving ${c.n}, with a small hand-drawn flourish and one illustrated accent, elegant and wearable`],
+ ["Retro varsity",c=>`Varsity-style graphic: arched college lettering "${cap(c.n)} Athletic Dept.", number "No. 1" and a small mascot icon, athletic stripes`],
+ ["Field guide plate",c=>`Natural-history field-guide plate showing labeled specimens drawn from the world of ${c.n}, Latin-style captions that are actually jokes`],
+ ["Surreal mashup",c=>`Surreal illustration mashing ${c.n} with something totally unexpected, balanced symmetrical composition, one striking focal point`],
+ ["Bold slogan lockup",c=>`Short punchy slogan lockup about ${c.n} in heavy block type, two lines, with a thick underline shape and a tiny icon`],
+ ["Ticket or pass",c=>`Faux event ticket or backstage pass to the "${cap(c.n)} Tour", perforated edge, barcode, seat number reading "Row ${c.u}"`],
+ ["Geometric emblem",c=>`Symmetrical geometric emblem built from simple shapes suggesting ${c.n}, thick even line weight, one accent color`],
+ ["Woodcut print",c=>`Bold woodcut or linocut style illustration of the signature scene of ${c.n}, carved-line texture, heavy black shapes, hand-pulled print feel`],
+ ["Neon sign",c=>`Neon-sign style graphic with glowing tube lettering reading "${cap(c.n)}", simple outlined icon, bold flat shapes`],
+ ["Blueprint schematic",c=>`Technical blueprint-style schematic of a prized object from ${c.n}, callout lines with jokey part labels, drafting-grid feel`],
+ ["Comic burst",c=>`Retro comic-book burst panel shouting a one-line headline about ${c.n}, bold outlines, action lines, punchy composition`]
+];
+const $=s=>document.querySelector(s);
+const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const TYPO={"Vintage badge":"Arched top header in slab-serif with ribbon banner subtext beneath the central graphic","Typographic stack":"Heavy condensed sans stacked on 2–3 lines, tight leading, one icon replacing a letter","Club crest":"Serif small caps on a ribbon banner under the shield, tiny date numerals","Minimal line icon":"Light geometric sans tagline, small and centered below the icon","Retro sunset scene":"Wide-set retro italic arched above the sun with stripe shading","Mascot character":"Chunky hand-lettered title with a bouncy baseline and thick outline","Fake product label":"Condensed label type with a small-print block and a serif product name","Map or coordinates":"Monospace coordinates with a clean small-caps sans caption","Pocket-size chest logo":"Monogram initials in a rounded geometric sans, no extra copy","Distressed stamp":"Bold stencil caps with ink-bleed texture, set at a slight tilt","Schedule or menu board":"Hand-lettered headings with condensed list lines and divider rules","Illustrated pattern tile":"One short caption in a rounded sans beneath the collage","Back-print oversized":"Large arched headline with a small fine-print line at the base","Vintage ad parody":"Mid-century script headline with condensed sans body copy","Patch set":"Single-word stitched labels in block caps under each icon","Monoline script":"Flowing monoline script with one flourish, no secondary text","Retro varsity":"Arched collegiate block lettering with a number and athletic stripes","Field guide plate":"Italic serif captions with numbered specimen labels","Surreal mashup":"Small centered title in a clean serif beneath the artwork","Bold slogan lockup":"Heavy block caps on two lines with a thick underline shape","Ticket or pass":"Condensed ticket type with perforation marks and a barcode","Geometric emblem":"Thin geometric sans wordmark placed beneath the emblem"};
+const PLACE={"Vintage badge":"Center Chest Emblem (7×7 in)","Typographic stack":"Full Front (10×12 in)","Club crest":"Center Chest (8×9 in)","Minimal line icon":"Center Chest (6×8 in)","Retro sunset scene":"Full Front (11×11 in)","Mascot character":"Full Front (10×12 in)","Fake product label":"Center Chest (8×10 in)","Map or coordinates":"Upper Chest (8×6 in)","Pocket-size chest logo":"Left Chest (3.5×3.5 in)","Distressed stamp":"Center Chest (9×6 in)","Schedule or menu board":"Full Front (10×12 in)","Illustrated pattern tile":"Full Front (12×14 in)","Back-print oversized":"Full Back (12×16 in)","Vintage ad parody":"Full Front (10×13 in)","Patch set":"Center Chest (9×8 in)","Monoline script":"Center Chest (8×4 in)","Retro varsity":"Full Front (10×10 in)","Field guide plate":"Full Back (12×15 in)","Surreal mashup":"Full Front (10×12 in)","Bold slogan lockup":"Center Chest (10×5 in)","Ticket or pass":"Center Chest (9×4 in)","Geometric emblem":"Center Chest (7×7 in)"};
+const state={},wrap=$("#fields");
+const parse=v=>v.split(",").map(x=>x.trim()).filter(Boolean);
+const srt=a=>a.slice().sort((x,y)=>x.localeCompare(y,undefined,{numeric:true,sensitivity:"base"}));
+let stepN=0;
+FIELDS.forEach(f=>{
+  if(f.step){stepN++;const sh=el("div","step"+(stepN>1?" next":""));sh.append(el("span","eyebrow","Step "+stepN),el("h3",null,f.step[0]),el("p","sub",f.step[1]));wrap.appendChild(sh)}
+  const fs=document.createElement("fieldset");
+  const lg=el("legend",null,f.multi?f.label+" (select multiple)":f.label);
+  const inp=el(f.area?"textarea":"input");if(f.area)inp.rows=3;else if(f.slider){inp.type="range";inp.min=f.min;inp.max=f.max;inp.step=1;inp.value=f.def}else inp.type="text";inp.placeholder=f.ph+(f.multi?" (separate with commas)":"");inp.maxLength=f.area?300:f.multi?160:80;inp.setAttribute("aria-label",f.label);
+  const chips=el("div","chips");
+  const rd=el("div","rd");const mark=()=>{if(f.slider){const n=+inp.value;rd.textContent=n+" "+f.unit+(n>1?"s":"")}{const l=f.multi?parse(inp.value).map(x=>x.toLowerCase()):[inp.value.trim().toLowerCase()];chips.querySelectorAll(".chip").forEach(x=>{const on=l.includes(x.textContent.toLowerCase());x.classList.toggle("on",on);x.setAttribute("aria-pressed",String(on))})}};
+  const addChip=o=>{const b=el("button","chip",o);b.type="button";b.onclick=()=>{if(f.multi){const l=parse(inp.value),i=l.findIndex(x=>x.toLowerCase()===o.toLowerCase());if(i>-1)l.splice(i,1);else l.push(o);inp.value=l.join(", ")}else inp.value=o;inp.dispatchEvent(new Event("input"))};chips.appendChild(b)};
+  inp.addEventListener("input",mark);
+  state[f.k]={inp,chips,mark,addChip};
+  if(f.k!=="niche")srt(f.opts).forEach(addChip);
+  fs.append(lg,inp);if(f.slider){const tk=el("div","ticks");Array.from({length:f.max-f.min+1},(_,i)=>f.min+i).filter(t=>f.max<=8||t===f.min||t===f.max).forEach(t=>tk.appendChild(el("span",null,String(t))));fs.append(tk,rd);mark()}fs.append(chips);wrap.appendChild(fs);
+});
+const val=k=>state[k].inp.value.trim();
+const BASE=FIELDS.find(f=>f.k==="niche").opts.slice();let nKey=null,curList=BASE;
+function refreshNiches(force){
+  const hits=parse(val("aud")).map(x=>x.toLowerCase()).filter(a=>NK[a]),key=hits.join("|");
+  if(!force&&key===nKey)return;nKey=key;
+  let list=[];hits.forEach(a=>NK[a].forEach(n=>{if(!list.includes(n))list.push(n)}));
+  if(!list.length)list=BASE;
+  const s=state.niche,pl=curList.map(x=>x.toLowerCase()),nl=list.map(x=>x.toLowerCase());
+  s.inp.value=parse(s.inp.value).filter(x=>{const l=x.toLowerCase();return !pl.includes(l)||nl.includes(l)}).join(", ");
+  curList=list;s.chips.textContent="";srt(list).forEach(s.addChip);s.mark();
+}
+state.aud.inp.addEventListener("input",()=>refreshNiches());
+refreshNiches(true);
+function build(ctx){
+  const auds=parse(ctx.aud),niches=parse(ctx.niche);
+  const style=parse(ctx.pers).map(p=>PERS[p.toLowerCase()]||p).join(", combined with ");
+  const age=AGE[ctx.age]||`designed to appeal to ages ${ctx.age}`;
+  const count=Math.max(1,Math.min(ideas.length,parseInt(ctx.count,10)||12));
+  const pals=shuffle(palFor(ctx.colors));
+  const n=parseInt(ctx.colors,10);
+  const tag=n?`${n} Spot Color${n>1?"s":""}`:ctx.colors;
+  const cust=ctx.custom?` Custom requirements: ${ctx.custom}. Follow these exactly; if specific colors are named, use them within the color limit.`:"";
+  const off=Math.floor(Math.random()*niches.length);
+  const dark="Dark Apparel (Black/Navy/Charcoal)",light="Light Apparel (White/Heather Grey/Cream)";
+  return shuffle(ideas).slice(0,count).map(([title,fn],i)=>{
+    const pal=pals[i%pals.length],niche=niches[(i+off)%niches.length],aud=auds[Math.floor(Math.random()*auds.length)];
+    const app=/white ink|cream ink/.test(pal)?dark:/black ink|navy ink/.test(pal)?light:(Math.random()<.5?dark:light);
+    return {title,niche,tag,app,typo:TYPO[title]||"Clean, legible type sized for a single-pass print",place:ctx.place,
+      text:`Vector t-shirt graphic design for ${niche}, targeted at ${aud} (${ctx.age}). Concept: ${fn({n:niche.toLowerCase(),u:aud})}. Design personality: ${style}. Audience feel: ${age}.${cust} Screen-print specification: ${pal}, ${SUFFIX}.`};
+  });
+}
+function copy(text,btn){
+  const done=()=>{const t=btn.textContent;btn.textContent="Copied";setTimeout(()=>btn.textContent=t,1200)};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(done,()=>fallback(text,done))}else fallback(text,done);
+}
+function fallback(text,done){const t=document.createElement("textarea");t.value=text;document.body.appendChild(t);t.select();try{document.execCommand("copy")}catch(e){}t.remove();done()}
+function empty(){
+  const out=$("#out");out.textContent="";
+  const d=el("div","empty");d.insertAdjacentHTML("afterbegin",'<svg class="wm" viewBox="0 0 345.92 190.33" aria-hidden="true"><use href="#eg-head"/></svg>');d.append(el("strong",null,"No concepts yet"),document.createTextNode("Fill in the required fields (or tap a preset) and generate. Running it again gives a different batch."));
+  out.appendChild(d);
+}
+const IC_TYPE='<svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" x2="15" y1="20" y2="20"/><line x1="12" x2="12" y1="4" y2="20"/></svg>';
+const IC_SHIRT='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>';
+const bt=(icon,text)=>{const d=el("div","bt");d.insertAdjacentHTML("beforeend",icon);d.appendChild(el("span",null,text));return d};
+function render(ctx,list){
+  const out=$("#out");out.textContent="";
+  const rh=el("div","panel rh"),left=el("div");
+  const h=el("h2");h.append(el("span",null,"Generated Merch Concepts"),el("span","pill",list.length+" Concepts"));
+  left.append(h,el("p","sub",`Generated ${list.length} concept prompts for “${ctx.niche}” targeting ${ctx.aud} (${ctx.age}).`));
+  const acts=el("div","acts");
+  const all=el("button","btn","Copy All Prompts");all.type="button";
+  all.onclick=()=>copy(list.map((x,i)=>`${i+1}. ${x.title}: ${x.text}`).join("\n\n"),all);
+  const again=el("button","btn","New Batch");again.type="button";again.onclick=()=>render(ctx,build(ctx));
+  acts.append(all,again);rh.append(left,acts);out.appendChild(rh);
+  list.forEach((x,i)=>{
+    const c=el("article","panel card"),top=el("div","ct"),tt=el("div","tt");
+    tt.append(el("div","ctitle",`${cap(x.niche)}: ${x.title}`),el("div","sub",x.app));
+    const b=el("button","btn","Copy Prompt");b.type="button";b.onclick=()=>copy(x.text,b);
+    top.append(el("span","num",String(i+1)),tt,b);
+    const lab=el("div","lbl");lab.append(el("span",null,"Vector AI generator prompt:"),el("span","tagc",x.tag));
+    const meta=el("div","meta"),b1=el("div","box"),b2=el("div","box");
+    b1.append(bt(IC_TYPE,"Typography & Layout"),el("div",null,x.typo));
+    b2.append(bt(IC_SHIRT,"Print Placement"),el("div",null,x.place));
+    meta.append(b1,b2);c.append(top,lab,el("div","code",x.text),meta);out.appendChild(c);
+  });
+}
+function generate(){
+  const miss=FIELDS.filter(f=>!f.optional&&!val(f.k));
+  if(miss.length){$("#err").textContent="Still needed: "+miss.map(f=>f.label.toLowerCase()).join(", ")+".";return}
+  $("#err").textContent="";
+  const ctx={place:val("place"),age:val("age"),u:val("aud"),aud:val("aud"),n:val("niche").toLowerCase(),niche:val("niche"),pers:val("pers"),colors:val("colors"),custom:val("custom"),count:val("count")};
+  render(ctx,build(ctx));
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+$("#form").onsubmit=e=>{e.preventDefault();generate()};
+const doReset=()=>{
+  FIELDS.forEach(f=>{state[f.k].inp.value=f.slider?f.def:"";state[f.k].mark()});
+  refreshNiches(true);$("#err").textContent="";empty();window.scrollTo({top:0,behavior:"smooth"});
+};
+document.querySelectorAll(".reset").forEach(b=>b.onclick=doReset);
+const PRESETS=[
+ ["Walleye Fishing",{age:"25–34",aud:"Outdoor lovers",niche:"Northwoods walleye fishing",pers:"Rugged outdoorsy",colors:"2"}],
+ ["Vintage Gym",{age:"25–34",aud:"Fitness & gym",niche:"Powerlifters",pers:"Vintage Americana",colors:"2"}],
+ ["Trail Running",{age:"25–34",aud:"Outdoor lovers",niche:"Trail runners",pers:"Minimalist & clean",colors:"1"}],
+ ["Tech Workers",{age:"25–34",aud:"Remote workers & techies",niche:"Software engineers",pers:"Nerdy & clever",colors:"3"}]];
+PRESETS.forEach(([name,v])=>{
+  const b=el("button","pre",name);b.type="button";
+  b.onclick=()=>{
+    ["age","aud","pers","colors"].forEach(k=>state[k].inp.value=v[k]);state.place.inp.value=v.place||"Full Front (12×12 in)";
+    refreshNiches();state.niche.inp.value=v.niche;
+    FIELDS.forEach(f=>state[f.k].mark());generate();
+  };
+  $("#presets").appendChild(b);
+});
+empty();
+</script>
+
+</body></html>

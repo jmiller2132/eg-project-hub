@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Eagle Graphics Project Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Jost:wght@600;700;800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+--g300:#b2dd79;--g400:#94cf4a;--g500:#76bd1d;--g600:#5f9a17;--g700:#4a7812;--g800:#365711;--g900:#20340a;
+--k100:#f0f1f2;--k200:#e1e3e4;--k300:#c5c8c9;--k400:#9ca0a2;--k500:#7d8183;--k600:#63676a;--k700:#53585a;--k800:#3a3e40;--k900:#2a2d2e;
+--display:"Jost","Century Gothic",system-ui,sans-serif;--body:"Open Sans","Helvetica Neue",Arial,sans-serif;--mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+--ease:cubic-bezier(.4,0,.2,1);--shadow-md:0 4px 12px rgba(42,45,46,.10),0 1px 3px rgba(42,45,46,.08)}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:#fff;color:var(--k700);font:400 15px/1.7 var(--body)}
+a{color:inherit}
+:focus-visible{outline:3px solid rgba(118,189,29,.4);outline-offset:2px}
+.c{max-width:1240px;margin:0 auto;padding:0 24px}
+h1,h2,h3{margin:0;font-family:var(--display);text-transform:uppercase;color:var(--k900);text-wrap:balance}
+.eyebrow{display:block;font:600 11px/1.4 var(--display);text-transform:uppercase;letter-spacing:.18em;color:var(--g700)}
+.bar{width:48px;height:3px;background:var(--g500);margin:12px 0 0}
+/* header */
+header.top{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--k200)}
+.top .c{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:68px}
+.brand{display:flex;align-items:center;gap:16px;text-decoration:none;color:var(--k700)}
+.brand svg{height:44px;width:auto;display:block}
+.brand span{border-left:1px solid var(--k300);padding-left:16px;font:700 13px/1.2 var(--display);text-transform:uppercase;letter-spacing:.14em;color:var(--k900)}
+nav.jump{display:flex;gap:4px;flex-wrap:wrap}
+nav.jump a{font:600 12px/1 var(--display);text-transform:uppercase;letter-spacing:.1em;text-decoration:none;color:var(--k700);padding:10px 12px;border-bottom:3px solid transparent;transition:color 140ms var(--ease),border-color 140ms var(--ease)}
+nav.jump a:hover{color:var(--k900);border-color:var(--g600)}
+@media(max-width:820px){nav.jump{display:none}}
+/* hero */
+.hero{position:relative;overflow:hidden;background:var(--k900);color:var(--k200);padding:64px 0 56px}
+.hero .wm{position:absolute;right:-60px;top:50%;transform:translateY(-50%);width:560px;max-width:70%;opacity:.06;color:#fff;pointer-events:none}
+.hero .eyebrow{color:var(--g400)}
+.hero h1{color:#fff;font-size:clamp(34px,5vw,56px);font-weight:800;line-height:1.05;letter-spacing:-.01em;margin-top:10px}
+.hero p{max-width:620px;margin:16px 0 0;color:var(--k300);font-size:16px}
+.stats{display:flex;flex-wrap:wrap;gap:12px 40px;margin-top:32px}
+.stat b{display:block;font:800 32px/1 var(--display);color:var(--g500)}
+.stat small{font:600 11px/1.4 var(--display);text-transform:uppercase;letter-spacing:.14em;color:var(--k300)}
+.search{margin-top:32px;max-width:520px;position:relative}
+.search input{width:100%;min-height:48px;padding:10px 14px 10px 44px;font:400 15px/1.5 var(--body);color:#fff;background:var(--k800);border:1px solid var(--k600);border-radius:3px;transition:border-color 140ms var(--ease)}
+.search input::placeholder{color:var(--k400)}
+.search input:focus-visible{border-color:var(--g500);outline-offset:0}
+.search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--k400)}
+/* sections */
+section.band{padding:56px 0}
+section.band.alt{background:var(--k100)}
+.sh{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:28px}
+.sh h2{font-size:26px;font-weight:800;line-height:1.15;margin-top:6px}
+.sh p{margin:0;color:var(--k600);font-size:14px;max-width:440px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:24px}
+.card{position:relative;display:flex;flex-direction:column;background:#fff;border:1px solid var(--k200);border-radius:4px;padding:24px;text-decoration:none;color:var(--k700);transition:box-shadow 200ms var(--ease),transform 200ms var(--ease),border-color 200ms var(--ease)}
+a.card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);border-color:var(--k300)}
+a.card:active{transform:translateY(-1px)}
+.card .ic{width:48px;height:48px;color:var(--g500);margin-bottom:16px}
+.card .ic svg{width:48px;height:48px;stroke-width:2}
+.card h3{font-size:17px;font-weight:700;line-height:1.3;letter-spacing:.02em}
+.card p{margin:8px 0 0;font-size:14px;line-height:1.6;flex:1}
+.meta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--k200)}
+.where{font:500 12px/1.4 var(--mono);color:var(--k600);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.go{display:inline-flex;align-items:center;gap:6px;flex:none;font:700 12px/1 var(--display);text-transform:uppercase;letter-spacing:.1em;color:var(--g700)}
+.go svg{width:16px;height:16px;transition:transform 140ms var(--ease)}
+a.card:hover .go{color:var(--g800)}
+a.card:hover .go svg{transform:translateX(2px)}
+.tag{position:absolute;top:20px;right:20px;font:600 10px/1 var(--body);text-transform:uppercase;letter-spacing:.1em;padding:5px 8px;border-radius:2px;border:1px solid var(--k300);color:var(--k600);background:#fff}
+.tag.live{border-color:var(--g600);color:var(--g700)}
+.tag.win{border-color:var(--k400)}
+.card.soon{background:var(--k100);border-style:dashed}
+.card.soon .ic{color:var(--k400)}
+.card.soon .go{color:var(--k500)}
+.card.pending{pointer-events:none}
+.card.pending .tag{border-color:#c98a12;color:#8a5d0a}
+.hidden{display:none!important}
+.empty{display:none;padding:40px 0;color:var(--k600)}
+.empty.on{display:block}
+footer{background:var(--k900);color:var(--k400);font-size:13px;padding:28px 0}
+footer .c{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center}
+footer svg{height:22px;width:auto;color:#fff}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}a.card:hover,a.card:active{transform:none}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><symbol id="eg-head" viewBox="0 0 345.92 190.33"><path fill="currentColor" d="M0,35.87s40.31,39.02,168.4,35.17c128.09-3.85,173.84,81.37,173.84,81.37,0,0-74.93-65.41-159.94-67.51C97.28,82.82,42.68,80.09,0,35.87Z"></path><path fill="#76BD1D" d="M117.53,66.85s32.58,2.27,51.76,1.04c0,0-56.52-7.19-96.09-32.78,0,0,14.51,21.14,44.32,31.74Z"></path><path fill="#76BD1D" d="M35.04,67.24s29.79,14.84,67.38,17.07c0,0,22.57,11.59,69.71,12.64,0,0-93.43,12.5-137.09-29.71Z"></path><path fill="currentColor" d="M280.75,118.26c16.38,6.72,30.68,16.31,43.84,26,0,0-67.91-32.46-155.72-21.97,0,0,14.02,6.15,29.4,5.62,0,0-77.9,27.39-155-31.67,0,0,64.1,23.91,128.05,13.89,63.94-10.02,93.06,1.41,109.44,8.13Z"></path><path fill="#76BD1D" d="M105.34,0s47.37,33.91,104.14,45.98c40.57,8.63,79.09,41.54,79.09,41.54,0,0-16.5-3.62-21.25-.52,0,0-13.28-6.59-24.33-9.52,0,0-15.55-19.85-60.21-28.09C143.43,42.13,105.34,0,105.34,0Z"></path><path fill="currentColor" d="M114.48,12.34s23.44,21.93,39.54,29.83c0,0,2.34,9.44,23.54,18.46,0,0-43.44-12.15-63.07-48.29Z"></path><path fill="#76BD1D" d="M233.75,123.37s81.99,27.82,105.78,29.46c0,0,14.46,9.46-.11,37.5,0,0-.17-23.52-30.07-32.97-29.89-9.45-67.78-28.42-75.6-33.99Z"></path></symbol><symbol id="eg-lockup" viewBox="0 0 406.37 276.69"><path fill="currentColor" d="M25.5,237.31v-96.78h51.99v17.15h-34.05v22.79h32.61v17.15h-32.61v22.53h34.05v17.15H25.5Z"></path><path fill="currentColor" d="M160.91,237.31l-10.34-25.01h-34.44l-10.74,25.01h-19.77l40.33-96.78h14.15l40.59,96.78h-19.77ZM133.02,165.8l-10.35,29.33h20.69l-10.34-29.33Z"></path><path fill="currentColor" d="M233.6,239.01c-29.73,0-52.64-22-52.64-50.29s22.66-49.9,50.94-49.9c21.08,0,40.99,12.7,47.27,30.12h-21.09c-6.02-8.38-15.32-12.83-26.58-12.83-19.12,0-32.48,14.67-32.48,32.87s14.54,32.74,33.53,32.74c12.7,0,23.18-6.28,28.42-17.02h-40.07v-16.76h63.25v2.36c0,26.32-22,48.72-50.55,48.72Z"></path><path fill="currentColor" d="M353.56,237.31v-96.78h51.99v17.15h-34.05v22.79h32.61v17.15h-32.61v22.53h34.05v17.15h-51.99Z"></path><path fill="#76BD1D" d="M25.67,251.52c0-1.05.28-1.9.85-2.53.57-.63,1.42-.95,2.56-.95h8.2l.99,5.33h-6.3c-.34,0-.52.18-.52.55v16.99c0,.37.17.55.52.55h2.61v-11.3h5.59v16.52h-10.02c-1.66,0-2.83-.34-3.49-1.03-.66-.69-.99-1.82-.99-3.4v-20.74Z"></path><path fill="#76BD1D" d="M94.45,265.03c0,.63-.22,1.21-.65,1.74-.44.53-1.08.79-1.92.79l3.01,9.13h-5.94l-2.77-9.13h-.75v9.13h-5.75v-28.65h10.9c1.35,0,2.33.34,2.95,1.01.62.67.93,1.57.93,2.71v13.28ZM85.42,253.06v9.88h2.81c.37,0,.56-.2.56-.59v-8.69c0-.39-.19-.59-.56-.59h-2.81Z"></path><path fill="#76BD1D" d="M139.39,273.13l-.52,3.56h-5.79l5.19-28.65h6.14l5.19,28.65h-5.78l-.52-3.56h-3.92ZM140.02,268.59h2.65l-1.31-10.15-1.35,10.15Z"></path><path fill="#76BD1D" d="M199.73,248.04c1.14,0,1.99.32,2.56.95.57.63.85,1.48.85,2.53v13.71c0,.55-.06,1.06-.18,1.52-.12.46-.34.86-.65,1.21-.32.34-.74.61-1.27.81-.53.2-1.19.3-1.98.3h-4.91v7.63h-5.71v-28.65h11.29ZM194.15,253.06v11.26h2.85c.24,0,.39-.04.46-.14.07-.09.1-.24.1-.45v-10.11c0-.37-.17-.55-.52-.55h-2.89Z"></path><path fill="#76BD1D" d="M257.5,276.69h-5.86v-11.46h-3.13v11.46h-5.86v-28.65h5.86v12.25h3.13v-12.25h5.86v28.65Z"></path><path fill="#76BD1D" d="M297.13,248.04h5.75v28.65h-5.75v-28.65Z"></path><path fill="#76BD1D" d="M346.97,276.69c-1.66,0-2.83-.34-3.49-1.03-.66-.69-.99-1.82-.99-3.4v-20.7c0-1.13.32-2,.97-2.61.65-.6,1.45-.91,2.4-.91h7.57l.99,5.33h-5.51c-.34,0-.52.18-.52.55v16.87c0,.37.17.55.52.55h5.51l-1.03,5.33h-6.42Z"></path><path fill="#76BD1D" d="M394.88,276.69l-1.03-5.33h6.18c.45,0,.67-.2.67-.59v-5.22c0-.39-.08-.63-.24-.71-.16-.08-.44-.12-.83-.12h-2.97c-.42,0-.82-.03-1.21-.1-.38-.07-.73-.22-1.03-.45-.3-.24-.54-.57-.71-.99-.17-.42-.26-.99-.26-1.7v-9.72c0-1.13.31-2.03.93-2.71.62-.67,1.61-1.01,2.95-1.01h7.93l.99,5.33h-6.5c-.47,0-.71.21-.71.63v5.21c0,.29.07.49.22.59.14.11.36.16.65.16h3.61c.92,0,1.63.22,2.12.65.49.43.73,1.19.73,2.27v9.44c0,1.58-.32,2.7-.97,3.36-.65.66-1.79.99-3.43.99h-7.09Z"></path><polygon fill="currentColor" points="313.88 220.15 313.88 158.64 295.94 148.79 295.94 237.31 343.48 237.31 343.48 220.15 313.88 220.15"></polygon><path fill="currentColor" d="M0,35.87s40.31,39.02,168.4,35.17c128.09-3.85,173.84,81.37,173.84,81.37,0,0-74.93-65.41-159.94-67.51C97.28,82.82,42.68,80.09,0,35.87Z"></path><path fill="#76BD1D" d="M117.53,66.85s32.58,2.27,51.76,1.04c0,0-56.52-7.19-96.09-32.78,0,0,14.51,21.14,44.32,31.74Z"></path><path fill="#76BD1D" d="M35.04,67.24s29.79,14.84,67.38,17.07c0,0,22.57,11.59,69.71,12.64,0,0-93.43,12.5-137.09-29.71Z"></path><path fill="currentColor" d="M280.75,118.26c16.38,6.72,30.68,16.31,43.84,26,0,0-67.91-32.46-155.72-21.97,0,0,14.02,6.15,29.4,5.62,0,0-77.9,27.39-155-31.67,0,0,64.1,23.91,128.05,13.89,63.94-10.02,93.06,1.41,109.44,8.13Z"></path><path fill="#76BD1D" d="M105.34,0s47.37,33.91,104.14,45.98c40.57,8.63,79.09,41.54,79.09,41.54,0,0-16.5-3.62-21.25-.52,0,0-13.28-6.59-24.33-9.52,0,0-15.55-19.85-60.21-28.09C143.43,42.13,105.34,0,105.34,0Z"></path><path fill="currentColor" d="M114.48,12.34s23.44,21.93,39.54,29.83c0,0,2.34,9.44,23.54,18.46,0,0-43.44-12.15-63.07-48.29Z"></path><path fill="#76BD1D" d="M233.75,123.37s81.99,27.82,105.78,29.46c0,0,14.46,9.46-.11,37.5,0,0-.17-23.52-30.07-32.97-29.89-9.45-67.78-28.42-75.6-33.99Z"></path></symbol></defs></svg>
+<header class="top"><div class="c">
+  <a class="brand" href="#top" aria-label="Eagle Graphics Project Hub"><svg viewBox="0 0 406.37 276.69" style="color:#53585a" role="img" aria-label="Eagle Graphics"><use href="#eg-lockup"/></svg><span>Project Hub</span></a>
+  <nav class="jump" aria-label="Sections"><a href="#apps">Web Apps</a><a href="#studios">Design Studios</a><a href="#resources">Resources</a></nav>
+</div></header>
+
+<div class="hero" id="top"><div class="c">
+  <svg class="wm" viewBox="0 0 345.92 190.33" aria-hidden="true"><use href="#eg-head"/></svg>
+  <span class="eyebrow">Eagle Graphics Internal</span>
+  <h1>Every Tool We Build,<br>In One Place</h1>
+  <div class="bar"></div>
+  <p>Web apps, design studios and reference material built in-house. Everything runs in the browser, nothing to install. Bookmark this page and start here.</p>
+  <div class="stats" id="stats"></div>
+  <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" type="search" placeholder="Search tools, e.g. packing slips" aria-label="Search tools"></div>
+</div></div>
+
+<main id="main"></main>
+<div class="c"><p class="empty" id="empty">Nothing matches that search. Try a shorter word.</p></div>
+
+<footer><div class="c">
+  <svg viewBox="0 0 406.37 276.69" role="img" aria-label="Eagle Graphics"><use href="#eg-lockup"/></svg>
+  <span>Internal use only. Need something added? Send it to Jeff.</span>
+</div></footer>
+
+<script>
+const I={
+ truck:'<path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/>',
+ store:'<path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><path d="M22 7v3a2 2 0 0 1-2 2a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7"/>',
+ alert:'<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M12 11v3"/><path d="M12 17h.01"/>',
+ shirt:'<path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/>',
+ car:'<path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/>',
+ flag:'<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/>',
+ file:'<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>',
+ clip:'<rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/>',
+ monitor:'<rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/>',
+ hash:'<line x1="4" x2="20" y1="9" y2="9"/><line x1="4" x2="20" y1="15" y2="15"/><line x1="10" x2="8" y1="3" y2="21"/><line x1="16" x2="14" y1="3" y2="21"/>',
+ table:'<path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/>',
+ mail:'<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>',
+ palette:'<circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.93 0 1.65-.75 1.65-1.69 0-.44-.18-.84-.44-1.13-.29-.29-.44-.65-.44-1.13a1.64 1.64 0 0 1 1.67-1.67h2c3.05 0 5.55-2.5 5.55-5.55C21.97 6.01 17.46 2 12 2z"/>'};
+const ARROW='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>';
+const DL='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>';
+
+/* To add a project: add one line to the right group below and redeploy. */
+const GROUPS=[
+ {id:"apps",eyebrow:"Operations",title:"Web Apps",blurb:"Order, store and fulfillment tools. Open and go.",items:[
+  {n:"ShopWorks Bulk Order Import",d:"Turn a bulk order CSV into a ShopWorks import file. Replaces the old GUI_V2 desktop program.",i:"clip",url:"/tools/order-import.html",tag:"Web",local:1},
+  {n:"Random Code Generator",d:"Unique code batches for promos, rewards and store redemptions, with Excel-safe CSV export.",i:"hash",url:"/tools/code-generator.html",tag:"Web",local:1},
+  {n:"BrightSites Packing Slips",d:"Generate and print packing slips for BrightSites orders.",i:"truck",url:"https://brightsites-packing-slips.vercel.app/",tag:"Live"},
+  {n:"EG Store Manager",d:"Manage company and team web stores from one dashboard.",i:"store",url:"https://eg-store-manager.vercel.app/",tag:"Live"},
+  {n:"Discrepancy Report",d:"Log and track receiving discrepancies against POs.",i:"alert",url:"https://discrepancy-report-bice.vercel.app/",tag:"Live"}]},
+ {id:"studios",eyebrow:"Art Department",title:"Design Studios",blurb:"Prompt builders and layout tools for the art team. Each opens in a new tab.",alt:1,items:[
+  {n:"Design Prompt Studio",d:"Batch of 1–24 screen-print-ready vector prompts, tuned by niche, audience and ink count.",i:"shirt",url:"/tools/design-prompt-studio.html",tag:"v2.1",local:1},
+  {n:"Sign & Vehicle Wrap Prompt Studio",d:"Prompt generator for Eagle Sign & Design wraps, banners and signage concepts.",i:"car",url:"/tools/vehicle-wrap-prompt-studio.html",tag:"v2.1",local:1},
+  {n:"Web Store Banner Studio",d:"Build store header banners with live preview and brand-ready type.",i:"flag",url:"/tools/web-store-banner-studio.html",tag:"v10",local:1},
+  {n:"Eagle Flyer Builder",d:"Lay out promotional flyers from templates and export for print.",i:"file",url:"/tools/flyer-builder.html",tag:"v10",local:1}]},
+ {id:"resources",eyebrow:"Reference",title:"Resources",blurb:"Templates, email tools and brand standards.",items:[
+  {n:"Bulk Order CSV Template",d:"Column layout for the ShopWorks Bulk Order Import: locations, designs, style, size, color, quantity, price.",i:"table",url:"/downloads/GUITemplate.csv",tag:"CSV",local:1,dl:1},
+  {n:"Eagle Graphics Design System",d:"Colors, type, logos and components. Start here before building anything new.",i:"palette",url:"https://claude.ai/artifact/R4Zw6cjx8m5MombDW2PfBM",tag:"Brand"},
+  {n:"Email Signature Builder",d:"Build a branded Eagle Graphics email signature and copy it straight into Outlook.",i:"mail",url:"/tools/email-signature-builder.html",tag:"Email",local:1},
+  {n:"Email Templates",d:"Standard customer and vendor email templates.",i:"mail",soon:1}]}
+];
+
+const main=document.getElementById("main");
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const host=u=>u.startsWith("/")?u.split("/").pop():u.replace(/^https?:\/\//,"").replace(/\/$/,"");
+let count=0;
+GROUPS.forEach(g=>{
+  const s=document.createElement("section");s.className="band"+(g.alt?" alt":"");s.id=g.id;
+  s.innerHTML=`<div class="c"><div class="sh"><div><span class="eyebrow">${g.eyebrow}</span><h2>${g.title}</h2><div class="bar"></div></div><p>${g.blurb}</p></div><div class="grid"></div></div>`;
+  const grid=s.querySelector(".grid");
+  g.items.forEach(x=>{
+    count++;
+    const ic=`<div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${I[x.i]}</svg></div>`;
+    const tagCls=(x.tag==="Live"||x.tag==="Web")?"tag live":x.tag==="Windows"?"tag win":"tag";
+    if(x.soon){
+      grid.insertAdjacentHTML("beforeend",`<div class="card soon" data-s="${esc((x.n+" "+x.d).toLowerCase())}"><span class="tag">Coming Soon</span>${ic}<h3>${esc(x.n)}</h3><p>${esc(x.d)}</p><div class="meta"><span class="where">Not linked yet</span><span class="go">Pending</span></div></div>`);
+      return;
+    }
+    const ext=x.url.startsWith("http");
+    const attrs=x.dl?` download`:` target="_blank" rel="noopener"`;
+    grid.insertAdjacentHTML("beforeend",`<a class="card" href="${esc(x.url)}"${attrs} data-s="${esc((x.n+" "+x.d+" "+g.title).toLowerCase())}"${x.local?` data-local="${esc(x.url)}"`:""}><span class="${tagCls}">${esc(x.tag)}</span>${ic}<h3>${esc(x.n)}</h3><p>${esc(x.d)}</p><div class="meta"><span class="where">${esc(host(x.url))}</span><span class="go">${x.dl?"Download "+DL:"Open "+ARROW}</span></div></a>`);
+  });
+  main.appendChild(s);
+});
+document.getElementById("stats").innerHTML=GROUPS.slice(0,2).map(g=>`<div class="stat"><b>${g.items.length}</b><small>${g.title}</small></div>`).join("")+`<div class="stat"><b>${count}</b><small>Total Projects</small></div>`;
+
+/* Mark hosted files that haven't been uploaded yet, so nobody hits a 404. */
+if(location.protocol.startsWith("http")){
+  document.querySelectorAll("[data-local]").forEach(a=>{
+    fetch(a.dataset.local,{method:"HEAD",cache:"no-store"}).then(r=>{if(!r.ok)throw 0}).catch(()=>{
+      a.classList.add("pending");a.removeAttribute("href");a.querySelector(".tag").textContent="Uploading Soon";
+    });
+  });
+}
+
+const q=document.getElementById("q"),empty=document.getElementById("empty");
+q.addEventListener("input",()=>{
+  const t=q.value.trim().toLowerCase();let any=0;
+  document.querySelectorAll("section.band").forEach(sec=>{
+    let vis=0;sec.querySelectorAll(".card").forEach(c=>{const m=!t||c.dataset.s.includes(t);c.classList.toggle("hidden",!m);if(m)vis++});
+    sec.classList.toggle("hidden",!vis);any+=vis;
+  });
+  empty.classList.toggle("on",!any);
+});
+</script>
+</body>
+</html>

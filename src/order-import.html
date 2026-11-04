@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ShopWorks Bulk Order Import | Eagle Graphics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Jost:wght@600;700;800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>{{CSS}}</style>
+</head>
+<body>
+{{SYMBOLS}}
+<header class="top"><div class="c">
+  <a class="brand" href="/" aria-label="Back to Project Hub"><svg viewBox="0 0 406.37 276.69" style="color:#53585a" role="img" aria-label="Eagle Graphics"><use href="#eg-lockup"/></svg><span>Project Hub</span></a>
+  <a class="back" href="/">All Tools</a>
+</div></header>
+
+<div class="hero"><div class="c">
+  <svg class="wm" viewBox="0 0 345.92 190.33" aria-hidden="true"><use href="#eg-head"/></svg>
+  <span class="eyebrow">Order Entry</span>
+  <h1>ShopWorks Bulk Order Import</h1>
+  <div class="bar"></div>
+  <p>Turn a bulk order CSV into a ShopWorks import file. Rows are grouped into orders by order type and design, sizes are mapped from the shared translation sheet, and the file downloads straight to your computer.</p>
+</div></div>
+
+<main><div class="c layout">
+  <form class="panel" id="form" novalidate>
+    <div class="ph"><h2>Order Details</h2></div>
+    <p class="msg err" id="err" role="alert" hidden></p>
+
+    <div class="field">
+      <label for="file">Input File</label>
+      <div class="drop" id="drop">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M8 13h2"/><path d="M14 13h2"/><path d="M8 17h2"/><path d="M14 17h2"/></svg>
+        <div><b id="fileName">Choose a CSV or drop it here</b><small id="fileMeta">Columns from the GUI order template</small></div>
+        <input type="file" id="file" accept=".csv,text/csv">
+      </div>
+      <p class="hint">Need the layout? <a href="/downloads/GUITemplate.csv" download>Download the CSV template</a>.</p>
+    </div>
+
+    <div class="field">
+      <label for="cid">Customer ID</label>
+      <input type="text" id="cid" autocomplete="off" placeholder="e.g. 12345">
+    </div>
+    <div class="field">
+      <label for="po">Customer Purchase Order</label>
+      <input type="text" id="po" autocomplete="off" placeholder="Optional">
+    </div>
+
+    <fieldset class="field">
+      <legend>Bulk Option</legend>
+      <div class="radios">
+        <label><input type="radio" name="src" value="OMG Bulk" checked> OMG Bulk</label>
+        <label><input type="radio" name="src" value="Brightsites Bulk"> Brightsites Bulk</label>
+        <label><input type="radio" name="src" value="Generic Bulk"> Generic Bulk</label>
+      </div>
+    </fieldset>
+
+    <div class="field">
+      <label>Size Translation Table</label>
+      <div class="status"><span class="dot busy" id="tDot"></span><div><span id="tText">Loading from the shared Google Sheet…</span><br><button type="button" class="linkbtn" id="tPick">Use a CSV file instead</button><input type="file" id="tFile" accept=".csv,text/csv" hidden></div></div>
+    </div>
+
+    <button class="btn primary" type="submit" id="run">Create Import File</button>
+  </form>
+
+  <section id="out" aria-live="polite">
+    <div class="panel empty" id="empty">
+      <svg class="wm" viewBox="0 0 345.92 190.33" aria-hidden="true"><use href="#eg-head"/></svg>
+      <strong>No File Yet</strong>
+      Pick your CSV, enter the customer ID and click Create Import File. You'll see a preview here before you download.
+    </div>
+    <div class="panel" id="result" hidden>
+      <div class="ph"><h2>Import File Ready</h2><span class="fname" id="rName"></span></div>
+      <div class="stats" id="rStats"></div>
+      <div id="rWarn"></div>
+      <div class="acts" style="margin-bottom:16px">
+        <button class="btn primary" type="button" id="dl" style="width:auto;min-height:44px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>Download .txt</button>
+        <button class="btn" type="button" id="copy">Copy Text</button>
+        <button class="btn" type="button" id="again">Enter New Order</button>
+      </div>
+      <pre class="out" id="rText"></pre>
+    </div>
+  </section>
+</div></main>
+<div class="toast" id="toast" role="status"></div>
+
+<script>{{CORE}}</script>
+<script>
+const $ = id => document.getElementById(id);
+let table = null, tableSource = "", csvText = null, csvName = "", result = null;
+
+function toast(t){const e=$("toast");e.textContent=t;e.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("on"),1800)}
+function setTable(t, src, ok, msg){
+  table = t; tableSource = src;
+  $("tDot").className = "dot " + (ok ? "ok" : "err");
+  $("tText").textContent = msg;
+}
+async function loadTable(){
+  try{
+    const r = await fetch(OrderCore.TRANSLATION_TABLE_URL, {cache:"no-store"});
+    if(!r.ok) throw new Error("HTTP " + r.status);
+    const t = OrderCore.parseTranslationTable(await r.text());
+    setTable(t, "sheet", true, `Loaded ${Object.keys(t).length} sizes from the shared Google Sheet.`);
+  }catch(e){
+    setTable(null, "", false, "Couldn't reach the shared Google Sheet. Download it as CSV (File > Download > CSV) and load it here.");
+  }
+}
+const readText = f => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => rej(r.error); r.readAsText(f); });
+
+$("tPick").onclick = () => $("tFile").click();
+$("tFile").onchange = async e => {
+  const f = e.target.files[0]; if(!f) return;
+  try{ const t = OrderCore.parseTranslationTable(await readText(f)); setTable(t, "file", true, `Loaded ${Object.keys(t).length} sizes from ${f.name}.`); }
+  catch(err){ setTable(null, "", false, err.message); }
+};
+
+async function takeFile(f){
+  if(!f) return;
+  csvText = await readText(f); csvName = f.name;
+  const n = OrderCore.dictRows(csvText).data.length;
+  $("fileName").textContent = f.name;
+  $("fileMeta").textContent = `${n} row${n===1?"":"s"}`;
+}
+$("file").onchange = e => takeFile(e.target.files[0]);
+const drop = $("drop");
+["dragenter","dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
+["dragleave","drop"].forEach(ev => drop.addEventListener(ev, () => drop.classList.remove("over")));
+drop.addEventListener("drop", e => { e.preventDefault(); takeFile(e.dataTransfer.files[0]); });
+
+function showErr(t){ const e=$("err"); e.textContent=t; e.hidden=!t; }
+
+$("form").onsubmit = e => {
+  e.preventDefault();
+  const missing = [];
+  if(!csvText) missing.push("an input file");
+  if(!$("cid").value.trim()) missing.push("a customer ID");
+  if(!table) missing.push("the size translation table");
+  if(missing.length){ showErr("Still needed: " + missing.join(", ") + "."); return; }
+  showErr("");
+  const src = document.querySelector("input[name=src]:checked").value;
+  try{
+    result = OrderCore.convert(csvText, table, $("cid").value.trim(), $("po").value, src);
+  }catch(err){ showErr("Processing failed: " + err.message); return; }
+  if(!result.orders){ showErr("No orders were found in that file. Check that it has Style, Quantity and OrderType filled in."); return; }
+  $("empty").hidden = true; $("result").hidden = false;
+  $("rName").textContent = result.filename;
+  $("rStats").innerHTML = `<div class="stat"><b>${result.orders}</b><small>Orders</small></div><div class="stat"><b>${result.products}</b><small>Products</small></div><div class="stat"><b>${result.rows}</b><small>CSV Rows</small></div>`;
+  const w = result.warnings;
+  $("rWarn").innerHTML = w.length ? `<div class="msg warn"><b>${w.length} row${w.length===1?"":"s"} need a look:</b><ul>${w.slice(0,25).map(x=>`<li>${x.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))}</li>`).join("")}${w.length>25?`<li>…and ${w.length-25} more</li>`:""}</ul></div>` : "";
+  $("rText").textContent = result.text;
+  if(innerWidth < 940) $("result").scrollIntoView({behavior:"smooth"});
+};
+
+/* Windows line endings, matching what the desktop GUI wrote. */
+$("dl").onclick = () => {
+  const blob = new Blob([result.text.replace(/\n/g, "\r\n")], {type:"text/plain"});
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = result.filename;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+  toast("Downloaded " + result.filename);
+};
+$("copy").onclick = async () => {
+  try{ await navigator.clipboard.writeText(result.text); toast("Copied to clipboard"); }
+  catch{ const t=document.createElement("textarea"); t.value=result.text; document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove(); toast("Copied to clipboard"); }
+};
+$("again").onclick = () => {
+  csvText = null; result = null; $("file").value = ""; $("cid").value = ""; $("po").value = "";
+  $("fileName").textContent = "Choose a CSV or drop it here"; $("fileMeta").textContent = "Columns from the GUI order template";
+  document.querySelector("input[value='OMG Bulk']").checked = true;
+  $("result").hidden = true; $("empty").hidden = false; showErr(""); scrollTo({top:0,behavior:"smooth"});
+};
+loadTable();
+</script>
+</body>
+</html>

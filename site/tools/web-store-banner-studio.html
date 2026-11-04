@@ -1,0 +1,1202 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Web Store Banner Studio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Graduate&family=Alfa+Slab+One&family=Archivo+Black&family=Bungee&family=Permanent+Marker&family=Teko:wght@500;600&family=Saira+Condensed:wght@600;800&family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=Kanit:ital,wght@0,700;1,800&family=Playfair+Display:wght@800&family=Montserrat:wght@600;800&family=Jost:wght@400;600;700;800&family=Open+Sans:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Eagle Graphics design system applied to the tool chrome. Layout: sticky live preview left, control rail right; stacks with the preview pinned on phones. */
+:root{
+  --bg:#F0F1F2; --panel:#FFFFFF; --ink:#2A2D2E; --body:#53585A; --muted:#63676A; --line:#E1E3E4; --line-strong:#C5C8C9;
+  --brand:#76BD1D; --accent:#4A7812; --accent-hover:#365711; --accent-press:#20340A; --accent-ink:#FFFFFF; --indicator:#5F9A17;
+  --well:#E1E3E4; --chip:#F7F8F8; --danger:#C0392B; --danger-ink:#FFFFFF; --focus:rgba(118,189,29,.40);
+  --f-display:"Jost","Century Gothic","Futura",system-ui,sans-serif;
+  --f-ui:"Open Sans","Helvetica Neue",Arial,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#2A2D2E; --panel:#3A3E40; --ink:#FFFFFF; --body:#E1E3E4; --muted:#C5C8C9; --line:#53585A; --line-strong:#7D8183;
+  --brand:#76BD1D; --accent:#76BD1D; --accent-hover:#94CF4A; --accent-press:#5F9A17; --accent-ink:#20340A; --indicator:#76BD1D;
+  --well:#222526; --chip:#2A2D2E; --danger:#E0604F; --danger-ink:#141516; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#2A2D2E; --panel:#3A3E40; --ink:#FFFFFF; --body:#E1E3E4; --muted:#C5C8C9; --line:#53585A; --line-strong:#7D8183;
+  --brand:#76BD1D; --accent:#76BD1D; --accent-hover:#94CF4A; --accent-press:#5F9A17; --accent-ink:#20340A; --indicator:#76BD1D;
+  --well:#222526; --chip:#2A2D2E; --danger:#E0604F; --danger-ink:#141516; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--body);font-family:var(--f-ui);font-size:14px;line-height:1.5}
+.wrap{max-width:1500px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 48px}
+header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:24px}
+.brandblock{display:flex;flex-direction:column;gap:4px}
+.eyebrow{font-family:var(--f-display);font-weight:600;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+header.top h1{font-family:var(--f-display);font-weight:800;font-size:30px;line-height:1.05;letter-spacing:-.01em;margin:0;text-transform:uppercase;color:var(--ink);text-wrap:balance}
+header.top h1::after{content:"";display:block;width:48px;height:3px;background:var(--brand);margin-top:12px}
+header.top p{margin:0;color:var(--muted);font-size:14px;flex:1 1 280px;max-width:65ch}
+.bottom-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:24px;padding-top:16px;border-top:1px solid var(--line)}
+.app{display:grid;grid-template-columns:400px minmax(0,1fr);gap:24px;align-items:start}
+.app>.rail{order:-1}
+@media (max-width:980px){.app{grid-template-columns:minmax(0,1fr)}.app>.rail{order:0}}
+.stage{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;flex-direction:column;gap:12px;min-width:0}
+@media (max-width:980px){.stage{background:var(--bg);padding-block:8px;margin-top:-8px}}
+.well{background:var(--well);border-radius:4px;padding:16px;min-width:0}
+.canvas-holder{position:relative;line-height:0}
+.canvas-holder canvas{width:100%;height:auto;display:block;max-width:100%;border-radius:2px}
+#guide{position:absolute;inset:0;pointer-events:none}
+.empty-msg{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:12px;line-height:1.4;border:2px dashed var(--line-strong);border-radius:2px;background:var(--panel);color:var(--muted);font-size:13px}
+.empty-msg b{font-family:var(--f-display);font-weight:700;font-size:16px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink)}
+.empty-msg span{max-width:42ch}
+.meta{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;font-family:var(--f-mono);font-size:12px;color:var(--muted);line-height:1.3}
+.meta label{font-family:var(--f-ui);font-size:13px;display:flex;gap:6px;align-items:center;cursor:pointer;color:var(--body)}
+.store{background:var(--panel);border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.store-bar{display:flex;justify-content:space-between;align-items:center;padding:8px 16px;border-bottom:1px solid var(--line);font-family:var(--f-display);font-weight:600;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.store img{display:block;width:100%;height:auto}
+.store-body{padding:16px 20px 20px}
+.store-body .dl{font-size:13px;color:var(--body)}
+.store-body h2{margin:4px 0 6px;font-family:var(--f-display);font-size:26px;line-height:1.2;font-weight:700;color:var(--ink);text-wrap:balance}
+.store-body p{margin:0;color:var(--muted);font-size:14px;max-width:65ch}
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:16px}
+.tiles div{aspect-ratio:4/3;background:var(--chip);border-radius:2px;max-width:100%}
+.rail{display:flex;flex-direction:column;gap:12px;min-width:0}
+details.sec{background:var(--panel);border:1px solid var(--line);border-radius:4px}
+details.sec>summary{list-style:none;cursor:pointer;padding:14px 16px;font-family:var(--f-display);font-weight:700;font-size:15px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink);display:flex;justify-content:space-between;align-items:center;border-radius:4px}
+details.sec[open]>summary{box-shadow:inset 0 -1px 0 var(--line)}
+details.sec>summary::-webkit-details-marker{display:none}
+details.sec>summary::after{content:"+";font-family:var(--f-mono);color:var(--accent);font-weight:500}
+details.sec[open]>summary::after{content:"–"}
+.sec-body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:12px}
+.sec-body+.sec-body{padding-top:0}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:end}
+.row>*{flex:1 1 120px;min-width:0}
+.f{display:flex;flex-direction:column;gap:4px;min-width:0}
+.f>span,.lbl{font-family:var(--f-ui);font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+input[type=text],input[type=number],select{width:100%;font:inherit;font-size:14px;color:var(--ink);background:var(--panel);border:1px solid var(--line-strong);border-radius:3px;padding:8px 10px;min-width:0;transition:border-color 140ms cubic-bezier(.4,0,.2,1)}
+input[type=text]:focus,input[type=number]:focus,select:focus{border-color:var(--indicator)}
+input[type=text]:disabled{background:var(--chip);color:var(--muted);cursor:not-allowed}
+input[type=color]{width:100%;height:38px;border:1px solid var(--line-strong);border-radius:3px;background:var(--panel);padding:2px;cursor:pointer}
+input[type=color]:disabled{cursor:not-allowed;opacity:1;background:var(--chip)}
+input[type=range]{width:100%;accent-color:var(--indicator)}
+input[type=checkbox]{accent-color:var(--indicator);width:16px;height:16px}
+input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.line-card{border:1px solid var(--line);border-radius:4px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.line-head{display:flex;justify-content:space-between;align-items:center}
+.line-head b{font-family:var(--f-display);font-weight:700;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink)}
+.line-head label{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--muted);cursor:pointer}
+.line-card.off .line-fields{opacity:.45}
+.line-fields{display:flex;flex-direction:column;gap:8px}
+.hint{font-size:13px;color:var(--muted);margin:0}
+.chk{display:flex;gap:8px;align-items:center;font-size:14px;cursor:pointer;color:var(--body)}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+button{font:inherit;cursor:pointer;border-radius:3px}
+.btn{background:var(--panel);color:var(--ink);border:1px solid var(--line-strong);padding:8px 14px;font-size:14px;font-weight:600;transition:background-color 140ms cubic-bezier(.4,0,.2,1),border-color 140ms cubic-bezier(.4,0,.2,1),color 140ms cubic-bezier(.4,0,.2,1)}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-family:var(--f-display);font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:15px;min-height:42px;padding:10px 20px}
+.btn.primary:hover{background:var(--accent-hover);border-color:var(--accent-hover);color:var(--accent-ink)}
+.btn.primary:active{background:var(--accent-press);border-color:var(--accent-press);box-shadow:inset 0 1px 0 rgba(255,255,255,.14)}
+#styles{display:flex;flex-direction:column;gap:10px}
+.style-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.style-btn{padding:6px 4px;font-family:var(--f-display);font-weight:700;font-size:12px;letter-spacing:.04em;text-transform:uppercase;text-align:center;min-width:0;overflow-wrap:anywhere;line-height:1.2}
+.style-btn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.swatches{display:flex;flex-wrap:wrap;gap:8px}
+.sw{display:flex;border:1px solid var(--line-strong);border-radius:3px;overflow:hidden;padding:0;height:30px;background:none}
+.sw:hover{border-color:var(--accent)}
+.sw i{display:block;width:16px;height:100%}
+.sw span{font-size:12px;padding:0 8px;display:flex;align-items:center;background:var(--chip);color:var(--ink)}
+.val{font-family:var(--f-mono);font-size:11px;color:var(--muted);text-transform:none;letter-spacing:0;font-style:normal;font-weight:400}
+.file-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.file-row input[type=file]{font-size:13px;max-width:100%;color:var(--muted)}
+.status{font-size:13px;color:var(--muted);min-height:1.2em;margin:0}
+.fallback img{display:block;width:100%;height:auto;border:1px solid var(--line);margin-top:8px}
+.proj-btns .btn{flex:1 1 120px}
+.side-add{align-items:center}
+.layers{display:flex;flex-direction:column;gap:10px}
+.layer-card{border:1px solid var(--line);border-radius:4px;padding:12px;display:flex;flex-direction:column;gap:10px;transition:border-color 140ms cubic-bezier(.4,0,.2,1)}
+.layer-card.active{border-color:var(--indicator)}
+.layer-head{display:flex;align-items:center;gap:10px;min-width:0}
+.layer-thumb{width:44px;height:44px;object-fit:contain;flex:none;border:1px solid var(--line);border-radius:2px;background:repeating-conic-gradient(var(--chip) 0 25%,var(--panel) 0 50%) 0 0/10px 10px}
+.layer-title{display:flex;flex-direction:column;min-width:0;flex:1}
+.layer-title b{font-family:var(--f-display);font-weight:700;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink)}
+.layer-title span{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.layer-tag{flex:none;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.layer-btns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.layer-btns .btn{font-size:13px;padding:6px 8px}
+.btn:disabled,.btn:disabled:hover{background:var(--chip);color:var(--muted);border-color:var(--line);cursor:not-allowed}
+.flash{animation:flash 1.6s cubic-bezier(.4,0,.2,1)}
+@keyframes flash{0%,40%{box-shadow:0 0 0 3px var(--focus);border-color:var(--indicator)}100%{box-shadow:0 0 0 3px transparent}}
+@media (prefers-reduced-motion:reduce){.flash{animation:none;outline:3px solid var(--focus)}}
+.pos-row{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.pos-row .btn{font-size:13px;padding:6px 10px}
+.room-warn{margin:0;font-size:13px;color:var(--ink);background:var(--chip);border-left:3px solid var(--danger);padding:8px 10px;border-radius:2px}
+#projText{width:100%;font-family:var(--f-mono);font-size:11px;color:var(--ink);background:var(--chip);border:1px solid var(--line-strong);border-radius:3px;padding:8px;resize:vertical;min-width:0}
+.hint code{font-family:var(--f-mono);font-size:12px}
+.reset-btn.armed,.reset-btn.armed:hover{background:var(--danger);color:var(--danger-ink);border-color:var(--danger)}
+.color-pair{display:flex;gap:6px;min-width:0}
+.color-pair input[type=color]{flex:0 0 42px;width:42px}
+.color-pair .hex{flex:1 1 auto;font-family:var(--f-mono);font-size:13px;text-transform:uppercase;padding:8px}
+.hex.bad{border-color:var(--danger);outline:1px solid var(--danger)}
+.row>.f:has(.color-pair){flex:1 1 150px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}.btn:active{transform:none}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brandblock"><span class="eyebrow">Eagle Graphics</span><h1>Web Store Banner Studio</h1></div>
+    <p>Build school &amp; team store header banners with your own text, colors and logo, then download an image ready to upload.</p>
+    <button class="btn reset-btn" type="button">Reset Form</button>
+  </header>
+
+  <div class="app">
+    <section class="stage" aria-label="Banner preview">
+      <div class="well">
+        <div class="canvas-holder">
+          <canvas id="cv" width="1620" height="458" aria-label="Banner preview"></canvas>
+          <canvas id="guide" width="1620" height="458"></canvas>
+          <div class="empty-msg" id="emptyMsg" hidden><b>Blank banner</b><span>Type your text, pick a quick style, or open a project to start a new design.</span></div>
+        </div>
+        <div class="meta">
+          <span id="dims">1620 × 458 px · 3.54 : 1</span>
+          <div class="row" style="flex:0 1 auto;gap:14px">
+            <label><input type="checkbox" id="showGuide" checked> Safe margins</label>
+            <label><input type="checkbox" id="showStore"> Store page view</label>
+          </div>
+        </div>
+      </div>
+      <div class="store" id="storeView" hidden>
+        <div class="store-bar"><span>Your logo</span><span>Cart (0)</span></div>
+        <img id="storeImg" alt="Banner as it appears on the store page">
+        <div class="store-body">
+          <div class="dl"><b id="storeDl">Deadline: Nov 2, 2026</b> (11:59 PM CST)</div>
+          <h2 id="storeName">Pivot Point</h2>
+          <p id="storeNote">Orders will be distributed at Pivot Point.</p>
+          <div class="tiles"><div></div><div></div><div></div><div></div></div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="rail">
+      <details class="sec" open>
+        <summary>Project file</summary>
+        <div class="sec-body">
+          <p class="hint">Save your work as a .json project file and open it later to pick up where you left off. Text, colors, settings, logo and photo are all included.</p>
+          <div class="btns proj-btns">
+            <button class="btn" id="saveProj" type="button">Save Project</button>
+            <button class="btn" id="openProj" type="button">Open Project</button>
+            <input type="file" id="projFile" accept=".json,application/json" hidden>
+          </div>
+          <p class="status" id="projStatus" role="status"></p>
+          <div id="projFallback" hidden>
+            <p class="hint">Saving files isn't available in this view. Copy the text below into a new file and name it something like <code>my-banner-project.json</code>.</p>
+            <textarea id="projText" readonly rows="6"></textarea>
+            <div class="btns" style="margin-top:8px"><button class="btn" id="copyProj" type="button">Copy Project Text</button></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="sec" open>
+        <summary>Quick styles</summary>
+        <div class="sec-body">
+          <div id="styles">
+            <div class="style-grid" id="basicStyles"></div>
+          </div>
+          <p class="hint">A style sets layout, fonts, sizes and texture. Your text and colors stay as they are. Hover a style to see what it does.</p>
+        </div>
+      </details>
+
+      <details class="sec" open>
+        <summary>Text</summary>
+        <div class="sec-body" id="lines"></div>
+        <div class="sec-body" style="padding-top:0">
+          <div class="row">
+            <label class="f"><span>All text alignment</span>
+              <select id="align" data-k="align">
+                <option value="auto">Match layout</option><option value="left">Left</option><option value="center">Center</option><option value="right">Right</option>
+              </select></label>
+            <label class="f"><span>Title effect</span>
+              <select id="effect" data-k="effect">
+                <option value="none">None</option><option value="shadow">Drop shadow</option><option value="outline">Outline</option><option value="both">Outline + shadow</option>
+              </select></label>
+          </div>
+          <div class="row">
+            <label class="f"><span>Effect color</span><input type="color" id="effectColor" data-k="effectColor"></label>
+            <label class="f"><span>Badge shape</span>
+              <select id="badgeShape" data-k="badgeShape">
+                <option value="slant">Slanted</option><option value="pill">Pill</option><option value="block">Block</option>
+              </select></label>
+          </div>
+          <label class="chk"><input type="checkbox" id="upperTitle" data-k="upperTitle"> All caps title</label>
+          <label class="chk"><input type="checkbox" id="underline" data-k="underline"> Accent bar under title</label>
+        </div>
+      </details>
+
+      <details class="sec" open>
+        <summary>Layout &amp; logo</summary>
+        <div class="sec-body">
+          <label class="f"><span>Layout</span>
+            <select id="layout" data-k="layout">
+              <option value="left">Left text, open right</option>
+              <option value="center">Centered</option>
+              <option value="split">Split panel</option>
+              <option value="stripe">Speed stripes</option>
+            </select></label>
+          <div class="f"><span>Team or store logo</span>
+            <div class="file-row"><input type="file" id="logoFile" accept="image/*"><button class="btn" id="logoClear" type="button">Remove</button></div>
+            <p class="hint">PNG with a transparent background works best.</p>
+          </div>
+          <div class="row">
+            <label class="f"><span>Logo alignment</span>
+              <select id="logoPos" data-k="logoPos"><option value="inherit">Same as all text</option><option value="left">Left</option><option value="center">Center</option><option value="right">Right</option></select></label>
+            <label class="f"><span>Logo size <em class="val" id="v-logoSize"></em></span><input type="range" id="logoSize" data-k="logoSize" min="8" max="45" step="1"></label>
+          </div>
+          <p class="hint">The logo starts under the subtitle, sized so it never touches it. Drag it on the preview to move it, or drag a corner to resize it.</p>
+          <div class="pos-row"><span class="val" id="pos-logo"></span><button class="btn pos-reset" type="button" data-reset="logo">Reset Position &amp; Size</button></div>
+          <p class="room-warn" id="logoRoom" role="status" hidden>There's no room below the subtitle for the logo. Hide the button or make the title or eyebrow smaller to make space.</p>
+        </div>
+      </details>
+
+      <details class="sec" open>
+        <summary>Right-side images</summary>
+        <div class="sec-body">
+          <p class="hint">Add up to three images, such as product cutouts, a mascot or graphics. PNGs with transparent backgrounds layer on top of each other cleanly. Click an image on the preview to select it, drag it to move it, and drag a corner handle to resize it. The sliders do the same.</p>
+          <div class="btns side-add">
+            <button class="btn" id="addSide" type="button">Add Image</button>
+            <span class="val" id="sideCount"></span>
+            <input type="file" id="sideFile" accept=".png,image/png,image/webp,image/jpeg" multiple hidden>
+          </div>
+          <div class="layers" id="sideLayers"></div>
+        </div>
+      </details>
+
+      <details class="sec" open>
+        <summary>Background</summary>
+        <div class="sec-body">
+          <div class="f"><span>School &amp; team colors</span><div class="swatches" id="palettes"></div></div>
+          <div class="row">
+            <label class="f"><span>Primary</span><input type="color" id="c1" data-k="c1"></label>
+            <label class="f"><span>Secondary</span><input type="color" id="c2" data-k="c2"></label>
+            <label class="f"><span>Accent</span><input type="color" id="accent" data-k="accent"></label>
+          </div>
+          <div class="row">
+            <label class="f"><span>Fill</span>
+              <select id="bgType" data-k="bgType"><option value="gradient">Gradient</option><option value="solid">Solid</option><option value="photo">Photo</option></select></label>
+            <label class="f"><span>Gradient angle <em class="val" id="v-angle"></em></span><input type="range" id="angle" data-k="angle" min="0" max="360" step="5"></label>
+          </div>
+          <div class="row">
+            <label class="f"><span>Texture</span>
+              <select id="pattern" data-k="pattern">
+                <option value="none">None</option><option value="mesh">Jersey mesh</option><option value="stripes">Diagonal pinstripe</option>
+                <option value="halftone">Halftone fade</option><option value="chevron">Chevron</option><option value="topo">Topo lines</option>
+              </select></label>
+            <label class="f"><span>Texture strength <em class="val" id="v-patternAlpha"></em></span><input type="range" id="patternAlpha" data-k="patternAlpha" min="0" max="40" step="1"></label>
+          </div>
+          <div class="f"><span>Photo</span>
+            <div class="file-row"><input type="file" id="photoFile" accept="image/*"><button class="btn" id="photoClear" type="button">Remove</button></div>
+            <p class="hint">Used as the full background when Fill is Photo, or inside the panel for the Split layout.</p>
+          </div>
+          <label class="f"><span>Photo color overlay <em class="val" id="v-photoDim"></em></span><input type="range" id="photoDim" data-k="photoDim" min="0" max="95" step="1"></label>
+        </div>
+      </details>
+
+      <details class="sec" open>
+        <summary>Size</summary>
+        <div class="sec-body">
+          <label class="f"><span>Banner size</span>
+            <select id="sizePreset">
+              <option value="1620x458">Store banner · 1620 × 458</option>
+              <option value="1920x460">Wide store banner · 1920 × 460</option>
+              <option value="1200x400">Compact · 1200 × 400</option>
+              <option value="custom">Custom size…</option>
+            </select></label>
+          <div class="row" id="customSize" hidden>
+            <label class="f"><span>Width px</span><input type="number" id="cw" min="300" max="4000" step="1"></label>
+            <label class="f"><span>Height px</span><input type="number" id="ch" min="100" max="2000" step="1"></label>
+          </div>
+        </div>
+      </details>
+
+      <details class="sec" open>
+        <summary>Export</summary>
+        <div class="sec-body">
+          <div class="row">
+            <label class="f" style="flex:2 1 160px"><span>File name</span><input type="text" id="fname" data-k="fname" placeholder="store-banner"></label>
+            <label class="f"><span>Format</span><select id="fmt" data-k="fmt"><option value="png">PNG</option><option value="jpg">JPG</option></select></label>
+          </div>
+          <div class="btns">
+            <button class="btn primary" id="exportBtn" type="button">Download Banner</button>
+          </div>
+          <p class="status" id="status" role="status"></p>
+          <div class="fallback" id="fallback" hidden>
+            <p class="hint">Saving isn't available in this view. Right-click (or long-press) the image below and choose Save image.</p>
+            <img id="fallbackImg" alt="Exported banner">
+          </div>
+        </div>
+      </details>
+    </aside>
+  </div>
+  <div class="bottom-bar">
+    <p class="hint">Reset Form clears all text fields and uploads and returns colors and settings to the starting design.</p>
+    <button class="btn reset-btn" type="button">Reset Form</button>
+  </div>
+</div>
+
+<script>
+(() => {
+const FONTS = {
+  "Anton":{w:400},"Bebas Neue":{w:400},"Graduate":{w:400},"Alfa Slab One":{w:400},"Archivo Black":{w:400},
+  "Bungee":{w:400},"Permanent Marker":{w:400},"Teko":{w:600},"Saira Condensed":{w:800},"Barlow Condensed":{w:700},
+  "Barlow":{w:600},"Kanit":{w:700},"Playfair Display":{w:800},"Montserrat":{w:800}
+};
+const LINE_META = [
+  {id:"eyebrow", name:"Eyebrow", hint:"Small label above the title. Always set in caps.", min:3, max:14},
+  {id:"title", name:"Title", hint:"Store or team name. Type | to break onto a second line.", min:10, max:45},
+  {id:"sub", name:"Subtitle", hint:"Deadline, pickup info or a short message.", min:3, max:14},
+  {id:"badge", name:"Button", hint:"Call to action. Always set in caps.", min:3, max:10}
+];
+const DEFAULTS = {
+  w:1620, h:458, layout:"left", align:"auto",
+  c1:"#13294B", c2:"#0A1830", accent:"#F2B33D", bgType:"gradient", angle:110,
+  pattern:"mesh", patternAlpha:10, photoDim:60,
+  logoPos:"inherit", logoSize:22,
+  effect:"shadow", effectColor:"#F2B33D", badgeShape:"slant", upperTitle:true, underline:true,
+  fname:"pivot-point-store-banner", fmt:"png",
+  sides:[], pos:{},
+  lines:{
+    eyebrow:{on:true,text:"2026 Team Store",font:"Saira Condensed",size:7,color:"#F2B33D",italic:false},
+    title:{on:true,text:"Pivot Point",font:"Anton",size:30,color:"#FFFFFF",italic:false},
+    sub:{on:true,text:"Orders close Nov 2 · Distributed at Pivot Point",font:"Barlow",size:6,color:"#DCE3EC",italic:false},
+    badge:{on:true,text:"Shop Now",font:"Barlow Condensed",size:5.5,color:"auto",italic:false}
+  },
+  deadline:"Nov 2, 2026"
+};
+const STYLES = [
+  {name:"Varsity", note:"Centered, collegiate type, mesh", set:{layout:"center",bgType:"gradient",angle:90,c1:"#13294B",c2:"#0A1830",accent:"#F2B33D",pattern:"mesh",patternAlpha:12,effect:"outline",effectColor:"#F2B33D",badgeShape:"block",upperTitle:true,underline:false,
+    fonts:{eyebrow:["Saira Condensed","#F2B33D",7],title:["Graduate","#FFFFFF",27],sub:["Barlow","#DCE3EC",6],badge:["Barlow Condensed","auto",5.5]}}},
+  {name:"Speed", note:"Italic block type, racing stripes", set:{layout:"stripe",bgType:"gradient",angle:120,c1:"#161616",c2:"#2B2B2B",accent:"#D7263D",pattern:"stripes",patternAlpha:8,effect:"shadow",effectColor:"#D7263D",badgeShape:"slant",upperTitle:true,underline:true,
+    fonts:{eyebrow:["Teko","#D7263D",8],title:["Kanit","#FFFFFF",28,true],sub:["Barlow","#CFCFCF",6],badge:["Barlow Condensed","auto",5.5]}}},
+  {name:"Clean", note:"Light background, modern sans", set:{layout:"left",bgType:"gradient",angle:90,c1:"#F4F6F8",c2:"#E3E8EE",accent:"#1F5FBF",pattern:"topo",patternAlpha:10,effect:"none",effectColor:"#1F5FBF",badgeShape:"pill",upperTitle:false,underline:true,
+    fonts:{eyebrow:["Barlow Condensed","#1F5FBF",6.5],title:["Montserrat","#15202B",24],sub:["Barlow","#4A5562",6],badge:["Barlow","auto",5]}}},
+  {name:"Split", note:"Text panel beside a photo or logo", set:{layout:"split",bgType:"solid",angle:90,c1:"#0E3B2E",c2:"#F1EFE7",accent:"#E9C46A",pattern:"halftone",patternAlpha:12,effect:"none",effectColor:"#E9C46A",badgeShape:"block",upperTitle:false,underline:true,
+    fonts:{eyebrow:["Saira Condensed","#E9C46A",6.5],title:["Alfa Slab One","#FFFFFF",22],sub:["Barlow","#D5E2DC",6],badge:["Barlow Condensed","auto",5.5]}}},
+  {name:"Photo", note:"Your photo with a color wash", set:{layout:"left",bgType:"photo",photoDim:62,c1:"#111A24",c2:"#111A24",accent:"#FF6B1A",pattern:"none",patternAlpha:0,effect:"shadow",effectColor:"#000000",badgeShape:"slant",upperTitle:true,underline:true,
+    fonts:{eyebrow:["Teko","#FF6B1A",8],title:["Bebas Neue","#FFFFFF",34],sub:["Barlow","#FFFFFF",6],badge:["Barlow Condensed","auto",5.5]}}},
+  {name:"Retro", note:"Sunset gradient, chunky 70s type", set:{layout:"center",bgType:"gradient",angle:90,c1:"#F28C28",c2:"#B8322B",accent:"#2B1B17",pattern:"halftone",patternAlpha:14,effect:"shadow",effectColor:"#2B1B17",badgeShape:"pill",upperTitle:true,underline:false,
+    fonts:{eyebrow:["Barlow Condensed","#FFF1D6",6.5],title:["Bungee","#FFF1D6",24],sub:["Barlow","#FFE7C2",6],badge:["Barlow Condensed","auto",5.5]}}},
+  {name:"Tactical", note:"Olive drab, topo lines, condensed type", set:{layout:"left",bgType:"gradient",angle:135,c1:"#3B4232",c2:"#1E221A",accent:"#C9B27C",pattern:"topo",patternAlpha:12,effect:"none",effectColor:"#C9B27C",badgeShape:"block",upperTitle:true,underline:true,
+    fonts:{eyebrow:["Saira Condensed","#C9B27C",6.5],title:["Teko","#EDEBE3",36],sub:["Barlow","#CFCFC3",6],badge:["Barlow Condensed","auto",5.5]}}},
+  {name:"Spirit", note:"Hand-lettered title on cream", set:{layout:"center",bgType:"solid",angle:90,c1:"#F7F2E6",c2:"#EDE4CF",accent:"#C8102E",pattern:"stripes",patternAlpha:5,effect:"none",effectColor:"#C8102E",badgeShape:"slant",upperTitle:false,underline:false,
+    fonts:{eyebrow:["Barlow Condensed","#1B2A4A",6.5],title:["Permanent Marker","#C8102E",26],sub:["Barlow","#1B2A4A",6],badge:["Barlow Condensed","auto",5.5]}}},
+  {name:"Classic", note:"Charcoal and gold, refined serif", set:{layout:"center",bgType:"gradient",angle:90,c1:"#1C1C1E",c2:"#2C2A27",accent:"#C6A15B",pattern:"none",patternAlpha:0,effect:"none",effectColor:"#C6A15B",badgeShape:"block",upperTitle:false,underline:true,
+    fonts:{eyebrow:["Barlow Condensed","#C6A15B",6],title:["Playfair Display","#F4EFE6",24],sub:["Barlow","#CFC8BC",6],badge:["Barlow Condensed","auto",5]}}},
+  {name:"Bold Block", note:"Heavy type, split panel, chevrons", set:{layout:"split",bgType:"solid",angle:90,c1:"#1D4FBF",c2:"#FFFFFF",accent:"#FFD23F",pattern:"chevron",patternAlpha:8,effect:"shadow",effectColor:"#0F2C73",badgeShape:"slant",upperTitle:true,underline:false,
+    fonts:{eyebrow:["Saira Condensed","#FFD23F",7],title:["Archivo Black","#FFFFFF",20],sub:["Barlow","#E1E9FA",6],badge:["Barlow Condensed","auto",5.5]}}},
+  {name:"Stadium", note:"Huge centered type, pinstripes, outline", set:{layout:"center",bgType:"gradient",angle:90,pattern:"stripes",patternAlpha:7,effect:"both",badgeShape:"block",upperTitle:true,underline:false,
+    fonts:{eyebrow:["Teko","",8],title:["Anton","",36],sub:["Barlow Condensed","",7],badge:["Barlow Condensed","",5.5]}}},
+  {name:"Throwback", note:"Collegiate type, chevrons, outline", set:{layout:"left",bgType:"gradient",angle:100,pattern:"chevron",patternAlpha:9,effect:"outline",badgeShape:"slant",upperTitle:true,underline:true,
+    fonts:{eyebrow:["Saira Condensed","",7],title:["Graduate","",26],sub:["Barlow","",6],badge:["Barlow Condensed","",5.5]}}},
+  {name:"Arcade", note:"Blocky display type, mesh, pill button", set:{layout:"center",bgType:"gradient",angle:45,pattern:"mesh",patternAlpha:10,effect:"shadow",badgeShape:"pill",upperTitle:true,underline:false,
+    fonts:{eyebrow:["Barlow Condensed","",6.5],title:["Bungee","",22],sub:["Barlow","",6],badge:["Barlow Condensed","",5.5]}}},
+  {name:"Minimal", note:"Solid fill, clean sans, no extras", set:{layout:"left",bgType:"solid",angle:90,pattern:"none",patternAlpha:0,effect:"none",badgeShape:"pill",upperTitle:false,underline:false,
+    fonts:{eyebrow:["Barlow Condensed","",6],title:["Montserrat","",22],sub:["Barlow","",6],badge:["Barlow","",5]}}},
+  {name:"Editorial", note:"Serif title in a split panel", set:{layout:"split",bgType:"solid",angle:90,pattern:"none",patternAlpha:0,effect:"none",badgeShape:"block",upperTitle:false,underline:true,
+    fonts:{eyebrow:["Barlow Condensed","",6],title:["Playfair Display","",21],sub:["Barlow","",6],badge:["Barlow Condensed","",5]}}},
+  {name:"Street", note:"Marker title, halftone, speed stripes", set:{layout:"stripe",bgType:"gradient",angle:120,pattern:"halftone",patternAlpha:12,effect:"shadow",badgeShape:"slant",upperTitle:false,underline:false,
+    fonts:{eyebrow:["Teko","",8],title:["Permanent Marker","",26],sub:["Barlow","",6],badge:["Barlow Condensed","",5.5]}}}
+];
+const PALETTES = [
+  ["Navy / Gold","#13294B","#0A1830","#F2B33D"],["Scarlet / Black","#B3121D","#1A1A1A","#FFFFFF"],
+  ["Forest / White","#1E4D2B","#123320","#FFFFFF"],["Royal / Silver","#1D4FBF","#0F2C73","#C9CED6"],
+  ["Purple / Gold","#3F2A73","#22154A","#F0C23C"],["Maroon / Gray","#6B1E2B","#3E1018","#BFC3C8"],
+  ["Orange / Navy","#E2621B","#B24710","#14284B"],["Black / Teal","#121417","#24292F","#13B5B1"],
+  ["Kelly / Gold","#118C4F","#0B6338","#F6C744"],["Columbia / Navy","#7FB2E5","#4C86C2","#0E2445"]
+];
+
+Object.values(DEFAULTS.lines).forEach(l => l.align = "inherit");
+const $ = id => document.getElementById(id);
+const clone = o => JSON.parse(JSON.stringify(o));
+let S = clone(DEFAULTS);
+try { const saved = JSON.parse(localStorage.getItem("wsbs-state") || "null"); if (saved && saved.lines) S = Object.assign(clone(DEFAULTS), saved, {lines:Object.assign(clone(DEFAULTS.lines), saved.lines)}); } catch(e){}
+let logoImg = null, photoImg = null, logoData = null, photoData = null;
+let cleared = false, logoCapped = false, logoHidden = false;
+let elemRects = [], hoverElem = null, activeElem = null;
+const ELEMS = ["eyebrow","title","sub","badge","logo"];
+const posOf = id => { const P = (S.pos && S.pos[id]) || {}; return { dx:+P.dx||0, dy:+P.dy||0, sc:+P.sc||1 }; };
+const isMoved = id => { const P = posOf(id); return Math.abs(P.dx)>0.05 || Math.abs(P.dy)>0.05 || Math.abs(P.sc-1)>0.005; };
+let sideImgs = {}, sideRects = [], activeLayer = null, hoverLayer = null, focusLayer = null, drag = null;
+const uid = () => "L" + Math.random().toString(36).slice(2,9);
+const esc = t => String(t).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+Object.values(S.lines).forEach(l => { if (!l.align) l.align = "inherit"; });
+
+/* ---------- build line editors ---------- */
+const fontOptions = Object.keys(FONTS).map(f => `<option value="${f}">${f}</option>`).join("");
+$("lines").innerHTML = LINE_META.map(m => `
+  <div class="line-card" id="card-${m.id}">
+    <div class="line-head"><b>${m.name}</b><label><input type="checkbox" id="${m.id}-on" data-k="lines.${m.id}.on"> Show</label></div>
+    <div class="line-fields">
+      <input type="text" id="${m.id}-text" data-k="lines.${m.id}.text" aria-label="${m.name} text" placeholder="Enter ${m.name.toLowerCase()} text">
+      <p class="hint">${m.hint}</p>
+      <div class="row">
+        <label class="f" style="flex:2 1 150px"><span>Font</span><select id="${m.id}-font" data-k="lines.${m.id}.font">${fontOptions}</select></label>
+        <label class="f"><span>Color</span><input type="color" id="${m.id}-color" data-k="lines.${m.id}.color"></label>
+      </div>
+      <div class="row">
+        <label class="f" style="flex:3 1 150px"><span>Size <em class="val" id="v-${m.id}-size"></em></span><input type="range" id="${m.id}-size" data-k="lines.${m.id}.size" min="${m.min}" max="${m.max}" step="0.5"></label>
+        <label class="chk" style="flex:0 1 auto"><input type="checkbox" id="${m.id}-italic" data-k="lines.${m.id}.italic"> Italic</label>
+      </div>
+      <label class="f"><span>Alignment</span><select id="${m.id}-align" data-k="lines.${m.id}.align">
+        <option value="inherit">Same as all text</option><option value="left">Left</option><option value="center">Center</option><option value="right">Right</option>
+      </select></label>
+      <div class="pos-row"><span class="val" id="pos-${m.id}"></span><button class="btn pos-reset" type="button" data-reset="${m.id}">Reset Position &amp; Size</button></div>
+      ${m.id==="badge" ? `<label class="chk"><input type="checkbox" id="badge-autocolor"> Pick text color automatically</label>` : ""}
+    </div>
+  </div>`).join("");
+$("lines").insertAdjacentHTML("afterbegin", `<p class="hint">Drag any text on the preview to move it, or select it and drag a corner to resize it. Reset Position &amp; Size puts it back where the layout placed it.</p>`);
+$("lines").insertAdjacentHTML("beforeend", `<label class="f"><span>Deadline (store page view only)</span><input type="text" id="deadline" data-k="deadline" placeholder="e.g. Nov 2, 2026"></label>`);
+
+const styleBtn = (s,i) => `<button class="btn style-btn${s.premium ? " premium" : ""}" type="button" data-style="${i}" aria-pressed="false" title="${s.note}">${s.name}</button>`;
+$("basicStyles").innerHTML = STYLES.map((s,i) => s.premium ? "" : styleBtn(s,i)).join("");
+$("palettes").innerHTML = PALETTES.map((p,i) => `<button class="sw" type="button" data-pal="${i}" title="${p[0]}"><i style="background:${p[1]}"></i><i style="background:${p[3]}"></i><span>${p[0]}</span></button>`).join("");
+
+/* ---------- hex fields beside every color picker ---------- */
+document.querySelectorAll('input[type="color"]').forEach(c => {
+  const pair = document.createElement("div"); pair.className = "color-pair";
+  c.parentNode.insertBefore(pair, c); pair.appendChild(c);
+  const h = document.createElement("input");
+  h.type = "text"; h.className = "hex"; h.id = c.id + "-hex"; h.maxLength = 7; h.placeholder = "#RRGGBB";
+  h.setAttribute("aria-label", "Hex color"); h.spellcheck = false; h._c = c;
+  pair.appendChild(h);
+  const norm = (v, allowShort) => {
+    v = v.trim().replace(/^#?/, "#");
+    if (/^#[0-9a-f]{6}$/i.test(v)) return v.toUpperCase();
+    if (allowShort && /^#[0-9a-f]{3}$/i.test(v)) return ("#" + v.slice(1).split("").map(x=>x+x).join("")).toUpperCase();
+    return null;
+  };
+  const apply = (v) => { c.value = v.toLowerCase(); h._fromHex = true; c.dispatchEvent(new Event("input", {bubbles:true})); h._fromHex = false; };
+  h.addEventListener("input", () => { const v = norm(h.value, false); h.classList.toggle("bad", !v && h.value.replace("#","").length >= 6); if (v) apply(v); });
+  h.addEventListener("change", () => { const v = norm(h.value, true); if (v){ h.value = v; h.classList.remove("bad"); apply(v); } else { h.value = c.value.toUpperCase(); h.classList.remove("bad"); } });
+  c.addEventListener("input", () => { if (!h._fromHex){ h.value = c.value.toUpperCase(); h.classList.remove("bad"); } });
+});
+
+/* ---------- state <-> inputs ---------- */
+const getPath = (p) => p.split(".").reduce((o,k)=>o&&o[k], S);
+const setPath = (p,v) => { const ks=p.split("."); let o=S; ks.slice(0,-1).forEach(k=>o=o[k]); o[ks.at(-1)]=v; };
+function syncInputs(){
+  renderSideCards();
+  document.querySelectorAll("[data-k]").forEach(el => {
+    let v = getPath(el.dataset.k);
+    if (el.type==="checkbox") el.checked = !!v;
+    else if (el.type==="color") el.value = (v==="auto" ? "#000000" : v);
+    else el.value = v;
+  });
+  if (!(S.logoSize >= 8 && S.logoSize <= 45)) S.logoSize = 22;
+  if (!["inherit","left","center","right"].includes(S.logoPos)) S.logoPos = "inherit";
+  $("logoPos").value = S.logoPos; $("logoSize").value = S.logoSize;
+  $("badge-autocolor").checked = S.lines.badge.color==="auto";
+  $("badge-color").disabled = S.lines.badge.color==="auto";
+  document.querySelectorAll(".hex").forEach(h => { h.value = h._c.value.toUpperCase(); h.disabled = h._c.disabled; h.classList.remove("bad"); });
+  const key = `${S.w}x${S.h}`;
+  const has = [...$("sizePreset").options].some(o=>o.value===key);
+  $("sizePreset").value = has ? key : "custom";
+  $("customSize").hidden = has;
+  $("cw").value = S.w; $("ch").value = S.h;
+  updateLabels();
+}
+function updateLabels(){
+  LINE_META.forEach(m => { $("v-"+m.id+"-size").textContent = S.lines[m.id].size + "% of height"; $("card-"+m.id).classList.toggle("off", !S.lines[m.id].on); });
+  $("v-logoSize").textContent = S.logoSize + "% of height";
+  ELEMS.forEach(id => {
+    const P = posOf(id), moved = isMoved(id), el = $("pos-"+id), btn = document.querySelector(`[data-reset="${id}"]`);
+    if (el) el.textContent = !moved ? "Default placement" : [ (Math.abs(P.dx)>0.05||Math.abs(P.dy)>0.05) ? "Moved" : "", Math.abs(P.sc-1)>0.005 ? Math.round(P.sc*100) + "% size" : "" ].filter(Boolean).join(" · ");
+    if (btn) btn.disabled = !moved;
+  });
+  (S.sides||[]).forEach(l => {
+    const set = (k,t) => { const e = $("v-"+l.id+"-"+k); if (e) e.textContent = t; };
+    set("scale", l.scale + "% of height"); set("opacity", l.opacity + "%");
+    set("inset", l.inset + "% of width");
+    set("shift", l.shift === 0 ? "no offset" : (l.shift < 0 ? "up " + (-l.shift) : "down " + l.shift) + "% of height");
+  });
+  $("v-angle").textContent = S.angle + "°";
+  $("v-patternAlpha").textContent = S.patternAlpha + "%";
+  $("v-photoDim").textContent = S.photoDim + "%";
+  const g = gcd(S.w,S.h);
+  $("dims").textContent = `${S.w} × ${S.h} px · ${(S.w/S.h).toFixed(2)} : 1`;
+}
+const gcd=(a,b)=>b?gcd(b,a%b):a;
+
+document.addEventListener("input", e => {
+  const el = e.target; if (!el.dataset || !el.dataset.k) return;
+  let v = el.type==="checkbox" ? el.checked : (el.type==="range"||el.type==="number") ? parseFloat(el.value) : el.value;
+  setPath(el.dataset.k, v); updateLabels(); schedule();
+});
+$("badge-autocolor").addEventListener("change", e => {
+  S.lines.badge.color = e.target.checked ? "auto" : $("badge-color").value; $("badge-color").disabled = e.target.checked; $("badge-color-hex").disabled = e.target.checked; schedule();
+});
+$("sizePreset").addEventListener("change", e => {
+  if (e.target.value==="custom"){ $("customSize").hidden=false; return; }
+  const [w,h] = e.target.value.split("x").map(Number); S.w=w; S.h=h; $("customSize").hidden=true; $("cw").value=w; $("ch").value=h; updateLabels(); schedule();
+});
+["cw","ch"].forEach(id => $(id).addEventListener("change", () => {
+  const w = Math.round(+$("cw").value), h = Math.round(+$("ch").value);
+  if (w>=300 && w<=4000 && h>=100 && h<=2000){ S.w=w; S.h=h; updateLabels(); schedule(); setStatus(""); }
+  else setStatus("Width must be 300–4000 px and height 100–2000 px.");
+}));
+$("styles").addEventListener("click", e => {
+  const b = e.target.closest("[data-style]"); if (!b) return;
+  const st = clone(STYLES[+b.dataset.style].set); const fonts = st.fonts; delete st.fonts;
+  ["c1","c2","accent","effectColor"].forEach(k => delete st[k]);
+  Object.assign(S, st);
+  for (const k in fonts){ const [f,,sz,it] = fonts[k]; Object.assign(S.lines[k], {font:f,size:sz,italic:!!it}); }
+  document.querySelectorAll("[data-style]").forEach(x => x.setAttribute("aria-pressed", x===b ? "true" : "false"));
+  syncInputs(); schedule();
+  if (S.bgType==="photo" && !photoImg) setStatus("Photo style: add a photo under Background. Until then the primary color fills in.");
+});
+$("palettes").addEventListener("click", e => {
+  const b = e.target.closest("[data-pal]"); if (!b) return;
+  const p = PALETTES[+b.dataset.pal]; S.c1=p[1]; S.c2=p[2]; S.accent=p[3];
+  const light = lum(p[1]) > 0.5;
+  S.lines.title.color = light ? "#15202B" : "#FFFFFF";
+  S.lines.eyebrow.color = p[3]; S.effectColor = p[3];
+  S.lines.sub.color = light ? "#3E4955" : "#E3E8EE";
+  syncInputs(); schedule();
+});
+
+function imageFromData(data){
+  return new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = data; });
+}
+function loadImageFile(file, cb){
+  if (!file) return; const fr = new FileReader();
+  fr.onload = () => imageFromData(fr.result).then(im => cb(im, fr.result)).catch(() => setStatus("That file couldn't be read as an image. Try a PNG or JPG."));
+  fr.readAsDataURL(file);
+}
+$("logoFile").addEventListener("change", e => loadImageFile(e.target.files[0], (im, d) => { logoImg = im; logoData = d; schedule(); }));
+$("photoFile").addEventListener("change", e => loadImageFile(e.target.files[0], (im, d) => { photoImg = im; photoData = d; schedule(); }));
+$("logoClear").addEventListener("click", () => { logoImg=null; logoData=null; $("logoFile").value=""; schedule(); });
+$("photoClear").addEventListener("click", () => { photoImg=null; photoData=null; $("photoFile").value=""; schedule(); });
+function nextNum(){ for (let n=1; n<=3; n++) if (!S.sides.some(l => l.num===n)) return n; return S.sides.length+1; }
+$("addSide").addEventListener("click", () => $("sideFile").click());
+$("sideFile").addEventListener("change", e => {
+  const files = [...e.target.files].slice(0, Math.max(0, 3 - S.sides.length));
+  if (e.target.files.length > files.length) setSideNote("Only three images can be added. Extra files were skipped.");
+  files.forEach(file => loadImageFile(file, (im, d) => {
+    if (S.sides.length >= 3) return;
+    const l = { id:uid(), num:nextNum(), name:file.name, scale:90, opacity:100, anchor:"center", inset:4 + S.sides.length*14, shift:0 };
+    S.sides.push(l); sideImgs[l.id] = { img:im, data:d }; activeLayer = l.id;
+    if (cleared){ cleared = false; }
+    syncInputs(); schedule();
+  }));
+  e.target.value = "";
+});
+function setSideNote(t){ $("sideCount").textContent = t; setTimeout(() => updateSideCount(), 3500); }
+function updateSideCount(){ $("sideCount").textContent = S.sides.length ? `${S.sides.length} of 3 images` : "No images yet"; $("addSide").disabled = S.sides.length >= 3; }
+$("sideLayers").addEventListener("click", e => {
+  const b = e.target.closest("[data-act]"); if (!b) return;
+  const i = S.sides.findIndex(l => l.id === b.dataset.id); if (i < 0) return;
+  const act = b.dataset.act;
+  if (act==="fwd" && i < S.sides.length-1) [S.sides[i], S.sides[i+1]] = [S.sides[i+1], S.sides[i]];
+  else if (act==="back" && i > 0) [S.sides[i], S.sides[i-1]] = [S.sides[i-1], S.sides[i]];
+  else if (act==="recenter"){ S.sides[i].shift = 0; }
+  else if (act==="remove"){ delete sideImgs[S.sides[i].id]; S.sides.splice(i,1); }
+  activeLayer = act==="remove" ? null : b.dataset.id;
+  syncInputs(); schedule();
+  const again = document.querySelector(`[data-act="${act}"][data-id="${b.dataset.id}"]`); if (again && !again.disabled) again.focus();
+});
+$("sideLayers").addEventListener("focusin", e => { const c = e.target.closest("[data-layer]"); if (c){ focusLayer = activeLayer = c.dataset.layer; markActive(); drawGuide(); } });
+$("sideLayers").addEventListener("focusout", () => { focusLayer = null; drawGuide(); });
+function markActive(){ document.querySelectorAll(".layer-card").forEach(c => c.classList.toggle("active", c.dataset.layer === activeLayer)); }
+function renderSideCards(){
+  if (!Array.isArray(S.sides)) S.sides = [];
+  const n = S.sides.length;
+  $("sideLayers").innerHTML = S.sides.map((l,i) => {
+    const top = i===n-1, bottom = i===0;
+    const tag = n>1 ? (top ? "Top layer" : bottom ? "Bottom layer" : "Middle layer") : "";
+    const k = (f) => `id="${l.id}-${f}" data-k="sides.${i}.${f}"`;
+    return `<div class="layer-card${l.id===activeLayer?" active":""}" data-layer="${l.id}">
+      <div class="layer-head">
+        <img class="layer-thumb" src="${sideImgs[l.id] ? sideImgs[l.id].data : ""}" alt="">
+        <div class="layer-title"><b>Image ${l.num}</b><span>${esc(l.name || "")}</span></div>
+        ${tag ? `<span class="layer-tag">${tag}</span>` : ""}
+      </div>
+      <div class="row">
+        <label class="f"><span>Scale <em class="val" id="v-${l.id}-scale"></em></span><input type="range" ${k("scale")} min="10" max="200" step="1"></label>
+        <label class="f"><span>Opacity <em class="val" id="v-${l.id}-opacity"></em></span><input type="range" ${k("opacity")} min="5" max="100" step="1"></label>
+      </div>
+      <div class="row">
+        <label class="f"><span>Vertical position</span><select ${k("anchor")}><option value="center">Centered</option><option value="bottom">Sit on bottom edge</option><option value="top">Hang from top edge</option></select></label>
+        <label class="f"><span>Distance from right <em class="val" id="v-${l.id}-inset"></em></span><input type="range" ${k("inset")} min="-60" max="100" step="0.5"></label>
+      </div>
+      <label class="f"><span>Move up or down <em class="val" id="v-${l.id}-shift"></em></span><input type="range" ${k("shift")} min="-150" max="150" step="0.5"></label>
+      <div class="layer-btns">
+        <button class="btn" type="button" data-act="fwd" data-id="${l.id}" ${top?"disabled":""}>Bring Forward</button>
+        <button class="btn" type="button" data-act="back" data-id="${l.id}" ${bottom?"disabled":""}>Send Backward</button>
+        <button class="btn" type="button" data-act="recenter" data-id="${l.id}">Recenter Vertically</button>
+        <button class="btn" type="button" data-act="remove" data-id="${l.id}">Remove</button>
+      </div>
+    </div>`;
+  }).reverse().join("");
+  updateSideCount();
+}
+
+/* ---------- project files ---------- */
+function mergeSettings(src){
+  const out = Object.assign(clone(DEFAULTS), src || {});
+  out.lines = clone(DEFAULTS.lines);
+  for (const k in out.lines) Object.assign(out.lines[k], (src && src.lines && src.lines[k]) || {});
+  return out;
+}
+function projStatus(t){ $("projStatus").textContent = t; }
+$("saveProj").addEventListener("click", async () => {
+  $("projFallback").hidden = true;
+  const proj = { app:"web-store-banner-studio", version:1, savedAt:new Date().toISOString(), settings:S, images:{ logo:logoData, photo:photoData, sides:S.sides.map(l => sideImgs[l.id] ? sideImgs[l.id].data : null) } };
+  const text = JSON.stringify(proj, null, 2);
+  const base = (S.fname || S.lines.title.text || "store-banner").replace(/\|/g," ").replace(/[^\w\-]+/g,"-").replace(/^-+|-+$/g,"").toLowerCase() || "store-banner";
+  const name = base + "-project.json";
+  const dl = await downloadsP;
+  if (dl){
+    try { await dl.save({filename:name, data:text}); projStatus(`Saved ${name}.`); return; }
+    catch(err){
+      if (err && err.code==="declined"){ projStatus("Save cancelled."); return; }
+      if (err && err.code==="rate_limited"){ projStatus("A save prompt is already open. Finish it, then try again."); return; }
+    }
+  }
+  $("projText").value = text; $("projFallback").hidden = false; projStatus("");
+});
+$("copyProj").addEventListener("click", () => {
+  const t = $("projText");
+  navigator.clipboard.writeText(t.value).then(() => projStatus("Project text copied.")).catch(() => { t.focus(); t.select(); projStatus("Press Ctrl+C (or Cmd+C) to copy the selected text."); });
+});
+$("openProj").addEventListener("click", () => $("projFile").click());
+$("projFile").addEventListener("change", e => {
+  const file = e.target.files[0]; if (!file) return;
+  const fr = new FileReader();
+  fr.onload = async () => {
+    let proj;
+    try { proj = JSON.parse(fr.result); } catch(err){ projStatus("That file isn't valid JSON. Choose a project file saved from this tool."); return; }
+    const settings = proj && (proj.settings || (proj.lines ? proj : null));
+    if (!settings || !settings.lines){ projStatus("That file isn't a Banner Studio project. Choose a .json file saved with Save Project."); return; }
+    S = mergeSettings(settings);
+    const imgs = proj.images || {};
+    const ok = d => typeof d === "string" && d.startsWith("data:image/");
+    try { logoImg = ok(imgs.logo) ? await imageFromData(imgs.logo) : null; logoData = logoImg ? imgs.logo : null; } catch(_){ logoImg = logoData = null; }
+    try { photoImg = ok(imgs.photo) ? await imageFromData(imgs.photo) : null; photoData = photoImg ? imgs.photo : null; } catch(_){ photoImg = photoData = null; }
+    sideImgs = {};
+    let list = Array.isArray(imgs.sides) ? imgs.sides : [];
+    if (!Array.isArray(S.sides)) S.sides = [];
+    if (!S.sides.length && ok(imgs.side)){
+      S.sides = [{ id:uid(), num:1, name:"Image 1", scale:settings.sideScale||90, opacity:settings.sideOpacity||100, anchor:settings.sideAnchor||"center", inset:settings.sideInset ?? 4, shift:settings.sideShift||0 }];
+      list = [imgs.side];
+    }
+    const keepLayers = [];
+    for (let k = 0; k < S.sides.length && keepLayers.length < 3; k++){
+      const d = list[k]; if (!ok(d)) continue;
+      try { const im = await imageFromData(d); const l = Object.assign({ num:keepLayers.length+1, name:"Image", scale:90, opacity:100, anchor:"center", inset:4, shift:0 }, S.sides[k]); l.id = l.id || uid(); sideImgs[l.id] = { img:im, data:d }; keepLayers.push(l); } catch(_){}
+    }
+    S.sides = keepLayers; activeLayer = null; activeElem = null;
+    $("sideFile").value = "";
+    $("logoFile").value = ""; $("photoFile").value = ""; $("projFallback").hidden = true;
+    document.querySelectorAll("[data-style]").forEach(x => x.setAttribute("aria-pressed","false"));
+    syncInputs(); schedule();
+    projStatus(`Opened ${file.name}.` + (logoImg ? " Logo restored." : "") + (photoImg ? " Photo restored." : ""));
+    e.target.value = "";
+  };
+  fr.onerror = () => projStatus("That file couldn't be read. Try choosing it again.");
+  fr.readAsText(file);
+});
+
+function doReset(){ cleared = true; activeElem = null; S = clone(DEFAULTS); Object.values(S.lines).forEach(l => l.text = ""); S.deadline = ""; S.fname = ""; logoImg=photoImg=logoData=photoData=null; sideImgs={}; activeLayer=null; $("logoFile").value=""; $("photoFile").value=""; $("sideFile").value=""; $("fallback").hidden=true; syncInputs(); schedule(); setStatus(""); }
+document.querySelectorAll(".reset-btn").forEach(btn => {
+  let timer = null;
+  btn.addEventListener("click", () => {
+    if (!btn.classList.contains("armed")){
+      btn.classList.add("armed"); btn.textContent = "Click Again to Reset";
+      timer = setTimeout(() => { btn.classList.remove("armed"); btn.textContent = "Reset Form"; }, 3000);
+      return;
+    }
+    clearTimeout(timer); doReset();
+    btn.classList.remove("armed"); btn.textContent = "Form Reset";
+    setTimeout(() => { btn.textContent = "Reset Form"; }, 1800);
+  });
+});
+{
+  const rail = document.querySelector(".rail");
+  const wake = () => { if (cleared){ cleared = false; schedule(); } };
+  rail.addEventListener("input", e => { if (e.target.id !== "fname") wake(); }, true);
+  rail.addEventListener("change", e => { if (!["fname","fmt"].includes(e.target.id)) wake(); }, true);
+  rail.addEventListener("click", e => { if (e.target.closest("[data-style],[data-pal]")) wake(); }, true);
+}
+$("showGuide").addEventListener("change", drawGuide);
+$("showStore").addEventListener("change", e => { $("storeView").hidden = !e.target.checked; updateStore(); });
+
+/* ---------- helpers ---------- */
+function hexRgb(h){ h=h.replace("#",""); if(h.length===3)h=h.split("").map(c=>c+c).join(""); const n=parseInt(h,16); return [(n>>16)&255,(n>>8)&255,n&255]; }
+function rgba(h,a){ const [r,g,b]=hexRgb(h); return `rgba(${r},${g},${b},${a})`; }
+function lum(h){ const c=hexRgb(h).map(v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4)}); return 0.2126*c[0]+0.7152*c[1]+0.0722*c[2]; }
+function fontStr(L, size){ const w = FONTS[L.font]?.w || 700; return `${L.italic?"italic ":""}${w} ${size}px "${L.font}", "Arial Narrow", Arial, sans-serif`; }
+function drawCover(ctx, img, x, y, w, h){
+  const r = Math.max(w/img.width, h/img.height); const iw = img.width*r, ih = img.height*r;
+  ctx.drawImage(img, x+(w-iw)/2, y+(h-ih)/2, iw, ih);
+}
+function setStatus(t){ $("status").textContent = t; }
+
+/* ---------- patterns ---------- */
+function drawPattern(ctx, W, H, s, kind, color, alpha){
+  if (kind==="none" || alpha<=0) return;
+  ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.fillStyle = color;
+  if (kind==="stripes"){
+    ctx.lineWidth = 2*s; const gap = 16*s;
+    for (let x=-H; x<W+H; x+=gap){ ctx.beginPath(); ctx.moveTo(x,H); ctx.lineTo(x+H*0.7,0); ctx.stroke(); }
+  } else if (kind==="mesh"){
+    const g = 14*s, r = 2.6*s;
+    for (let y=0, row=0; y<H+g; y+=g*0.866, row++) for (let x=(row%2?g/2:0); x<W+g; x+=g){ ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill(); }
+  } else if (kind==="halftone"){
+    const g = 18*s;
+    for (let y=0; y<H+g; y+=g) for (let x=0; x<W+g; x+=g){
+      const t = Math.max(0, (x/W - 0.35)/0.65); const r = g*0.48*t; if (r>0.4){ ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill(); }
+    }
+  } else if (kind==="chevron"){
+    ctx.lineWidth = 3*s; const gw = 40*s, gh = 22*s;
+    for (let y=-gh; y<H+gh; y+=gh*1.6){ ctx.beginPath(); for (let x=0, i=0; x<=W+gw; x+=gw/2, i++) ctx.lineTo(x, y+(i%2?gh/2:-gh/2)); ctx.stroke(); }
+  } else if (kind==="topo"){
+    ctx.lineWidth = 1.6*s; const cx = W*0.82, cy = H*0.55;
+    for (let k=1; k<26; k++){
+      const R = k*22*s; ctx.beginPath();
+      for (let a=0; a<=Math.PI*2+0.01; a+=0.05){
+        const wob = 1 + 0.12*Math.sin(a*3+k*0.6) + 0.06*Math.sin(a*5-k*0.3);
+        const x = cx + Math.cos(a)*R*1.6*wob, y = cy + Math.sin(a)*R*wob;
+        a===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+      }
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+
+/* ---------- main render ---------- */
+function render(ctx, W, H){
+  const s = H/458;
+  ctx.save();
+  ctx.clearRect(0,0,W,H);
+  // background fill
+  if (S.bgType==="photo" && photoImg){
+    drawCover(ctx, photoImg, 0,0,W,H);
+    const a = S.photoDim/100;
+    if (S.layout==="center"){ ctx.fillStyle = rgba(S.c1, a); ctx.fillRect(0,0,W,H); }
+    else {
+      const g = ctx.createLinearGradient(0,0,W,0);
+      g.addColorStop(0, rgba(S.c1, Math.min(1,a*1.15))); g.addColorStop(0.55, rgba(S.c1, a*0.8)); g.addColorStop(1, rgba(S.c1, a*0.3));
+      ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+    }
+  } else if (S.bgType==="gradient"){
+    const ang = S.angle*Math.PI/180, dx=Math.cos(ang), dy=Math.sin(ang);
+    const half = (Math.abs(W*dx)+Math.abs(H*dy))/2;
+    const g = ctx.createLinearGradient(W/2-dx*half, H/2-dy*half, W/2+dx*half, H/2+dy*half);
+    g.addColorStop(0,S.c1); g.addColorStop(1,S.c2); ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  } else { ctx.fillStyle = S.c1; ctx.fillRect(0,0,W,H); }
+
+  const texColor = lum(S.c1) > 0.5 ? "#000000" : "#FFFFFF";
+  drawPattern(ctx, W, H, s, S.pattern, texColor, S.patternAlpha/100);
+
+  // layout decoration + text area
+  const pad = Math.max(W*0.055, 40*s);
+  let x0 = pad, x1 = W - pad, alignDefault = "left", logoZone = null;
+  if (S.layout==="split"){
+    const xa = W*0.60, xb = W*0.53;
+    ctx.save(); ctx.beginPath(); ctx.moveTo(xa,0); ctx.lineTo(W,0); ctx.lineTo(W,H); ctx.lineTo(xb,H); ctx.closePath();
+    ctx.fillStyle = S.c2; ctx.fill();
+    if (photoImg && S.bgType!=="photo"){ ctx.clip(); drawCover(ctx, photoImg, xb, 0, W-xb, H); }
+    ctx.restore();
+    ctx.save(); ctx.strokeStyle = S.accent; ctx.lineWidth = 10*s; ctx.beginPath(); ctx.moveTo(xa-9*s,0); ctx.lineTo(xb-9*s,H); ctx.stroke(); ctx.restore();
+    x1 = xb - pad*0.8;
+    logoZone = {x: xb + (W-xb)*0.08, y:0, w:(W-xb)*0.84, h:H};
+  } else if (S.layout==="stripe"){
+    const sk = H*0.38, bands = [[0.70,0.045,S.accent,1],[0.765,0.03,S.accent,0.55],[0.815,0.02,S.accent,0.3]];
+    bands.forEach(([px,pw,c,a]) => { ctx.save(); ctx.globalAlpha=a; ctx.fillStyle=c; ctx.beginPath();
+      const x=W*px, w=W*pw; ctx.moveTo(x+sk,0); ctx.lineTo(x+sk+w,0); ctx.lineTo(x+w,H); ctx.lineTo(x,H); ctx.closePath(); ctx.fill(); ctx.restore(); });
+    x1 = W*0.68;
+    logoZone = {x: W*0.84, y:0, w:W*0.16-pad*0.4, h:H};
+  } else if (S.layout==="left"){
+    ctx.fillStyle = S.accent; ctx.fillRect(0, H-8*s, W, 8*s);
+  }
+  if (S.layout==="center") alignDefault = "center";
+
+  // right-side images, bottom layer first
+  sideRects = [];
+  (S.sides||[]).forEach(l => {
+    const si = sideImgs[l.id]; if (!si) return;
+    const r = si.img.width/si.img.height;
+    const sh = H*l.scale/100, sw = sh*r;
+    const sx = W - W*l.inset/100 - sw;
+    const sy = (l.anchor==="bottom" ? H - sh - (S.layout==="left" ? 8*s : 0) : l.anchor==="top" ? 0 : (H - sh)/2) + H*(l.shift||0)/100;
+    ctx.save(); ctx.globalAlpha = l.opacity/100; ctx.drawImage(si.img, sx, sy, sw, sh); ctx.restore();
+    sideRects.push({ id:l.id, x:sx, y:sy, w:sw, h:sh });
+  });
+
+  const baseAlign = S.align==="auto" ? alignDefault : S.align;
+  const areaW = Math.max(40, x1 - x0);
+
+  // build text blocks
+  const blocks = [];
+  const order = ["eyebrow","title","sub","badge"];
+  order.forEach(id => {
+    const L = S.lines[id]; if (!L.on || !L.text.trim()) return;
+    let txt = L.text;
+    if (id==="eyebrow" || id==="badge" || (id==="title" && S.upperTitle)) txt = txt.toUpperCase();
+    const parts = id==="title" ? txt.split("|").map(t=>t.trim()).filter(Boolean) : [txt];
+    let size = L.size/100*H;
+    const spacing = id==="eyebrow" ? 0.2 : id==="badge" ? 0.12 : id==="title" ? 0.01 : 0;
+    const maxW = id==="badge" ? areaW*0.9 : areaW;
+    const measure = sz => { ctx.font = fontStr(L, sz); setLS(ctx, sz*spacing); return Math.max(...parts.map(p=>ctx.measureText(p).width)) + (id==="badge" ? sz*2.6 : 0); };
+    while (measure(size) > maxW && size > 6) size *= 0.96;
+    ctx.font = fontStr(L, size); setLS(ctx, size*spacing);
+    const lines = parts.map(p => { const m = ctx.measureText(p); return {t:p, w:m.width, asc:m.actualBoundingBoxAscent, desc:m.actualBoundingBoxDescent}; });
+    let h;
+    if (id==="badge") h = size*2.3;
+    else h = lines.reduce((a,l,i)=> a + l.asc + l.desc + (i ? size*0.18 : 0), 0);
+    blocks.push({id, L, size, spacing, lines, h});
+  });
+  const gapAfter = {eyebrow:0.045, title:0.05, sub:0.06, logo:0.05, badge:0};
+  const ulH = 6*s, ulGap = 0.04*H;
+  const heightOf = list => { let t = 0; list.forEach((b,i) => { t += b.h; if (b.id==="title" && S.underline) t += ulGap + ulH; if (i<list.length-1) t += gapAfter[b.id]*H; }); return t; };
+  let y;
+  logoCapped = false; logoHidden = false;
+  if (logoImg){
+    // eyebrow, title and subtitle stay centered top to bottom; the logo and button go underneath
+    const textBlocks = blocks.filter(b => b.id!=="badge");
+    const badge = blocks.find(b => b.id==="badge");
+    const th = heightOf(textBlocks);
+    const bottomLimit = H - H*0.07 - (S.layout==="left" ? 8*s : 0);
+    const badgeRoom = badge ? badge.h + gapAfter.logo*H : 0;
+    const ratio = logoImg.width/logoImg.height;
+    let lh = H*S.logoSize/100, avail, gapTop;
+    if (textBlocks.length){
+      y = (H - th)/2;
+      gapTop = gapAfter[textBlocks.at(-1).id]*H;
+      avail = bottomLimit - (y + th + gapTop) - badgeRoom;
+    } else {
+      avail = H*0.86 - badgeRoom;
+    }
+    if (lh > avail){ lh = Math.max(0, avail); logoCapped = true; }
+    let lw = lh*ratio;
+    if (lw > areaW*0.6){ lw = areaW*0.6; lh = lw/ratio; }
+    const rebuilt = textBlocks.slice();
+    if (lh >= 6*s) rebuilt.push({id:"logo", h:lh, w:lw}); else logoHidden = true;
+    if (badge) rebuilt.push(badge);
+    blocks.length = 0; blocks.push(...rebuilt);
+    if (!textBlocks.length) y = (H - heightOf(blocks))/2;
+  } else {
+    y = (H - heightOf(blocks))/2 - (S.layout==="left" ? 4*s : 0);
+  }
+
+  elemRects = [];
+  blocks.forEach((b,i) => {
+    const L = b.L || {};
+    const align = (L.align && L.align!=="inherit") ? L.align : baseAlign;
+    const ax = align==="left" ? x0 : align==="right" ? x1 : (x0+x1)/2;
+    // default (unmoved) box for this element
+    let R, lx = 0;
+    if (b.id==="logo"){
+      const la = S.logoPos && S.logoPos!=="inherit" ? S.logoPos : baseAlign;
+      lx = la==="left" ? x0 : la==="right" ? x1 - b.w : (x0+x1)/2 - b.w/2;
+      R = { x:lx, y, w:b.w, h:b.h };
+    } else if (b.id==="badge"){
+      const bw = b.lines[0].w + b.size*2.6, bx = align==="left" ? ax : align==="right" ? ax - bw : ax - bw/2;
+      R = { x:bx, y, w:bw + (S.badgeShape==="slant" ? b.h*0.28 : 0), h:b.h };
+    } else {
+      const mw = Math.max(...b.lines.map(q => q.w)), rx = align==="left" ? ax : align==="right" ? ax - mw : ax - mw/2;
+      R = { x:rx, y, w:mw, h:b.h + (b.id==="title" && S.underline ? ulGap + ulH : 0) };
+    }
+    const P = posOf(b.id);
+    const cx0 = R.x + R.w/2, cy0 = R.y + R.h/2, ecx = cx0 + P.dx*W/100, ecy = cy0 + P.dy*H/100;
+    ctx.save(); ctx.translate(ecx, ecy); ctx.scale(P.sc, P.sc); ctx.translate(-cx0, -cy0);
+    const yStart = y;
+    if (b.id==="logo"){
+      ctx.drawImage(logoImg, lx, y, b.w, b.h);
+      y += b.h;
+    } else {
+    ctx.font = fontStr(L, b.size); setLS(ctx, b.size*b.spacing); ctx.textAlign = align; ctx.textBaseline = "alphabetic";
+    if (b.id==="badge"){
+      const tw = b.lines[0].w, bw = tw + b.size*2.6, bh = b.h;
+      let bx = align==="left" ? ax : align==="right" ? ax - bw : ax - bw/2;
+      ctx.save(); ctx.fillStyle = S.accent; ctx.beginPath();
+      if (S.badgeShape==="slant"){ const k = bh*0.28; ctx.moveTo(bx+k,y); ctx.lineTo(bx+bw+k,y); ctx.lineTo(bx+bw,y+bh); ctx.lineTo(bx,y+bh); ctx.closePath(); }
+      else if (S.badgeShape==="pill"){ roundRect(ctx,bx,y,bw,bh,bh/2); }
+      else ctx.rect(bx,y,bw,bh);
+      ctx.fill(); ctx.restore();
+      const tc = L.color==="auto" ? (lum(S.accent)>0.42 ? "#111111" : "#FFFFFF") : L.color;
+      const ln = b.lines[0]; const by = y + bh/2 + (ln.asc - ln.desc)/2;
+      ctx.fillStyle = tc; ctx.textAlign="center";
+      const cx = bx + bw/2 + (S.badgeShape==="slant" ? bh*0.14 : 0) + b.size*b.spacing/2;
+      ctx.fillText(ln.t, cx, by);
+      y += b.h;
+    } else {
+      b.lines.forEach((ln, k) => {
+        y += ln.asc;
+        const tx = align==="center" ? ax + b.size*b.spacing/2 : ax;
+        if (b.id==="title"){
+          ctx.save();
+          if (S.effect==="shadow" || S.effect==="both"){ ctx.shadowColor="rgba(0,0,0,0.38)"; ctx.shadowBlur=14*s*P.sc; ctx.shadowOffsetY=5*s*P.sc; }
+          if (S.effect==="outline" || S.effect==="both"){ ctx.lineJoin="round"; ctx.lineWidth=Math.max(2,b.size*0.075); ctx.strokeStyle=S.effectColor; ctx.strokeText(ln.t, tx, y); ctx.shadowColor="transparent"; }
+          ctx.fillStyle = L.color; ctx.fillText(ln.t, tx, y); ctx.restore();
+        } else {
+          if (b.id==="eyebrow" && S.layout==="center" && align==="center"){
+            const rw = Math.min(70*s, (areaW - ln.w)/2 - 16*s);
+            if (rw > 10){ ctx.fillStyle = S.accent; const ry = y - ln.asc/2 - 1.5*s;
+              ctx.fillRect(ax - ln.w/2 - 16*s - rw, ry, rw, 3*s); ctx.fillRect(ax + ln.w/2 + 16*s, ry, rw, 3*s); }
+          }
+          ctx.fillStyle = L.color; ctx.fillText(ln.t, tx, y);
+        }
+        y += ln.desc + (k < b.lines.length-1 ? b.size*0.18 : 0);
+      });
+    }
+    if (b.id==="title" && S.underline){
+      y += ulGap; const uw = Math.min(110*s, areaW*0.3);
+      const ux = align==="left" ? ax : align==="right" ? ax-uw : ax-uw/2;
+      ctx.fillStyle = S.accent; ctx.fillRect(ux, y, uw, ulH); y += ulH;
+    }
+    }
+    ctx.restore();
+    y = yStart + R.h;
+    elemRects.push({ id:b.id, x:ecx - R.w*P.sc/2, y:ecy - R.h*P.sc/2, w:R.w*P.sc, h:R.h*P.sc, cx0, cy0, w0:R.w, h0:R.h });
+    if (i < blocks.length-1) y += gapAfter[b.id]*H;
+  });
+  setLS(ctx, 0);
+  ctx.restore();
+}
+function setLS(ctx, px){ if ("letterSpacing" in ctx) ctx.letterSpacing = px.toFixed(2)+"px"; }
+function roundRect(ctx,x,y,w,h,r){ ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+
+function goTo(el, focusEl){
+  if (!el) return;
+  const d = el.closest("details"); if (d) d.open = true;
+  const smooth = !(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+  el.scrollIntoView({ behavior: smooth ? "smooth" : "auto", block: "center" });
+  el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash");
+  setTimeout(() => el.classList.remove("flash"), 1600);
+  if (focusEl) setTimeout(() => focusEl.focus({ preventScroll:true }), smooth ? 350 : 0);
+}
+function elemPad(){ return 8*S.h/458; }
+function selectedRect(){
+  if (activeElem){ const E = elemRects.find(r => r.id === activeElem); if (!E) return null; const pd = elemPad(); return { x:E.x-pd, y:E.y-pd, w:E.w+pd*2, h:E.h+pd*2 }; }
+  if (activeLayer) return sideRects.find(r => r.id === activeLayer) || null;
+  return null;
+}
+function handleSize(){ const w = $("cv").getBoundingClientRect().width || S.w; return 14 * S.w / w; }
+function corners(R){ return [[R.x,R.y],[R.x+R.w,R.y],[R.x+R.w,R.y+R.h],[R.x,R.y+R.h]]; }
+function drawGuide(){
+  const g = $("guide"), c = g.getContext("2d"); c.clearRect(0,0,g.width,g.height);
+  if (cleared) return;
+  const W=g.width, H=g.height, s=H/458;
+  if ($("showGuide").checked){
+    const ix=Math.max(W*0.04, 30*s), iy=H*0.08;
+    c.save(); c.setLineDash([10*s,8*s]); c.lineWidth=2*s; c.strokeStyle="rgba(255,255,255,0.75)";
+    c.strokeRect(ix,iy,W-ix*2,H-iy*2); c.strokeStyle="rgba(0,0,0,0.5)"; c.lineDashOffset=9*s; c.strokeRect(ix,iy,W-ix*2,H-iy*2); c.restore();
+  }
+  const hi = (drag && drag.id) || hoverLayer || focusLayer;
+  const R = hi && sideRects.find(r => r.id === hi);
+  if (R && R.id !== activeLayer){
+    c.save(); c.lineWidth = 3*s; c.setLineDash([12*s,6*s]); c.strokeStyle = "#76BD1D";
+    c.strokeRect(R.x, R.y, R.w, R.h); c.restore();
+  }
+  const E = !drag && hoverElem && hoverElem !== activeElem && elemRects.find(r => r.id === hoverElem);
+  if (E){
+    const pd = 8*s; c.save(); c.lineWidth = 2*s; c.setLineDash([8*s,6*s]); c.strokeStyle = "#76BD1D";
+    c.strokeRect(E.x-pd, E.y-pd, E.w+pd*2, E.h+pd*2); c.restore();
+  }
+  const A = selectedRect();
+  if (A){
+    const hs = handleSize();
+    c.save(); c.lineWidth = 3*s; c.strokeStyle = "#76BD1D"; c.strokeRect(A.x, A.y, A.w, A.h);
+    c.lineWidth = Math.max(2, hs*0.18); c.fillStyle = "#FFFFFF";
+    corners(A).forEach(([x,y]) => { c.fillRect(x-hs/2, y-hs/2, hs, hs); c.strokeRect(x-hs/2, y-hs/2, hs, hs); });
+    c.restore();
+  }
+}
+
+/* ---------- scheduling, fonts, persistence ---------- */
+let pending = false, storeTimer = null;
+async function ensureFonts(){
+  const fams = new Set(LINE_META.map(m => S.lines[m.id]).filter(L=>L.on).map(L => fontStr(L, 40)));
+  try { await Promise.all([...fams].map(f => document.fonts.load(f, "AaBb12"))); } catch(e){}
+}
+function schedule(){
+  if (pending) return; pending = true;
+  requestAnimationFrame(async () => {
+    pending = false;
+    await ensureFonts();
+    const cv = $("cv"), g = $("guide");
+    cv.style.touchAction = (S.sides && S.sides.length) ? "none" : "";
+    if (cv.width!==S.w || cv.height!==S.h){ cv.width=S.w; cv.height=S.h; g.width=S.w; g.height=S.h; }
+    if (cleared) cv.getContext("2d").clearRect(0,0,cv.width,cv.height); else render(cv.getContext("2d"), S.w, S.h);
+    $("emptyMsg").hidden = !cleared; drawGuide();
+    $("v-logoSize").textContent = S.logoSize + "% of height" + (logoImg && logoCapped && !cleared && !logoHidden ? " · limited to fit" : "");
+    $("logoRoom").hidden = !(logoImg && logoHidden && !cleared);
+    try { const keep = Object.assign({}, S, { sides: [] }); localStorage.setItem("wsbs-state", JSON.stringify(keep)); } catch(e){}
+    clearTimeout(storeTimer); storeTimer = setTimeout(updateStore, 250);
+  });
+}
+function updateStore(){
+  if ($("storeView").hidden) return;
+  $("storeImg").src = $("cv").toDataURL("image/jpeg", 0.85);
+  $("storeName").textContent = (S.lines.title.text || "Store name").replace(/\s*\|\s*/g," ");
+  $("storeDl").textContent = "Deadline: " + (S.deadline || "—");
+  $("storeNote").textContent = S.lines.sub.on && S.lines.sub.text ? S.lines.sub.text : "Store details appear here.";
+}
+
+/* ---------- export ---------- */
+let downloadsP = (window.claude && window.claude.use) ? window.claude.use("downloads").catch(()=>null) : Promise.resolve(null);
+$("exportBtn").addEventListener("click", async () => {
+  if (cleared){ setStatus("The banner is blank. Add text or pick a quick style first."); return; }
+  setStatus("Preparing image…"); $("fallback").hidden = true;
+  await ensureFonts();
+  const off = document.createElement("canvas"); off.width=S.w; off.height=S.h;
+  const ctx = off.getContext("2d");
+  const jpg = S.fmt==="jpg";
+  if (jpg){ ctx.fillStyle="#FFFFFF"; ctx.fillRect(0,0,S.w,S.h); }
+  render(ctx, S.w, S.h);
+  const blob = await new Promise(r => off.toBlob(r, jpg ? "image/jpeg" : "image/png", 0.93));
+  const name = (S.fname || "store-banner").replace(/[^\w\-]+/g,"-").replace(/^-+|-+$/g,"") + (jpg ? ".jpg" : ".png");
+  const dl = await downloadsP;
+  if (dl){
+    try { await dl.save({filename:name, data:blob}); setStatus(`Saved ${name} (${S.w} × ${S.h}).`); return; }
+    catch(err){
+      if (err && err.code==="declined"){ setStatus("Download cancelled."); return; }
+      if (err && err.code==="rate_limited"){ setStatus("A save prompt is already open. Finish it, then try again."); return; }
+    }
+  }
+  $("fallbackImg").src = URL.createObjectURL(blob); $("fallback").hidden = false;
+  setStatus(`${name} is ready below.`);
+});
+
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-reset]"); if (!b) return;
+  if (S.pos) delete S.pos[b.dataset.reset];
+  updateLabels(); schedule();
+});
+/* ---------- move and resize text, logo and right-side images on the preview ---------- */
+{
+  const cv = $("cv");
+  const pt = e => { const r = cv.getBoundingClientRect(); return { x:(e.clientX-r.left)*S.w/r.width, y:(e.clientY-r.top)*S.h/r.height }; };
+  const hit = p => { for (let k = sideRects.length-1; k >= 0; k--){ const R = sideRects[k]; if (p.x>=R.x && p.x<=R.x+R.w && p.y>=R.y && p.y<=R.y+R.h) return R.id; } return null; };
+  const hitElem = p => { const pd = elemPad(); for (let k = elemRects.length-1; k >= 0; k--){ const R = elemRects[k]; if (p.x>=R.x-pd && p.x<=R.x+R.w+pd && p.y>=R.y-pd && p.y<=R.y+R.h+pd) return R.id; } return null; };
+  const CURS = ["nwse-resize","nesw-resize","nwse-resize","nesw-resize"];
+  const handleHit = p => {
+    const R = selectedRect(); if (!R) return null;
+    const hs = handleSize()*0.9;
+    const k = corners(R).findIndex(([x,y]) => Math.abs(p.x-x) <= hs && Math.abs(p.y-y) <= hs);
+    return k < 0 ? null : { corner:k, R };
+  };
+  const r05 = v => Math.round(v*2)/2, r01 = v => Math.round(v*10)/10, clamp = (v,a,b) => Math.min(b, Math.max(a, v));
+  const baseY = (l, sh) => { const H = S.h; return l.anchor==="bottom" ? H - sh - (S.layout==="left" ? 8*H/458 : 0) : l.anchor==="top" ? 0 : (H - sh)/2; };
+  const syncLayer = l => { ["scale","inset","shift"].forEach(f => { const el = $(l.id+"-"+f); if (el) el.value = l[f]; }); updateLabels(); schedule(); };
+  const setPos = (id, P) => { S.pos = S.pos || {}; S.pos[id] = { dx:r01(P.dx), dy:r01(P.dy), sc:Math.round(P.sc*1000)/1000 }; updateLabels(); schedule(); };
+  const select = (kind, id) => { activeElem = kind==="elem" ? id : null; activeLayer = kind==="side" ? id : null; markActive(); drawGuide(); };
+  let down = null;
+  cv.addEventListener("pointerdown", e => {
+    if (cleared) return;
+    const p = pt(e), h = handleHit(p);
+    if (h){
+      const R = h.R, fx = h.corner===0||h.corner===3 ? R.x+R.w : R.x, fy = h.corner<2 ? R.y+R.h : R.y;
+      down = { p, kind:"handle" }; e.preventDefault();
+      if (activeElem){
+        const E = elemRects.find(r => r.id === activeElem); if (!E) return;
+        drag = { mode:"eresize", id:activeElem, corner:h.corner, fx, fy, w0:R.w, h0:R.h, sc0:posOf(activeElem).sc, E };
+      } else {
+        const l = S.sides.find(x => x.id === activeLayer); if (!l) return;
+        drag = { mode:"resize", id:activeLayer, corner:h.corner, fx, fy, w0:R.w, h0:R.h, ratio:R.w/R.h };
+      }
+      cv.setPointerCapture(e.pointerId); cv.style.cursor = CURS[h.corner]; drawGuide(); return;
+    }
+    const t = hitElem(p);
+    if (t){
+      const P = posOf(t);
+      down = { p, kind:"text", id:t }; e.preventDefault();
+      drag = { mode:"emove", id:t, p0:p, dx0:P.dx, dy0:P.dy, sc:P.sc };
+      select("elem", t); cv.setPointerCapture(e.pointerId); cv.style.cursor = "grabbing"; return;
+    }
+    const id = hit(p);
+    if (!id){ down = { p, kind:"bg" }; select(null, null); return; }
+    const l = S.sides.find(x => x.id === id); if (!l) return;
+    down = { p, kind:"side", id }; e.preventDefault();
+    drag = { mode:"move", id, p0:p, inset0:l.inset, shift0:l.shift };
+    select("side", id); cv.setPointerCapture(e.pointerId); cv.style.cursor = "grabbing";
+  });
+  cv.addEventListener("pointermove", e => {
+    const p = pt(e);
+    if (drag){
+      if (drag.mode === "emove"){
+        setPos(drag.id, { dx:drag.dx0 + (p.x-drag.p0.x)/S.w*100, dy:drag.dy0 + (p.y-drag.p0.y)/S.h*100, sc:drag.sc });
+        return;
+      }
+      if (drag.mode === "eresize"){
+        const E = drag.E, pd = elemPad();
+        const f = Math.max(Math.abs(p.x-drag.fx)/drag.w0, Math.abs(p.y-drag.fy)/drag.h0);
+        const sc = clamp(drag.sc0*f, 0.25, 4);
+        const pw = E.w0*sc + pd*2, ph = E.h0*sc + pd*2;
+        const ncx = (drag.corner===0||drag.corner===3) ? drag.fx - pw/2 : drag.fx + pw/2;
+        const ncy = drag.corner<2 ? drag.fy - ph/2 : drag.fy + ph/2;
+        setPos(drag.id, { dx:(ncx - E.cx0)/S.w*100, dy:(ncy - E.cy0)/S.h*100, sc });
+        return;
+      }
+      const l = S.sides.find(x => x.id === drag.id); if (!l) return;
+      if (drag.mode === "move"){
+        l.inset = clamp(r05(drag.inset0 - (p.x-drag.p0.x)/S.w*100), -60, 100);
+        l.shift = clamp(r05(drag.shift0 + (p.y-drag.p0.y)/S.h*100), -150, 150);
+      } else {
+        const f = Math.max(Math.abs(p.x-drag.fx)/drag.w0, Math.abs(p.y-drag.fy)/drag.h0);
+        let sh = clamp(drag.h0*f, S.h*0.10, S.h*2);
+        l.scale = Math.round(sh/S.h*100); sh = S.h*l.scale/100;
+        const sw = sh*drag.ratio;
+        const x = (drag.corner===0||drag.corner===3) ? drag.fx - sw : drag.fx;
+        const y = drag.corner<2 ? drag.fy - sh : drag.fy;
+        l.inset = clamp(r05((S.w - x - sw)/S.w*100), -60, 100);
+        l.shift = clamp(r05((y - baseY(l, sh))/S.h*100), -150, 150);
+      }
+      syncLayer(l); return;
+    }
+    if (cleared) return;
+    const h = handleHit(p);
+    if (h){ cv.style.cursor = CURS[h.corner]; cv.title = "Drag to resize"; return; }
+    const t = hitElem(p);
+    const id = t ? null : hit(p);
+    cv.style.cursor = (t || id) ? "grab" : "";
+    cv.title = (t || id) ? "Drag to move. Click to edit." : "Click to edit the background";
+    if (id !== hoverLayer || t !== hoverElem){ hoverLayer = id; hoverElem = t; drawGuide(); }
+  });
+  const end = () => { if (drag){ drag = null; cv.style.cursor = (hoverLayer || hoverElem) ? "grab" : ""; drawGuide(); } };
+  cv.addEventListener("pointerup", e => {
+    const d = down; down = null;
+    end();
+    if (!d || cleared) return;
+    const p = pt(e), r = cv.getBoundingClientRect(), px = Math.hypot(p.x-d.p.x, p.y-d.p.y) * r.width / S.w;
+    if (px > 5 || d.kind === "handle") return;
+    if (d.kind === "text"){
+      if (S.pos && S.pos[d.id] && !isMoved(d.id)) delete S.pos[d.id];
+      if (d.id === "logo") goTo($("logoFile").closest(".f"), null);
+      else goTo($("card-"+d.id), $(d.id+"-text"));
+    } else if (d.kind === "side"){
+      const card = document.querySelector(`.layer-card[data-layer="${d.id}"]`); if (card) goTo(card, null);
+    } else {
+      goTo($("bgType").closest("details"), null);
+    }
+  });
+  cv.addEventListener("pointercancel", end);
+  cv.addEventListener("pointerleave", () => { if (!drag && (hoverLayer || hoverElem)){ hoverLayer = null; hoverElem = null; cv.style.cursor = ""; drawGuide(); } });
+  window.addEventListener("resize", drawGuide);
+  // arrow keys nudge the selected item (Shift for bigger steps); Escape deselects
+  document.addEventListener("keydown", e => {
+    if (!activeElem && !activeLayer) return;
+    if (e.target.closest && e.target.closest("input,select,textarea")) return;
+    if (e.key === "Escape"){ select(null, null); return; }
+    const step = e.shiftKey ? 2 : 0.5;
+    const dx = e.key==="ArrowLeft" ? -step : e.key==="ArrowRight" ? step : 0, dy = e.key==="ArrowUp" ? -step : e.key==="ArrowDown" ? step : 0;
+    if (!dx && !dy) return;
+    e.preventDefault();
+    if (activeElem){ const P = posOf(activeElem); setPos(activeElem, { dx:P.dx+dx, dy:P.dy+dy, sc:P.sc }); }
+    else { const l = S.sides.find(x => x.id === activeLayer); if (!l) return; l.inset = clamp(l.inset - dx, -60, 100); l.shift = clamp(l.shift + dy, -150, 150); syncLayer(l); }
+  });
+}
+
+syncInputs();
+schedule();
+document.fonts && document.fonts.ready.then(schedule);
+})();
+</script>
+
+</body></html>

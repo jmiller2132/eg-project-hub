@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Random Code Generator | Eagle Graphics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Jost:wght@600;700;800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>:root{
+--g300:#b2dd79;--g400:#94cf4a;--g500:#76bd1d;--g600:#5f9a17;--g700:#4a7812;--g800:#365711;--g900:#20340a;
+--k100:#f0f1f2;--k200:#e1e3e4;--k300:#c5c8c9;--k400:#9ca0a2;--k500:#7d8183;--k600:#63676a;--k700:#53585a;--k800:#3a3e40;--k900:#2a2d2e;
+--danger:#b42318;--danger-bg:#fdecea;--warn:#8a5d0a;--warn-bg:#fdf3e1;--ok:#1f8a4c;--ok-bg:#e6f4ec;
+--display:"Jost","Century Gothic",system-ui,sans-serif;--body:"Open Sans","Helvetica Neue",Arial,sans-serif;--mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+--ease:cubic-bezier(.4,0,.2,1);--shadow-md:0 4px 12px rgba(42,45,46,.10),0 1px 3px rgba(42,45,46,.08)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--k100);color:var(--k700);font:400 15px/1.7 var(--body)}
+:focus-visible{outline:3px solid rgba(118,189,29,.4);outline-offset:2px}
+.c{max-width:1240px;margin:0 auto;padding:0 24px}
+h1,h2,h3{margin:0;font-family:var(--display);text-transform:uppercase;color:var(--k900);text-wrap:balance}
+.eyebrow{display:block;font:600 11px/1.4 var(--display);text-transform:uppercase;letter-spacing:.18em;color:var(--g700)}
+.bar{width:48px;height:3px;background:var(--g500);margin:12px 0 0}
+header.top{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--k200)}
+.top .c{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:64px}
+.brand{display:flex;align-items:center;gap:16px;text-decoration:none;color:var(--k700)}
+.brand svg{height:40px;width:auto;display:block}
+.brand span{border-left:1px solid var(--k300);padding-left:16px;font:700 13px/1.2 var(--display);text-transform:uppercase;letter-spacing:.14em;color:var(--k900)}
+.back{font:600 12px/1 var(--display);text-transform:uppercase;letter-spacing:.1em;color:var(--k700);text-decoration:none;padding:10px 0;border-bottom:3px solid transparent}
+.back:hover{color:var(--k900);border-color:var(--g600)}
+.hero{position:relative;overflow:hidden;background:var(--k900);padding:40px 0 36px}
+.hero .wm{position:absolute;right:-40px;top:50%;transform:translateY(-50%);width:420px;max-width:60%;opacity:.06;color:#fff;pointer-events:none}
+.hero .eyebrow{color:var(--g400)}
+.hero h1{color:#fff;font-size:clamp(28px,4vw,42px);font-weight:800;line-height:1.08;margin-top:8px}
+.hero p{max-width:640px;margin:14px 0 0;color:var(--k300)}
+main{padding:32px 0 64px}
+.layout{display:grid;grid-template-columns:400px minmax(0,1fr);gap:24px;align-items:start}
+@media(max-width:940px){.layout{grid-template-columns:minmax(0,1fr)}}
+.panel{background:#fff;border:1px solid var(--k200);border-radius:4px;padding:24px;min-width:0}
+.ph{position:relative;display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:14px;margin-bottom:20px;border-bottom:1px solid var(--k200)}
+.ph::after{content:"";position:absolute;left:0;bottom:-1px;width:48px;height:3px;background:var(--g500)}
+.ph h2{font-size:17px;font-weight:700;letter-spacing:.04em}
+.field{margin:0 0 18px;border:0;padding:0;min-width:0}
+.field>label,.field legend{display:block;padding:0;margin:0 0 6px;font:600 11px/1.5 var(--display);text-transform:uppercase;letter-spacing:.16em;color:var(--k700)}
+.hint{margin:6px 0 0;font-size:12.5px;line-height:1.5;color:var(--k600)}
+input[type=text],input[type=number]{width:100%;min-height:42px;padding:8px 12px;font:400 14px/1.5 var(--body);color:var(--k900);background:#fff;border:1px solid var(--k300);border-radius:3px;transition:border-color 140ms var(--ease)}
+input[type=text]:focus-visible,input[type=number]:focus-visible{border-color:var(--g600);outline-offset:0}
+input.mono{font-family:var(--mono)}
+.drop{position:relative;display:flex;align-items:center;gap:14px;padding:16px;border:1px dashed var(--k400);border-radius:4px;background:var(--k100);cursor:pointer;transition:border-color 140ms var(--ease),background 140ms var(--ease)}
+.drop:hover,.drop.over{border-color:var(--g600);background:#f6fbef}
+.drop input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.drop svg{width:28px;height:28px;flex:none;color:var(--g600)}
+.drop b{display:block;font:600 14px/1.4 var(--body);color:var(--k900);overflow-wrap:anywhere}
+.drop small{display:block;font-size:12.5px;color:var(--k600)}
+.radios{display:flex;flex-direction:column;gap:6px}
+.radios label,.checks label{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--k800);cursor:pointer}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px}
+input[type=radio],input[type=checkbox]{width:18px;height:18px;margin:0;accent-color:var(--g700)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:3px;border:1px solid var(--k500);background:#fff;color:var(--k800);font:700 12px/1 var(--display);text-transform:uppercase;letter-spacing:.1em;cursor:pointer;text-decoration:none;transition:background 140ms var(--ease),border-color 140ms var(--ease),color 140ms var(--ease)}
+.btn:hover{background:var(--g700);border-color:var(--g700);color:#fff}
+.btn:active{background:var(--g900);border-color:var(--g900);color:#fff;transform:translateY(1px)}
+.btn:disabled{background:var(--k200);border-color:var(--k200);color:var(--k400);cursor:not-allowed;transform:none}
+.btn.primary{width:100%;min-height:52px;font-size:14px;background:var(--g700);border-color:var(--g700);color:#fff}
+.btn.primary:hover{background:var(--g800);border-color:var(--g800)}
+.btn.primary:active{background:var(--g900);border-color:var(--g900)}
+.btn svg{width:16px;height:16px}
+.linkbtn{background:none;border:0;padding:0;font:600 12.5px/1.5 var(--body);color:var(--g700);text-decoration:underline;cursor:pointer}
+.linkbtn:hover{color:var(--g800)}
+.msg{margin:0 0 16px;padding:10px 12px;border-radius:3px;font-size:13.5px;line-height:1.5;border:1px solid}
+.msg.err{color:var(--danger);background:var(--danger-bg);border-color:#f4b4ac}
+.msg.warn{color:var(--warn);background:var(--warn-bg);border-color:#f0d39a}
+.msg.ok{color:var(--ok);background:var(--ok-bg);border-color:#a9d9bd}
+.msg ul{margin:6px 0 0;padding-left:18px}
+.status{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:3px;background:var(--k100);font-size:13px;line-height:1.5}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--k400);flex:none;margin-top:6px}
+.dot.ok{background:var(--ok)}.dot.err{background:var(--danger)}.dot.busy{background:#c98a12}
+.empty{position:relative;overflow:hidden;padding:40px 32px;color:var(--k600)}
+.empty strong{display:block;font:700 18px/1.3 var(--display);text-transform:uppercase;letter-spacing:.04em;color:var(--k900);margin-bottom:6px}
+.empty .wm{position:absolute;right:-24px;bottom:-34px;width:300px;max-width:70%;opacity:.05;color:var(--k700);pointer-events:none}
+.stats{display:flex;flex-wrap:wrap;gap:12px 32px;margin-bottom:20px}
+.stat b{display:block;font:800 28px/1 var(--display);color:var(--g700)}
+.stat small{font:600 11px/1.4 var(--display);text-transform:uppercase;letter-spacing:.14em;color:var(--k600)}
+.acts{display:flex;flex-wrap:wrap;gap:8px}
+pre.out,.codes{margin:0;max-height:560px;overflow:auto;padding:16px;background:var(--k100);border:1px solid var(--k200);border-radius:3px;font:400 12.5px/1.6 var(--mono);color:var(--k900);white-space:pre;tab-size:4}
+.fname{font:500 12.5px/1.4 var(--mono);color:var(--k600);overflow-wrap:anywhere}
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--k200);margin:-4px 0 20px}
+.tabs button{flex:1;background:none;border:0;border-bottom:3px solid transparent;margin-bottom:-1px;padding:10px 8px;font:700 12px/1 var(--display);text-transform:uppercase;letter-spacing:.12em;color:var(--k600);cursor:pointer;transition:color 140ms var(--ease),border-color 140ms var(--ease)}
+.tabs button:hover{color:var(--k900)}
+.tabs button[aria-selected=true]{color:var(--k900);border-color:var(--g600)}
+.guide{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:0;padding:12px 14px;background:var(--k100);border-radius:3px;font-size:13px;line-height:1.5}
+.guide dt{font:500 13px/1.5 var(--mono);color:var(--g700)}
+.guide dd{margin:0;color:var(--k700)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(12px);opacity:0;background:var(--k900);color:#fff;padding:10px 16px;border-radius:3px;font-size:13.5px;box-shadow:var(--shadow-md);transition:opacity 200ms var(--ease),transform 200ms var(--ease);pointer-events:none;z-index:50}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+[hidden]{display:none!important}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}.btn:active{transform:none}}
+
+.codes{white-space:pre;min-height:120px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><symbol id="eg-head" viewBox="0 0 345.92 190.33"><path fill="currentColor" d="M0,35.87s40.31,39.02,168.4,35.17c128.09-3.85,173.84,81.37,173.84,81.37,0,0-74.93-65.41-159.94-67.51C97.28,82.82,42.68,80.09,0,35.87Z"></path><path fill="#76BD1D" d="M117.53,66.85s32.58,2.27,51.76,1.04c0,0-56.52-7.19-96.09-32.78,0,0,14.51,21.14,44.32,31.74Z"></path><path fill="#76BD1D" d="M35.04,67.24s29.79,14.84,67.38,17.07c0,0,22.57,11.59,69.71,12.64,0,0-93.43,12.5-137.09-29.71Z"></path><path fill="currentColor" d="M280.75,118.26c16.38,6.72,30.68,16.31,43.84,26,0,0-67.91-32.46-155.72-21.97,0,0,14.02,6.15,29.4,5.62,0,0-77.9,27.39-155-31.67,0,0,64.1,23.91,128.05,13.89,63.94-10.02,93.06,1.41,109.44,8.13Z"></path><path fill="#76BD1D" d="M105.34,0s47.37,33.91,104.14,45.98c40.57,8.63,79.09,41.54,79.09,41.54,0,0-16.5-3.62-21.25-.52,0,0-13.28-6.59-24.33-9.52,0,0-15.55-19.85-60.21-28.09C143.43,42.13,105.34,0,105.34,0Z"></path><path fill="currentColor" d="M114.48,12.34s23.44,21.93,39.54,29.83c0,0,2.34,9.44,23.54,18.46,0,0-43.44-12.15-63.07-48.29Z"></path><path fill="#76BD1D" d="M233.75,123.37s81.99,27.82,105.78,29.46c0,0,14.46,9.46-.11,37.5,0,0-.17-23.52-30.07-32.97-29.89-9.45-67.78-28.42-75.6-33.99Z"></path></symbol><symbol id="eg-lockup" viewBox="0 0 406.37 276.69"><path fill="currentColor" d="M25.5,237.31v-96.78h51.99v17.15h-34.05v22.79h32.61v17.15h-32.61v22.53h34.05v17.15H25.5Z"></path><path fill="currentColor" d="M160.91,237.31l-10.34-25.01h-34.44l-10.74,25.01h-19.77l40.33-96.78h14.15l40.59,96.78h-19.77ZM133.02,165.8l-10.35,29.33h20.69l-10.34-29.33Z"></path><path fill="currentColor" d="M233.6,239.01c-29.73,0-52.64-22-52.64-50.29s22.66-49.9,50.94-49.9c21.08,0,40.99,12.7,47.27,30.12h-21.09c-6.02-8.38-15.32-12.83-26.58-12.83-19.12,0-32.48,14.67-32.48,32.87s14.54,32.74,33.53,32.74c12.7,0,23.18-6.28,28.42-17.02h-40.07v-16.76h63.25v2.36c0,26.32-22,48.72-50.55,48.72Z"></path><path fill="currentColor" d="M353.56,237.31v-96.78h51.99v17.15h-34.05v22.79h32.61v17.15h-32.61v22.53h34.05v17.15h-51.99Z"></path><path fill="#76BD1D" d="M25.67,251.52c0-1.05.28-1.9.85-2.53.57-.63,1.42-.95,2.56-.95h8.2l.99,5.33h-6.3c-.34,0-.52.18-.52.55v16.99c0,.37.17.55.52.55h2.61v-11.3h5.59v16.52h-10.02c-1.66,0-2.83-.34-3.49-1.03-.66-.69-.99-1.82-.99-3.4v-20.74Z"></path><path fill="#76BD1D" d="M94.45,265.03c0,.63-.22,1.21-.65,1.74-.44.53-1.08.79-1.92.79l3.01,9.13h-5.94l-2.77-9.13h-.75v9.13h-5.75v-28.65h10.9c1.35,0,2.33.34,2.95,1.01.62.67.93,1.57.93,2.71v13.28ZM85.42,253.06v9.88h2.81c.37,0,.56-.2.56-.59v-8.69c0-.39-.19-.59-.56-.59h-2.81Z"></path><path fill="#76BD1D" d="M139.39,273.13l-.52,3.56h-5.79l5.19-28.65h6.14l5.19,28.65h-5.78l-.52-3.56h-3.92ZM140.02,268.59h2.65l-1.31-10.15-1.35,10.15Z"></path><path fill="#76BD1D" d="M199.73,248.04c1.14,0,1.99.32,2.56.95.57.63.85,1.48.85,2.53v13.71c0,.55-.06,1.06-.18,1.52-.12.46-.34.86-.65,1.21-.32.34-.74.61-1.27.81-.53.2-1.19.3-1.98.3h-4.91v7.63h-5.71v-28.65h11.29ZM194.15,253.06v11.26h2.85c.24,0,.39-.04.46-.14.07-.09.1-.24.1-.45v-10.11c0-.37-.17-.55-.52-.55h-2.89Z"></path><path fill="#76BD1D" d="M257.5,276.69h-5.86v-11.46h-3.13v11.46h-5.86v-28.65h5.86v12.25h3.13v-12.25h5.86v28.65Z"></path><path fill="#76BD1D" d="M297.13,248.04h5.75v28.65h-5.75v-28.65Z"></path><path fill="#76BD1D" d="M346.97,276.69c-1.66,0-2.83-.34-3.49-1.03-.66-.69-.99-1.82-.99-3.4v-20.7c0-1.13.32-2,.97-2.61.65-.6,1.45-.91,2.4-.91h7.57l.99,5.33h-5.51c-.34,0-.52.18-.52.55v16.87c0,.37.17.55.52.55h5.51l-1.03,5.33h-6.42Z"></path><path fill="#76BD1D" d="M394.88,276.69l-1.03-5.33h6.18c.45,0,.67-.2.67-.59v-5.22c0-.39-.08-.63-.24-.71-.16-.08-.44-.12-.83-.12h-2.97c-.42,0-.82-.03-1.21-.1-.38-.07-.73-.22-1.03-.45-.3-.24-.54-.57-.71-.99-.17-.42-.26-.99-.26-1.7v-9.72c0-1.13.31-2.03.93-2.71.62-.67,1.61-1.01,2.95-1.01h7.93l.99,5.33h-6.5c-.47,0-.71.21-.71.63v5.21c0,.29.07.49.22.59.14.11.36.16.65.16h3.61c.92,0,1.63.22,2.12.65.49.43.73,1.19.73,2.27v9.44c0,1.58-.32,2.7-.97,3.36-.65.66-1.79.99-3.43.99h-7.09Z"></path><polygon fill="currentColor" points="313.88 220.15 313.88 158.64 295.94 148.79 295.94 237.31 343.48 237.31 343.48 220.15 313.88 220.15"></polygon><path fill="currentColor" d="M0,35.87s40.31,39.02,168.4,35.17c128.09-3.85,173.84,81.37,173.84,81.37,0,0-74.93-65.41-159.94-67.51C97.28,82.82,42.68,80.09,0,35.87Z"></path><path fill="#76BD1D" d="M117.53,66.85s32.58,2.27,51.76,1.04c0,0-56.52-7.19-96.09-32.78,0,0,14.51,21.14,44.32,31.74Z"></path><path fill="#76BD1D" d="M35.04,67.24s29.79,14.84,67.38,17.07c0,0,22.57,11.59,69.71,12.64,0,0-93.43,12.5-137.09-29.71Z"></path><path fill="currentColor" d="M280.75,118.26c16.38,6.72,30.68,16.31,43.84,26,0,0-67.91-32.46-155.72-21.97,0,0,14.02,6.15,29.4,5.62,0,0-77.9,27.39-155-31.67,0,0,64.1,23.91,128.05,13.89,63.94-10.02,93.06,1.41,109.44,8.13Z"></path><path fill="#76BD1D" d="M105.34,0s47.37,33.91,104.14,45.98c40.57,8.63,79.09,41.54,79.09,41.54,0,0-16.5-3.62-21.25-.52,0,0-13.28-6.59-24.33-9.52,0,0-15.55-19.85-60.21-28.09C143.43,42.13,105.34,0,105.34,0Z"></path><path fill="currentColor" d="M114.48,12.34s23.44,21.93,39.54,29.83c0,0,2.34,9.44,23.54,18.46,0,0-43.44-12.15-63.07-48.29Z"></path><path fill="#76BD1D" d="M233.75,123.37s81.99,27.82,105.78,29.46c0,0,14.46,9.46-.11,37.5,0,0-.17-23.52-30.07-32.97-29.89-9.45-67.78-28.42-75.6-33.99Z"></path></symbol></defs></svg>
+<header class="top"><div class="c">
+  <a class="brand" href="/" aria-label="Back to Project Hub"><svg viewBox="0 0 406.37 276.69" style="color:#53585a" role="img" aria-label="Eagle Graphics"><use href="#eg-lockup"/></svg><span>Project Hub</span></a>
+  <a class="back" href="/">All Tools</a>
+</div></header>
+
+<div class="hero"><div class="c">
+  <svg class="wm" viewBox="0 0 345.92 190.33" aria-hidden="true"><use href="#eg-head"/></svg>
+  <span class="eyebrow">Promos &amp; Rewards</span>
+  <h1>Random Code Generator</h1>
+  <div class="bar"></div>
+  <p>Make batches of unique codes for promos, rewards and store redemptions. Every code in a batch is unique, and the CSV export keeps leading zeros intact in Excel.</p>
+</div></div>
+
+<main><div class="c layout">
+  <form class="panel" id="form" novalidate>
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" id="tabR" aria-selected="true" aria-controls="paneR">Random</button>
+      <button type="button" role="tab" id="tabP" aria-selected="false" aria-controls="paneP">Pattern</button>
+    </div>
+    <p class="msg err" id="err" role="alert" hidden></p>
+
+    <div id="paneR" role="tabpanel" aria-labelledby="tabR">
+      <div class="row2">
+        <div class="field"><label for="rCount">Number of Codes</label><input type="text" inputmode="numeric" id="rCount" value="10"></div>
+        <div class="field"><label for="rLen">Code Length</label><input type="text" inputmode="numeric" id="rLen" value="8"></div>
+      </div>
+      <fieldset class="field">
+        <legend>Characters</legend>
+        <div class="checks">
+          <label><input type="checkbox" id="cUp" checked> Uppercase</label>
+          <label><input type="checkbox" id="cLo" checked> Lowercase</label>
+          <label><input type="checkbox" id="cDig" checked> Digits</label>
+          <label><input type="checkbox" id="cSpec"> Special</label>
+          <label><input type="checkbox" id="cPun"> Punctuation</label>
+          <label><input type="checkbox" id="cBr"> Brackets</label>
+          <label><input type="checkbox" id="cSp"> Space</label>
+        </div>
+      </fieldset>
+    </div>
+
+    <div id="paneP" role="tabpanel" aria-labelledby="tabP" hidden>
+      <div class="row2">
+        <div class="field"><label for="pCount">Number of Codes</label><input type="text" inputmode="numeric" id="pCount" value="10"></div>
+        <div class="field"><label for="pat">Pattern</label><input type="text" class="mono" id="pat" value="X9x" spellcheck="false" autocomplete="off"></div>
+      </div>
+      <p class="hint" id="pPrev" style="margin:-8px 0 14px"></p>
+      <div class="field"><label>Pattern Guide</label><dl class="guide" id="guide"></dl></div>
+    </div>
+
+    <div class="field">
+      <label for="ex">Exclude Characters</label>
+      <input type="text" class="mono" id="ex" value="Il1|0O" spellcheck="false" autocomplete="off">
+      <p class="hint">Defaults leave out look-alikes (I, l, 1, |, 0, O) so codes are easy to read and type.</p>
+    </div>
+
+    <button class="btn primary" type="submit" id="go">Generate Codes</button>
+    <div style="text-align:center;margin-top:12px"><button type="button" class="linkbtn" id="reset">Reset to defaults</button></div>
+  </form>
+
+  <section aria-live="polite">
+    <div class="panel">
+      <div class="ph"><h2 id="rTitle">Your Codes</h2>
+        <div class="acts">
+          <button class="btn" type="button" id="copy" disabled>Copy All</button>
+          <button class="btn" type="button" id="csv" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>Export CSV</button>
+        </div>
+      </div>
+      <div id="warn"></div>
+      <pre class="codes" id="codes">Generated codes will appear here.</pre>
+    </div>
+  </section>
+</div></main>
+<div class="toast" id="toast" role="status"></div>
+
+<script>/* Random Code Generator: a port of randomcodegenerator.py. */
+const CodeCore = (() => {
+  const UP = "ABCDEFGHIJKLMNOPQRSTUVWXYZ", LO = "abcdefghijklmnopqrstuvwxyz", DIG = "0123456789";
+  const SPECIAL = "!\"#$%&'()*+,-./:;<=>?@[]^_`{|}~";
+  const PUNCT = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"; /* Python string.punctuation */
+  const BRACKETS = "[](){}<>";
+  const CLASSES = {
+    X: UP, x: LO, "9": DIG, A: UP + DIG, a: LO + DIG, "#": SPECIAL, "!": PUNCT, "[": BRACKETS,
+    v: "aeiou", V: "AEIOU", c: "bcdfghjklmnpqrstvwxyz", C: "BCDFGHJKLMNPQRSTVWXYZ",
+    "?": UP + LO + DIG + SPECIAL + "[](){}<> "
+  };
+  const GUIDE = [["X","Uppercase"],["x","Lowercase"],["9","Digits"],["A","Uppercase + digits"],["a","Lowercase + digits"],["#","Special characters"],["!","Punctuation"],["[","Brackets"],["v","Vowels"],["V","Uppercase vowels"],["c","Consonants"],["C","Uppercase consonants"],["?","Any character"],["/","Escape: /X gives a literal X"]];
+  const MAX = 100000;
+
+  const uniq = s => [...new Set(s)].join("");
+  const without = (s, ex) => [...s].filter(c => !ex.includes(c)).join("");
+
+  /* Unbiased random index using the browser's crypto RNG. */
+  function rnd(n) {
+    const c = globalThis.crypto;
+    if (!c) return Math.floor(Math.random() * n);
+    const lim = Math.floor(0x100000000 / n) * n, b = new Uint32Array(1);
+    do c.getRandomValues(b); while (b[0] >= lim);
+    return b[0] % n;
+  }
+  const pick = s => s[rnd(s.length)];
+
+  function parseCount(v, label) {
+    if (!/^\s*\+?\d+\s*$/.test(String(v))) throw new Error(`${label} must be a positive whole number.`);
+    const n = parseInt(v, 10);
+    if (n <= 0) throw new Error(`${label} must be greater than zero.`);
+    return n;
+  }
+
+  function fill(n, capacity, make) {
+    const warnings = [];
+    if (n > MAX) { warnings.push(`Capped at ${MAX.toLocaleString()} codes per batch.`); n = MAX; }
+    if (n > capacity) { warnings.push(`Requested ${n.toLocaleString()} codes, but only ${capacity.toLocaleString()} unique codes are possible with these settings. Generating the maximum.`); n = capacity; }
+    const set = new Set(), limit = Math.max(n * 5, n + 1000);
+    let tries = 0;
+    while (set.size < n && tries < limit) { set.add(make()); tries++; }
+    if (set.size < n) warnings.push(`Only ${set.size.toLocaleString()} unique codes could be made in a reasonable number of attempts. Try a longer code or more character types.`);
+    return { codes: [...set].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0)), warnings };
+  }
+
+  /* opts: {count, length, upper, lower, digits, special, punctuation, brackets, space, exclude} */
+  function random(opts) {
+    const n = parseCount(opts.count, "Number of codes"), len = parseCount(opts.length, "Code length");
+    let cs = "";
+    if (opts.upper) cs += UP; if (opts.lower) cs += LO; if (opts.digits) cs += DIG;
+    if (opts.special) cs += SPECIAL; if (opts.punctuation) cs += PUNCT;
+    if (opts.brackets) cs += BRACKETS; if (opts.space) cs += " ";
+    cs = without(uniq(cs), opts.exclude || "");
+    if (!cs) throw new Error("The selected character types minus the excluded characters leave nothing to build codes from. Adjust your selections.");
+    const cap = Math.pow(cs.length, len);
+    return fill(n, cap, () => { let s = ""; for (let i = 0; i < len; i++) s += pick(cs); return s; });
+  }
+
+  /* opts: {count, pattern, exclude} */
+  function pattern(opts) {
+    const n = parseCount(opts.count, "Number of codes"), p = opts.pattern || "";
+    if (!p) throw new Error("Enter a pattern, e.g. X9x.");
+    if (p.startsWith("=")) throw new Error("The pattern can't start with = (Excel would read it as a formula).");
+    const parts = [];
+    for (let i = 0; i < p.length; i++) {
+      if (p[i] === "/") { parts.push({ lit: i + 1 < p.length ? p[++i] : "/" }); continue; }
+      const cls = CLASSES[p[i]];
+      if (cls === undefined) { parts.push({ lit: p[i] }); continue; }
+      const set = without(cls, opts.exclude || "");
+      if (!set) throw new Error(`Pattern character "${p[i]}" has nothing left after exclusions.`);
+      parts.push({ set });
+    }
+    const cap = parts.reduce((a, x) => a * (x.set ? x.set.length : 1), 1);
+    return fill(n, cap, () => parts.map(x => x.lit ?? pick(x.set)).join(""));
+  }
+
+  /* Matches the desktop export: header "Code", each code wrapped as ="CODE" so Excel keeps it as text. */
+  function toCSV(codes) {
+    const q = v => /[",\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+    return ["Code", ...codes.map(c => q(`="${c}"`))].join("\r\n") + "\r\n";
+  }
+  return { random, pattern, toCSV, GUIDE, MAX };
+})();
+// = CodeCore;
+</script>
+<script>
+const $ = id => document.getElementById(id);
+let mode = "random", codes = [];
+const esc = s => s.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function toast(t){const e=$("toast");e.textContent=t;e.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("on"),1800)}
+$("guide").innerHTML = CodeCore.GUIDE.map(([k,v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("");
+
+function setMode(m){
+  mode = m;
+  $("tabR").setAttribute("aria-selected", m === "random"); $("tabP").setAttribute("aria-selected", m === "pattern");
+  $("paneR").hidden = m !== "random"; $("paneP").hidden = m !== "pattern";
+  showErr("");
+}
+$("tabR").onclick = () => setMode("random"); $("tabP").onclick = () => setMode("pattern");
+document.querySelector(".tabs").addEventListener("keydown", e => {
+  if(e.key === "ArrowRight" || e.key === "ArrowLeft"){ const m = mode === "random" ? "pattern" : "random"; setMode(m); $(m === "random" ? "tabR" : "tabP").focus(); }
+});
+
+function previewPattern(){
+  try{ const r = CodeCore.pattern({count:1, pattern:$("pat").value, exclude:$("ex").value}); $("pPrev").textContent = "Example: " + r.codes[0]; }
+  catch(e){ $("pPrev").textContent = ""; }
+}
+$("pat").addEventListener("input", previewPattern); $("ex").addEventListener("input", previewPattern);
+
+function showErr(t){ const e=$("err"); e.textContent=t; e.hidden=!t; }
+function render(r){
+  codes = r.codes;
+  $("codes").textContent = codes.join("\n");
+  $("rTitle").textContent = `${codes.length.toLocaleString()} Code${codes.length===1?"":"s"}`;
+  $("warn").innerHTML = r.warnings.map(w => `<p class="msg warn">${esc(w)}</p>`).join("");
+  $("copy").disabled = $("csv").disabled = !codes.length;
+}
+$("form").onsubmit = e => {
+  e.preventDefault(); showErr("");
+  try{
+    const r = mode === "random"
+      ? CodeCore.random({count:$("rCount").value, length:$("rLen").value, upper:$("cUp").checked, lower:$("cLo").checked, digits:$("cDig").checked, special:$("cSpec").checked, punctuation:$("cPun").checked, brackets:$("cBr").checked, space:$("cSp").checked, exclude:$("ex").value})
+      : CodeCore.pattern({count:$("pCount").value, pattern:$("pat").value, exclude:$("ex").value});
+    render(r);
+    if(innerWidth < 940) $("codes").scrollIntoView({behavior:"smooth", block:"center"});
+  }catch(err){ showErr(err.message); }
+};
+$("copy").onclick = async () => {
+  const t = codes.join("\n");
+  try{ await navigator.clipboard.writeText(t); }
+  catch{ const a=document.createElement("textarea"); a.value=t; document.body.appendChild(a); a.select(); document.execCommand("copy"); a.remove(); }
+  toast(`Copied ${codes.length.toLocaleString()} codes`);
+};
+$("csv").onclick = () => {
+  const d = new Date(), p = n => String(n).padStart(2,"0");
+  const name = `generated_codes_${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}.csv`;
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([CodeCore.toCSV(codes)], {type:"text/csv"})); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+  toast("Downloaded " + name);
+};
+$("reset").onclick = () => {
+  $("rCount").value = "10"; $("rLen").value = "8"; $("pCount").value = "10"; $("pat").value = "X9x"; $("ex").value = "Il1|0O";
+  [["cUp",1],["cLo",1],["cDig",1],["cSpec",0],["cPun",0],["cBr",0],["cSp",0]].forEach(([id,v]) => $(id).checked = !!v);
+  codes = []; $("codes").textContent = "Generated codes will appear here."; $("rTitle").textContent = "Your Codes";
+  $("warn").innerHTML = ""; $("copy").disabled = $("csv").disabled = true; showErr(""); previewPattern();
+};
+previewPattern();
+</script>
+</body>
+</html>
