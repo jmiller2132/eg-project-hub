@@ -1,0 +1,176 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>AI Toolkit | Eagle Graphics</title>
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@500;600;700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<style>
+/* Layout: sticky brand bar, short intro, tool groups as card grids; a tool opens full-screen in a frame over the page. */
+:root{
+  --bg:#f7f8f8; --surface:#ffffff; --sunken:#f0f1f2; --line:#e1e3e4; --line-strong:#c5c8c9;
+  --heading:#2a2d2e; --text:#53585a; --muted:#63676a;
+  --brand:#76bd1d; --brand-text:#4a7812; --fill:#4a7812; --fill-hover:#365711; --on-fill:#ffffff;
+  --bar:#2a2d2e; --bar-text:#ffffff;
+  --display:"Jost","Century Gothic","Futura",system-ui,sans-serif;
+  --body:"Open Sans","Helvetica Neue",Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#1e2021; --surface:#2a2d2e; --sunken:#232627; --line:#3a3e40; --line-strong:#53585a;
+  --heading:#f7f8f8; --text:#c5c8c9; --muted:#9ca0a2;
+  --brand:#76bd1d; --brand-text:#94cf4a; --fill:#4a7812; --fill-hover:#5f9a17; --on-fill:#ffffff;
+  --bar:#141516; --bar-text:#ffffff; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#1e2021; --surface:#2a2d2e; --sunken:#232627; --line:#3a3e40; --line-strong:#53585a;
+  --heading:#f7f8f8; --text:#c5c8c9; --muted:#9ca0a2;
+  --brand:#76bd1d; --brand-text:#94cf4a; --fill:#4a7812; --fill-hover:#5f9a17; --on-fill:#ffffff;
+  --bar:#141516; --bar-text:#ffffff; color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font:400 15px/1.65 var(--body)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bar)}
+.gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bar);color:var(--bar-text)}
+.top .in{max-width:1180px;margin:0 auto;padding-block:12px;display:flex;align-items:center;gap:16px}
+.top svg{height:38px;width:auto;color:#fff;flex:none}
+.top b{font:700 15px/1.2 var(--display);letter-spacing:.12em;text-transform:uppercase;flex:1}
+.top .hub{font:700 12px/1 var(--display);letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;border:1px solid #7d8183;border-radius:3px;padding:9px 12px}
+.top .hub:hover{background:#4a7812;border-color:#4a7812}
+main{max-width:1180px;margin:0 auto;padding-block:40px 72px;display:flex;flex-direction:column;gap:48px}
+.intro{display:flex;flex-direction:column;gap:12px;max-width:68ch}
+.eyebrow{font:700 12px/1.4 var(--body);letter-spacing:.18em;text-transform:uppercase;color:var(--brand-text);margin:0}
+h1{margin:0;font:800 clamp(30px,5vw,48px)/1.05 var(--display);text-transform:uppercase;color:var(--heading);letter-spacing:-.01em;text-wrap:balance}
+.rule{width:48px;height:3px;background:var(--brand)}
+.intro p{margin:0;font-size:16px}
+section{display:flex;flex-direction:column;gap:16px}
+h2{margin:0;font:700 14px/1.3 var(--display);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+h2 span{font:400 13px/1.4 var(--body);letter-spacing:0;text-transform:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.card{min-width:0;display:flex;flex-direction:column;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:20px;text-decoration:none;color:inherit;transition:transform 140ms cubic-bezier(.4,0,.2,1),box-shadow 140ms cubic-bezier(.4,0,.2,1),border-color 140ms}
+a.card:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(20,21,22,.12);border-color:var(--line-strong)}
+a.card:focus-visible{outline:3px solid rgba(118,189,29,.55);outline-offset:2px}
+.card h3{margin:0;font:700 19px/1.2 var(--display);text-transform:uppercase;color:var(--heading);letter-spacing:.01em}
+.card p{margin:0;font-size:14px;line-height:1.6;flex:1}
+.meta{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding-top:10px;border-top:1px solid var(--line)}
+.who{font:600 11px/1.4 var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.go{font:700 12px/1 var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--on-fill);background:var(--fill);padding:8px 12px;border-radius:3px}
+a.card:hover .go{background:var(--fill-hover)}
+.go.ext::after{content:" \2197"}
+.card.hi{border-color:var(--brand);box-shadow:inset 0 3px 0 var(--brand)}
+.card.hi .who{color:var(--brand-text)}
+.card.off{background:var(--sunken);border-style:dashed}
+.tag{font:600 11px/1 var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line-strong);border-radius:3px;padding:7px 10px}
+/* full-screen tool view */
+.view{position:fixed;inset:0;z-index:20;background:var(--bg);display:flex;flex-direction:column}
+.vbar{background:var(--bar);color:var(--bar-text);padding-top:env(safe-area-inset-top,0px)}
+.vbar .in{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding-block:10px}
+.vbar button,.vbar a{font:700 12px/1 var(--display);letter-spacing:.1em;text-transform:uppercase;color:#fff;background:transparent;border:1px solid #7d8183;border-radius:3px;padding:9px 12px;cursor:pointer;text-decoration:none}
+.vbar button:hover,.vbar a:hover{background:#4a7812;border-color:#4a7812}
+.vbar .name{flex:1;min-width:0;font:700 16px/1.2 var(--display);text-transform:uppercase;letter-spacing:.06em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.frame{flex:1;min-height:0;display:flex;background:#141516;padding-bottom:env(safe-area-inset-bottom,0px)}
+.frame iframe{flex:1;border:0;width:100%;background:#fff}
+.frame video{flex:1;width:100%;min-width:0;max-height:100%;object-fit:contain;background:#141516}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}a.card:hover{transform:none}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><symbol id="eg-lockup" viewBox="0 0 406.37 276.69"><path fill="currentColor" d="M25.5,237.31v-96.78h51.99v17.15h-34.05v22.79h32.61v17.15h-32.61v22.53h34.05v17.15H25.5Z"></path><path fill="currentColor" d="M160.91,237.31l-10.34-25.01h-34.44l-10.74,25.01h-19.77l40.33-96.78h14.15l40.59,96.78h-19.77ZM133.02,165.8l-10.35,29.33h20.69l-10.34-29.33Z"></path><path fill="currentColor" d="M233.6,239.01c-29.73,0-52.64-22-52.64-50.29s22.66-49.9,50.94-49.9c21.08,0,40.99,12.7,47.27,30.12h-21.09c-6.02-8.38-15.32-12.83-26.58-12.83-19.12,0-32.48,14.67-32.48,32.87s14.54,32.74,33.53,32.74c12.7,0,23.18-6.28,28.42-17.02h-40.07v-16.76h63.25v2.36c0,26.32-22,48.72-50.55,48.72Z"></path><path fill="currentColor" d="M353.56,237.31v-96.78h51.99v17.15h-34.05v22.79h32.61v17.15h-32.61v22.53h34.05v17.15h-51.99Z"></path><path fill="#76BD1D" d="M25.67,251.52c0-1.05.28-1.9.85-2.53.57-.63,1.42-.95,2.56-.95h8.2l.99,5.33h-6.3c-.34,0-.52.18-.52.55v16.99c0,.37.17.55.52.55h2.61v-11.3h5.59v16.52h-10.02c-1.66,0-2.83-.34-3.49-1.03-.66-.69-.99-1.82-.99-3.4v-20.74Z"></path><path fill="#76BD1D" d="M94.45,265.03c0,.63-.22,1.21-.65,1.74-.44.53-1.08.79-1.92.79l3.01,9.13h-5.94l-2.77-9.13h-.75v9.13h-5.75v-28.65h10.9c1.35,0,2.33.34,2.95,1.01.62.67.93,1.57.93,2.71v13.28ZM85.42,253.06v9.88h2.81c.37,0,.56-.2.56-.59v-8.69c0-.39-.19-.59-.56-.59h-2.81Z"></path><path fill="#76BD1D" d="M139.39,273.13l-.52,3.56h-5.79l5.19-28.65h6.14l5.19,28.65h-5.78l-.52-3.56h-3.92ZM140.02,268.59h2.65l-1.31-10.15-1.35,10.15Z"></path><path fill="#76BD1D" d="M199.73,248.04c1.14,0,1.99.32,2.56.95.57.63.85,1.48.85,2.53v13.71c0,.55-.06,1.06-.18,1.52-.12.46-.34.86-.65,1.21-.32.34-.74.61-1.27.81-.53.2-1.19.3-1.98.3h-4.91v7.63h-5.71v-28.65h11.29ZM194.15,253.06v11.26h2.85c.24,0,.39-.04.46-.14.07-.09.1-.24.1-.45v-10.11c0-.37-.17-.55-.52-.55h-2.89Z"></path><path fill="#76BD1D" d="M257.5,276.69h-5.86v-11.46h-3.13v11.46h-5.86v-28.65h5.86v12.25h3.13v-12.25h5.86v28.65Z"></path><path fill="#76BD1D" d="M297.13,248.04h5.75v28.65h-5.75v-28.65Z"></path><path fill="#76BD1D" d="M346.97,276.69c-1.66,0-2.83-.34-3.49-1.03-.66-.69-.99-1.82-.99-3.4v-20.7c0-1.13.32-2,.97-2.61.65-.6,1.45-.91,2.4-.91h7.57l.99,5.33h-5.51c-.34,0-.52.18-.52.55v16.87c0,.37.17.55.52.55h5.51l-1.03,5.33h-6.42Z"></path><path fill="#76BD1D" d="M394.88,276.69l-1.03-5.33h6.18c.45,0,.67-.2.67-.59v-5.22c0-.39-.08-.63-.24-.71-.16-.08-.44-.12-.83-.12h-2.97c-.42,0-.82-.03-1.21-.1-.38-.07-.73-.22-1.03-.45-.3-.24-.54-.57-.71-.99-.17-.42-.26-.99-.26-1.7v-9.72c0-1.13.31-2.03.93-2.71.62-.67,1.61-1.01,2.95-1.01h7.93l.99,5.33h-6.5c-.47,0-.71.21-.71.63v5.21c0,.29.07.49.22.59.14.11.36.16.65.16h3.61c.92,0,1.63.22,2.12.65.49.43.73,1.19.73,2.27v9.44c0,1.58-.32,2.7-.97,3.36-.65.66-1.79.99-3.43.99h-7.09Z"></path><polygon fill="currentColor" points="313.88 220.15 313.88 158.64 295.94 148.79 295.94 237.31 343.48 237.31 343.48 220.15 313.88 220.15"></polygon><path fill="currentColor" d="M0,35.87s40.31,39.02,168.4,35.17c128.09-3.85,173.84,81.37,173.84,81.37,0,0-74.93-65.41-159.94-67.51C97.28,82.82,42.68,80.09,0,35.87Z"></path><path fill="#76BD1D" d="M117.53,66.85s32.58,2.27,51.76,1.04c0,0-56.52-7.19-96.09-32.78,0,0,14.51,21.14,44.32,31.74Z"></path><path fill="#76BD1D" d="M35.04,67.24s29.79,14.84,67.38,17.07c0,0,22.57,11.59,69.71,12.64,0,0-93.43,12.5-137.09-29.71Z"></path><path fill="currentColor" d="M280.75,118.26c16.38,6.72,30.68,16.31,43.84,26,0,0-67.91-32.46-155.72-21.97,0,0,14.02,6.15,29.4,5.62,0,0-77.9,27.39-155-31.67,0,0,64.1,23.91,128.05,13.89,63.94-10.02,93.06,1.41,109.44,8.13Z"></path><path fill="#76BD1D" d="M105.34,0s47.37,33.91,104.14,45.98c40.57,8.63,79.09,41.54,79.09,41.54,0,0-16.5-3.62-21.25-.52,0,0-13.28-6.59-24.33-9.52,0,0-15.55-19.85-60.21-28.09C143.43,42.13,105.34,0,105.34,0Z"></path><path fill="currentColor" d="M114.48,12.34s23.44,21.93,39.54,29.83c0,0,2.34,9.44,23.54,18.46,0,0-43.44-12.15-63.07-48.29Z"></path><path fill="#76BD1D" d="M233.75,123.37s81.99,27.82,105.78,29.46c0,0,14.46,9.46-.11,37.5,0,0-.17-23.52-30.07-32.97-29.89-9.45-67.78-28.42-75.6-33.99Z"></path></symbol></defs></svg>
+
+<header class="top gut"><div class="in">
+  <svg viewBox="0 0 406.37 276.69" role="img" aria-label="Eagle Graphics"><use href="#eg-lockup"/></svg>
+  <b>AI Toolkit</b>
+  <a class="hub" href="/">Project Hub</a>
+</div></header>
+
+<main class="gut">
+  <div class="intro">
+    <p class="eyebrow">Built with Claude, Cursor, ChatGPT &amp; Gemini</p>
+    <h1>Hand Off the Busywork</h1>
+    <div class="rule"></div>
+    <p>Every tool here takes an annoying, repetitive task off someone’s plate. Open one and poke around.</p>
+  </div>
+
+  <section aria-labelledby="g-try">
+    <h2 id="g-try">Try them here <span>Opens right on this page</span></h2>
+    <div class="grid">
+      <a class="card hi" href="#flyer" data-tool="flyer"><h3>Flyer Builder</h3><p>Store launch flyers with QR code and ordering steps, exported as a print-ready PDF.</p><div class="meta"><span class="who">Highlight</span><span class="go">Open</span></div></a>
+      <a class="card hi" href="#emails" data-tool="emails"><h3>Email Templates</h3><p>Store launch, reminder and seasonal emails, ready for Constant Contact or Outlook.</p><div class="meta"><span class="who">Highlight</span><span class="go">Open</span></div></a>
+      <a class="card hi" href="#inventory" data-tool="inventory"><h3>Inventory Report</h3><p>Drop in BrightSites exports and get a branded customer report with reorders first.</p><div class="meta"><span class="who">Highlight</span><span class="go">Open</span></div></a>
+      <a class="card" href="#quote" data-tool="quote"><h3>Quote Builder</h3><p>Garment cost and quantities in, priced quote and customer presentation out.</p><div class="meta"><span class="who"></span><span class="go">Open</span></div></a>
+      <a class="card" href="#signature" data-tool="signature"><h3>Signature Builder</h3><p>Fill in your details, pick a style and paste a clean signature into Outlook.</p><div class="meta"><span class="who"></span><span class="go">Open</span></div></a>
+      <a class="card hi" href="#wrap" data-tool="wrap"><h3>Wrap Prompt Studio</h3><p>Answer questions about the customer and vehicle; get a batch of wrap concept prompts.</p><div class="meta"><span class="who">Highlight</span><span class="go">Open</span></div></a>
+      <a class="card hi" href="#design" data-tool="design"><h3>Design Prompt Studio</h3><p>Pick placement, audience and style; get screen-print-ready design prompts.</p><div class="meta"><span class="who">Highlight</span><span class="go">Open</span></div></a>
+      <a class="card hi" href="#orders" data-tool="orders"><h3>ShopWorks Order Import</h3><p>Bulk order CSV in, ShopWorks import file out. Rebuilt from an old Windows app so it runs in any browser.</p><div class="meta"><span class="who">Highlight</span><span class="go">Open</span></div></a>
+      <a class="card" href="#codes" data-tool="codes"><h3>Code Generator</h3><p>Unique promo and redemption codes that never repeat earlier batches, with an Excel-safe export.</p><div class="meta"><span class="who"></span><span class="go">Open</span></div></a>
+      <a class="card" href="#banner" data-tool="banner"><h3>Web Store Banner Studio</h3><p>Store header banners with a live preview and brand-ready type.</p><div class="meta"><span class="who"></span><span class="go">Open</span></div></a>
+    </div>
+  </section>
+
+  <section aria-labelledby="g-web">
+    <h2 id="g-web">On the web <span>Opens in a new tab</span></h2>
+    <div class="grid">
+      <a class="card hi" href="https://discrepancy-report-bice.vercel.app/" target="_blank" rel="noopener"><h3>Discrepancy Report</h3><p>Log defective or short inventory and capture a digital sign-off.</p><div class="meta"><span class="who">Highlight</span><span class="go ext">Open</span></div></a>
+      <a class="card" href="/tools/brand-guide.html" target="_blank" rel="noopener"><h3>Eagle Brand Guide</h3><p>Eagle’s colors, type, logos and rules in one place, so anything AI builds comes out on brand.</p><div class="meta"><span class="who"></span><span class="go ext">Open</span></div></a>
+      <a class="card" href="https://eg-store-manager.vercel.app/admin" target="_blank" rel="noopener"><h3>Store Manager</h3><p>One admin portal for the BrightSites stores Eagle runs.</p><div class="meta"><span class="who"></span><span class="go ext">Open</span></div></a>
+      <a class="card" href="https://hop-yard-ale-works.vercel.app/" target="_blank" rel="noopener"><h3>Hop Yard Website</h3><p>A full brewery site for two locations, with an arcade game hidden inside.</p><div class="meta"><span class="who"></span><span class="go ext">Open</span></div></a>
+    </div>
+  </section>
+
+  <section aria-labelledby="g-desk">
+    <h2 id="g-desk">Desktop apps <span>Demo on a laptop</span></h2>
+    <div class="grid">
+      <div class="card off"><h3>Cherry Optical PDF Sorter</h3><p>Sorts and counts statement PDFs by page. What took hours now takes about 15 seconds.</p><div class="meta"><span class="who"></span><span class="tag">Windows app</span></div></div>
+      <div class="card off"><h3>ShopWorks Import Tool</h3><p>Turns a spreadsheet into a JSON file that ShopWorks can import.</p><div class="meta"><span class="who"></span><span class="tag">Windows app</span></div></div>
+    </div>
+  </section>
+</main>
+
+<div class="view" id="view" hidden>
+  <div class="vbar gut"><div class="in">
+    <button type="button" id="back">&larr; All tools</button>
+    <span class="name" id="vname"></span>
+    <a id="vtab" href="#" target="_blank" rel="noopener">Open in new tab</a>
+  </div></div>
+  <div class="frame" id="vframe"></div>
+</div>
+
+<script>
+const TOOLS={
+  quote:{name:"Quote Builder",src:"/tools/quote-builder.html"},
+  flyer:{name:"Flyer Builder",src:"/tools/flyer-builder.html"},
+  inventory:{name:"Inventory Report",src:"/tools/inventory-report.html"},
+  emails:{name:"Email Templates",src:"/tools/email-templates.html"},
+  signature:{name:"Signature Builder",src:"/tools/email-signature-builder.html"},
+  wrap:{name:"Vehicle Wrap Prompt Studio 2.1",src:"/tools/vehicle-wrap-prompt-studio.html"},
+  design:{name:"Design Prompt Studio 2.1",src:"/tools/design-prompt-studio.html"},
+  orders:{name:"ShopWorks Bulk Order Import",src:"/tools/order-import.html"},
+  codes:{name:"Random Code Generator",src:"/tools/code-generator.html"},
+  banner:{name:"Web Store Banner Studio",src:"/tools/web-store-banner-studio.html"}
+};
+const view=document.getElementById("view"),frame=document.getElementById("vframe");
+let current=null;
+function open(key){
+  const t=TOOLS[key]; if(!t){close();return}
+  if(current===key)return; current=key;
+  document.getElementById("vname").textContent=t.name;
+  document.getElementById("vtab").href=t.src;
+  frame.textContent="";
+  let el;
+  if(t.video){el=document.createElement("video");el.src=t.src;el.controls=true;el.playsInline=true}
+  else{el=document.createElement("iframe");el.src=t.src;el.title=t.name}
+  frame.appendChild(el);
+  view.hidden=false;document.body.style.overflow="hidden";
+  document.getElementById("back").focus();
+}
+function close(){
+  current=null;frame.textContent="";view.hidden=true;document.body.style.overflow="";
+}
+function sync(){open((location.hash||"").slice(1))}
+document.querySelectorAll("[data-tool]").forEach(a=>a.addEventListener("click",e=>{
+  e.preventDefault();const k=a.dataset.tool;try{history.replaceState(null,"","#"+k)}catch(_){}open(k);
+}));
+document.getElementById("back").addEventListener("click",()=>{try{history.replaceState(null,"",location.pathname+location.search)}catch(_){}close()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!view.hidden)document.getElementById("back").click()});
+window.addEventListener("hashchange",sync);
+sync();
+</script>
+
+</body></html>

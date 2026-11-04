@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Brand Guide | Eagle Graphics</title>
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Jost:wght@400;600;700;800&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>:root{
+--g300:#b2dd79;--g400:#94cf4a;--g500:#76bd1d;--g600:#5f9a17;--g700:#4a7812;--g800:#365711;--g900:#20340a;
+--k100:#f0f1f2;--k200:#e1e3e4;--k300:#c5c8c9;--k400:#9ca0a2;--k500:#7d8183;--k600:#63676a;--k700:#53585a;--k800:#3a3e40;--k900:#2a2d2e;
+--danger:#b42318;--danger-bg:#fdecea;--warn:#8a5d0a;--warn-bg:#fdf3e1;--ok:#1f8a4c;--ok-bg:#e6f4ec;
+--display:"Jost","Century Gothic",system-ui,sans-serif;--body:"Open Sans","Helvetica Neue",Arial,sans-serif;--mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+--ease:cubic-bezier(.4,0,.2,1);--shadow-md:0 4px 12px rgba(42,45,46,.10),0 1px 3px rgba(42,45,46,.08)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--k100);color:var(--k700);font:400 15px/1.7 var(--body)}
+:focus-visible{outline:3px solid rgba(118,189,29,.4);outline-offset:2px}
+.c{max-width:1240px;margin:0 auto;padding:0 24px}
+h1,h2,h3{margin:0;font-family:var(--display);text-transform:uppercase;color:var(--k900);text-wrap:balance}
+.eyebrow{display:block;font:600 11px/1.4 var(--display);text-transform:uppercase;letter-spacing:.18em;color:var(--g700)}
+.bar{width:48px;height:3px;background:var(--g500);margin:12px 0 0}
+header.top{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--k200)}
+.top .c{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:64px}
+.brand{display:flex;align-items:center;gap:16px;text-decoration:none;color:var(--k700)}
+.brand svg{height:40px;width:auto;display:block}
+.brand span{border-left:1px solid var(--k300);padding-left:16px;font:700 13px/1.2 var(--display);text-transform:uppercase;letter-spacing:.14em;color:var(--k900)}
+.back{font:600 12px/1 var(--display);text-transform:uppercase;letter-spacing:.1em;color:var(--k700);text-decoration:none;padding:10px 0;border-bottom:3px solid transparent}
+.back:hover{color:var(--k900);border-color:var(--g600)}
+.hero{position:relative;overflow:hidden;background:var(--k900);padding:40px 0 36px}
+.hero .wm{position:absolute;right:-40px;top:50%;transform:translateY(-50%);width:420px;max-width:60%;opacity:.06;color:#fff;pointer-events:none}
+.hero .eyebrow{color:var(--g400)}
+.hero h1{color:#fff;font-size:clamp(28px,4vw,42px);font-weight:800;line-height:1.08;margin-top:8px}
+.hero p{max-width:640px;margin:14px 0 0;color:var(--k300)}
+main{padding:32px 0 64px}
+.layout{display:grid;grid-template-columns:400px minmax(0,1fr);gap:24px;align-items:start}
+@media(max-width:940px){.layout{grid-template-columns:minmax(0,1fr)}}
+.panel{background:#fff;border:1px solid var(--k200);border-radius:4px;padding:24px;min-width:0}
+.ph{position:relative;display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:14px;margin-bottom:20px;border-bottom:1px solid var(--k200)}
+.ph::after{content:"";position:absolute;left:0;bottom:-1px;width:48px;height:3px;background:var(--g500)}
+.ph h2{font-size:17px;font-weight:700;letter-spacing:.04em}
+.field{margin:0 0 18px;border:0;padding:0;min-width:0}
+.field>label,.field legend{display:block;padding:0;margin:0 0 6px;font:600 11px/1.5 var(--display);text-transform:uppercase;letter-spacing:.16em;color:var(--k700)}
+.hint{margin:6px 0 0;font-size:12.5px;line-height:1.5;color:var(--k600)}
+input[type=text],input[type=number]{width:100%;min-height:42px;padding:8px 12px;font:400 14px/1.5 var(--body);color:var(--k900);background:#fff;border:1px solid var(--k300);border-radius:3px;transition:border-color 140ms var(--ease)}
+input[type=text]:focus-visible,input[type=number]:focus-visible{border-color:var(--g600);outline-offset:0}
+input.mono{font-family:var(--mono)}
+.drop{position:relative;display:flex;align-items:center;gap:14px;padding:16px;border:1px dashed var(--k400);border-radius:4px;background:var(--k100);cursor:pointer;transition:border-color 140ms var(--ease),background 140ms var(--ease)}
+.drop:hover,.drop.over{border-color:var(--g600);background:#f6fbef}
+.drop input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.drop svg{width:28px;height:28px;flex:none;color:var(--g600)}
+.drop b{display:block;font:600 14px/1.4 var(--body);color:var(--k900);overflow-wrap:anywhere}
+.drop small{display:block;font-size:12.5px;color:var(--k600)}
+.radios{display:flex;flex-direction:column;gap:6px}
+.radios label,.checks label{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--k800);cursor:pointer}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px}
+input[type=radio],input[type=checkbox]{width:18px;height:18px;margin:0;accent-color:var(--g700)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:3px;border:1px solid var(--k500);background:#fff;color:var(--k800);font:700 12px/1 var(--display);text-transform:uppercase;letter-spacing:.1em;cursor:pointer;text-decoration:none;transition:background 140ms var(--ease),border-color 140ms var(--ease),color 140ms var(--ease)}
+.btn:hover{background:var(--g700);border-color:var(--g700);color:#fff}
+.btn:active{background:var(--g900);border-color:var(--g900);color:#fff;transform:translateY(1px)}
+.btn:disabled{background:var(--k200);border-color:var(--k200);color:var(--k400);cursor:not-allowed;transform:none}
+.btn.primary{width:100%;min-height:52px;font-size:14px;background:var(--g700);border-color:var(--g700);color:#fff}
+.btn.primary:hover{background:var(--g800);border-color:var(--g800)}
+.btn.primary:active{background:var(--g900);border-color:var(--g900)}
+.btn svg{width:16px;height:16px}
+.linkbtn{background:none;border:0;padding:0;font:600 12.5px/1.5 var(--body);color:var(--g700);text-decoration:underline;cursor:pointer}
+.linkbtn:hover{color:var(--g800)}
+.msg{margin:0 0 16px;padding:10px 12px;border-radius:3px;font-size:13.5px;line-height:1.5;border:1px solid}
+.msg.err{color:var(--danger);background:var(--danger-bg);border-color:#f4b4ac}
+.msg.warn{color:var(--warn);background:var(--warn-bg);border-color:#f0d39a}
+.msg.ok{color:var(--ok);background:var(--ok-bg);border-color:#a9d9bd}
+.msg ul{margin:6px 0 0;padding-left:18px}
+.status{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:3px;background:var(--k100);font-size:13px;line-height:1.5}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--k400);flex:none;margin-top:6px}
+.dot.ok{background:var(--ok)}.dot.err{background:var(--danger)}.dot.busy{background:#c98a12}
+.empty{position:relative;overflow:hidden;padding:40px 32px;color:var(--k600)}
+.empty strong{display:block;font:700 18px/1.3 var(--display);text-transform:uppercase;letter-spacing:.04em;color:var(--k900);margin-bottom:6px}
+.empty .wm{position:absolute;right:-24px;bottom:-34px;width:300px;max-width:70%;opacity:.05;color:var(--k700);pointer-events:none}
+.stats{display:flex;flex-wrap:wrap;gap:12px 32px;margin-bottom:20px}
+.stat b{display:block;font:800 28px/1 var(--display);color:var(--g700)}
+.stat small{font:600 11px/1.4 var(--display);text-transform:uppercase;letter-spacing:.14em;color:var(--k600)}
+.acts{display:flex;flex-wrap:wrap;gap:8px}
+pre.out,.codes{margin:0;max-height:560px;overflow:auto;padding:16px;background:var(--k100);border:1px solid var(--k200);border-radius:3px;font:400 12.5px/1.6 var(--mono);color:var(--k900);white-space:pre;tab-size:4}
+.fname{font:500 12.5px/1.4 var(--mono);color:var(--k600);overflow-wrap:anywhere}
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--k200);margin:-4px 0 20px}
+.tabs button{flex:1;background:none;border:0;border-bottom:3px solid transparent;margin-bottom:-1px;padding:10px 8px;font:700 12px/1 var(--display);text-transform:uppercase;letter-spacing:.12em;color:var(--k600);cursor:pointer;transition:color 140ms var(--ease),border-color 140ms var(--ease)}
+.tabs button:hover{color:var(--k900)}
+.tabs button[aria-selected=true]{color:var(--k900);border-color:var(--g600)}
+.guide{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:0;padding:12px 14px;background:var(--k100);border-radius:3px;font-size:13px;line-height:1.5}
+.guide dt{font:500 13px/1.5 var(--mono);color:var(--g700)}
+.guide dd{margin:0;color:var(--k700)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(12px);opacity:0;background:var(--k900);color:#fff;padding:10px 16px;border-radius:3px;font-size:13.5px;box-shadow:var(--shadow-md);transition:opacity 200ms var(--ease),transform 200ms var(--ease);pointer-events:none;z-index:50}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+[hidden]{display:none!important}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}.btn:active{transform:none}}
+
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{background:#fff}
+section.band{padding:56px 0}
+section.band.alt{background:var(--k100)}
+.sh{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:28px}
+.sh h2{font-size:26px;font-weight:800;line-height:1.15;margin-top:6px}
+.sh p{margin:0;color:var(--k600);font-size:14px;max-width:460px}
+.jump{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px}
+.jump a{font:600 12px/1 var(--display);text-transform:uppercase;letter-spacing:.1em;color:#fff;text-decoration:none;border:1px solid var(--k600);border-radius:3px;padding:10px 14px}
+.jump a:hover{background:var(--g700);border-color:var(--g700)}
+.logos{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:20px}
+.logo{border:1px solid var(--k200);border-radius:4px;overflow:hidden;background:#fff;display:flex;flex-direction:column}
+.logo .pv{height:180px;display:grid;place-items:center;padding:28px}
+.logo .pv img{max-width:100%;max-height:120px}
+.logo .lb{padding:14px 16px;border-top:1px solid var(--k200);display:flex;flex-direction:column;gap:10px}
+.logo b{font:700 14px/1.3 var(--display);text-transform:uppercase;letter-spacing:.04em;color:var(--k900)}
+.logo small{display:block;font-size:12.5px;color:var(--k600);line-height:1.4}
+.logo .dl{display:flex;gap:8px}
+.logo .dl a{flex:1;min-height:34px;font-size:11px}
+.pri{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin-bottom:28px}
+.pc{border-radius:4px;overflow:hidden;border:1px solid var(--k200);background:#fff}
+.pc .sw{height:120px;display:flex;align-items:flex-end;padding:16px;color:#fff;font:800 22px/1 var(--display);text-transform:uppercase;letter-spacing:.02em}
+.pc dl{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;margin:0;padding:16px;font-size:13.5px}
+.pc dt{font:600 11px/1.9 var(--display);text-transform:uppercase;letter-spacing:.14em;color:var(--k600)}
+.pc dd{margin:0;font-family:var(--mono);color:var(--k900)}
+.pc .note{padding:0 16px 16px;margin:0;font-size:13px;color:var(--k700);line-height:1.55}
+.ramp{display:grid;grid-template-columns:repeat(10,1fr);border-radius:4px;overflow:hidden;border:1px solid var(--k200);margin-bottom:8px}
+@media(max-width:760px){.ramp{grid-template-columns:repeat(5,1fr)}}
+.ramp button{border:0;padding:44px 8px 10px;text-align:left;cursor:pointer;font:500 11px/1.3 var(--mono);transition:transform 140ms var(--ease)}
+.ramp button span{display:block;font:600 10px/1.3 var(--display);letter-spacing:.1em;text-transform:uppercase;opacity:.85}
+.ramp button:hover{transform:translateY(-2px)}
+.rlabel{margin:24px 0 10px;font:600 11px/1.4 var(--display);text-transform:uppercase;letter-spacing:.16em;color:var(--k700)}
+.sem{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.sem button{display:flex;align-items:center;gap:12px;border:1px solid var(--k200);border-radius:4px;background:#fff;padding:10px;cursor:pointer;text-align:left;font:400 13px/1.4 var(--body);color:var(--k800)}
+.sem i{width:36px;height:36px;border-radius:3px;flex:none}
+.sem code{display:block;font:500 12px/1.4 var(--mono);color:var(--k600)}
+.hint2{font-size:12.5px;color:var(--k600);margin:10px 0 0}
+.types{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.tc{background:#fff;border:1px solid var(--k200);border-radius:4px;padding:24px;display:flex;flex-direction:column;gap:10px}
+.tc .big{font-size:56px;line-height:1;color:var(--k900)}
+.tc b{font:700 15px/1.3 var(--display);text-transform:uppercase;letter-spacing:.06em;color:var(--k900)}
+.tc p{margin:0;font-size:14px}
+.tc a{font-size:13px;color:var(--g700)}
+.scale{margin-top:28px;border:1px solid var(--k200);border-radius:4px;background:#fff}
+.scale div{display:grid;grid-template-columns:140px 1fr;gap:16px;align-items:baseline;padding:14px 20px;border-top:1px solid var(--k200)}
+.scale div:first-child{border-top:0}
+.scale code{font:500 12px/1.4 var(--mono);color:var(--k600)}
+.scale span{color:var(--k900);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.rule{background:#fff;border:1px solid var(--k200);border-radius:4px;padding:22px 24px}
+.rule h3{font-size:16px;font-weight:700;letter-spacing:.04em;margin-bottom:12px}
+.rule ul{margin:0;padding-left:18px;font-size:14px;line-height:1.65}
+.rule li{margin-bottom:6px}
+.rule .no{color:var(--danger)}
+.ex{font-style:italic;color:var(--k700)}
+footer{background:var(--k900);color:var(--k400);font-size:13px;padding:28px 0}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><symbol id="eg-head" viewBox="0 0 345.92 190.33"><path fill="currentColor" d="M0,35.87s40.31,39.02,168.4,35.17c128.09-3.85,173.84,81.37,173.84,81.37,0,0-74.93-65.41-159.94-67.51C97.28,82.82,42.68,80.09,0,35.87Z"></path><path fill="#76BD1D" d="M117.53,66.85s32.58,2.27,51.76,1.04c0,0-56.52-7.19-96.09-32.78,0,0,14.51,21.14,44.32,31.74Z"></path><path fill="#76BD1D" d="M35.04,67.24s29.79,14.84,67.38,17.07c0,0,22.57,11.59,69.71,12.64,0,0-93.43,12.5-137.09-29.71Z"></path><path fill="currentColor" d="M280.75,118.26c16.38,6.72,30.68,16.31,43.84,26,0,0-67.91-32.46-155.72-21.97,0,0,14.02,6.15,29.4,5.62,0,0-77.9,27.39-155-31.67,0,0,64.1,23.91,128.05,13.89,63.94-10.02,93.06,1.41,109.44,8.13Z"></path><path fill="#76BD1D" d="M105.34,0s47.37,33.91,104.14,45.98c40.57,8.63,79.09,41.54,79.09,41.54,0,0-16.5-3.62-21.25-.52,0,0-13.28-6.59-24.33-9.52,0,0-15.55-19.85-60.21-28.09C143.43,42.13,105.34,0,105.34,0Z"></path><path fill="currentColor" d="M114.48,12.34s23.44,21.93,39.54,29.83c0,0,2.34,9.44,23.54,18.46,0,0-43.44-12.15-63.07-48.29Z"></path><path fill="#76BD1D" d="M233.75,123.37s81.99,27.82,105.78,29.46c0,0,14.46,9.46-.11,37.5,0,0-.17-23.52-30.07-32.97-29.89-9.45-67.78-28.42-75.6-33.99Z"></path></symbol><symbol id="eg-lockup" viewBox="0 0 406.37 276.69"><path fill="currentColor" d="M25.5,237.31v-96.78h51.99v17.15h-34.05v22.79h32.61v17.15h-32.61v22.53h34.05v17.15H25.5Z"></path><path fill="currentColor" d="M160.91,237.31l-10.34-25.01h-34.44l-10.74,25.01h-19.77l40.33-96.78h14.15l40.59,96.78h-19.77ZM133.02,165.8l-10.35,29.33h20.69l-10.34-29.33Z"></path><path fill="currentColor" d="M233.6,239.01c-29.73,0-52.64-22-52.64-50.29s22.66-49.9,50.94-49.9c21.08,0,40.99,12.7,47.27,30.12h-21.09c-6.02-8.38-15.32-12.83-26.58-12.83-19.12,0-32.48,14.67-32.48,32.87s14.54,32.74,33.53,32.74c12.7,0,23.18-6.28,28.42-17.02h-40.07v-16.76h63.25v2.36c0,26.32-22,48.72-50.55,48.72Z"></path><path fill="currentColor" d="M353.56,237.31v-96.78h51.99v17.15h-34.05v22.79h32.61v17.15h-32.61v22.53h34.05v17.15h-51.99Z"></path><path fill="#76BD1D" d="M25.67,251.52c0-1.05.28-1.9.85-2.53.57-.63,1.42-.95,2.56-.95h8.2l.99,5.33h-6.3c-.34,0-.52.18-.52.55v16.99c0,.37.17.55.52.55h2.61v-11.3h5.59v16.52h-10.02c-1.66,0-2.83-.34-3.49-1.03-.66-.69-.99-1.82-.99-3.4v-20.74Z"></path><path fill="#76BD1D" d="M94.45,265.03c0,.63-.22,1.21-.65,1.74-.44.53-1.08.79-1.92.79l3.01,9.13h-5.94l-2.77-9.13h-.75v9.13h-5.75v-28.65h10.9c1.35,0,2.33.34,2.95,1.01.62.67.93,1.57.93,2.71v13.28ZM85.42,253.06v9.88h2.81c.37,0,.56-.2.56-.59v-8.69c0-.39-.19-.59-.56-.59h-2.81Z"></path><path fill="#76BD1D" d="M139.39,273.13l-.52,3.56h-5.79l5.19-28.65h6.14l5.19,28.65h-5.78l-.52-3.56h-3.92ZM140.02,268.59h2.65l-1.31-10.15-1.35,10.15Z"></path><path fill="#76BD1D" d="M199.73,248.04c1.14,0,1.99.32,2.56.95.57.63.85,1.48.85,2.53v13.71c0,.55-.06,1.06-.18,1.52-.12.46-.34.86-.65,1.21-.32.34-.74.61-1.27.81-.53.2-1.19.3-1.98.3h-4.91v7.63h-5.71v-28.65h11.29ZM194.15,253.06v11.26h2.85c.24,0,.39-.04.46-.14.07-.09.1-.24.1-.45v-10.11c0-.37-.17-.55-.52-.55h-2.89Z"></path><path fill="#76BD1D" d="M257.5,276.69h-5.86v-11.46h-3.13v11.46h-5.86v-28.65h5.86v12.25h3.13v-12.25h5.86v28.65Z"></path><path fill="#76BD1D" d="M297.13,248.04h5.75v28.65h-5.75v-28.65Z"></path><path fill="#76BD1D" d="M346.97,276.69c-1.66,0-2.83-.34-3.49-1.03-.66-.69-.99-1.82-.99-3.4v-20.7c0-1.13.32-2,.97-2.61.65-.6,1.45-.91,2.4-.91h7.57l.99,5.33h-5.51c-.34,0-.52.18-.52.55v16.87c0,.37.17.55.52.55h5.51l-1.03,5.33h-6.42Z"></path><path fill="#76BD1D" d="M394.88,276.69l-1.03-5.33h6.18c.45,0,.67-.2.67-.59v-5.22c0-.39-.08-.63-.24-.71-.16-.08-.44-.12-.83-.12h-2.97c-.42,0-.82-.03-1.21-.1-.38-.07-.73-.22-1.03-.45-.3-.24-.54-.57-.71-.99-.17-.42-.26-.99-.26-1.7v-9.72c0-1.13.31-2.03.93-2.71.62-.67,1.61-1.01,2.95-1.01h7.93l.99,5.33h-6.5c-.47,0-.71.21-.71.63v5.21c0,.29.07.49.22.59.14.11.36.16.65.16h3.61c.92,0,1.63.22,2.12.65.49.43.73,1.19.73,2.27v9.44c0,1.58-.32,2.7-.97,3.36-.65.66-1.79.99-3.43.99h-7.09Z"></path><polygon fill="currentColor" points="313.88 220.15 313.88 158.64 295.94 148.79 295.94 237.31 343.48 237.31 343.48 220.15 313.88 220.15"></polygon><path fill="currentColor" d="M0,35.87s40.31,39.02,168.4,35.17c128.09-3.85,173.84,81.37,173.84,81.37,0,0-74.93-65.41-159.94-67.51C97.28,82.82,42.68,80.09,0,35.87Z"></path><path fill="#76BD1D" d="M117.53,66.85s32.58,2.27,51.76,1.04c0,0-56.52-7.19-96.09-32.78,0,0,14.51,21.14,44.32,31.74Z"></path><path fill="#76BD1D" d="M35.04,67.24s29.79,14.84,67.38,17.07c0,0,22.57,11.59,69.71,12.64,0,0-93.43,12.5-137.09-29.71Z"></path><path fill="currentColor" d="M280.75,118.26c16.38,6.72,30.68,16.31,43.84,26,0,0-67.91-32.46-155.72-21.97,0,0,14.02,6.15,29.4,5.62,0,0-77.9,27.39-155-31.67,0,0,64.1,23.91,128.05,13.89,63.94-10.02,93.06,1.41,109.44,8.13Z"></path><path fill="#76BD1D" d="M105.34,0s47.37,33.91,104.14,45.98c40.57,8.63,79.09,41.54,79.09,41.54,0,0-16.5-3.62-21.25-.52,0,0-13.28-6.59-24.33-9.52,0,0-15.55-19.85-60.21-28.09C143.43,42.13,105.34,0,105.34,0Z"></path><path fill="currentColor" d="M114.48,12.34s23.44,21.93,39.54,29.83c0,0,2.34,9.44,23.54,18.46,0,0-43.44-12.15-63.07-48.29Z"></path><path fill="#76BD1D" d="M233.75,123.37s81.99,27.82,105.78,29.46c0,0,14.46,9.46-.11,37.5,0,0-.17-23.52-30.07-32.97-29.89-9.45-67.78-28.42-75.6-33.99Z"></path></symbol></defs></svg>
+<header class="top"><div class="c">
+  <a class="brand" href="/" aria-label="Back to Project Hub"><svg viewBox="0 0 406.37 276.69" style="color:#53585a" role="img" aria-label="Eagle Graphics"><use href="#eg-lockup"/></svg><span>Project Hub</span></a>
+  <a class="back" href="/">All Tools</a>
+</div></header>
+
+<div class="hero"><div class="c">
+  <svg class="wm" viewBox="0 0 345.92 190.33" aria-hidden="true"><use href="#eg-head"/></svg>
+  <span class="eyebrow">Eagle Graphics Design System</span>
+  <h1>Brand Guide</h1>
+  <div class="bar"></div>
+  <p>Logos, colors, type and writing rules for anything with the Eagle name on it. Download what you need, and click any color to copy its code.</p>
+  <nav class="jump" aria-label="Sections"><a href="#logos">Logos</a><a href="#color">Color</a><a href="#type">Type</a><a href="#rules">Rules</a></nav>
+</div></div>
+
+<section class="band" id="logos"><div class="c">
+  <div class="sh"><div><span class="eyebrow">Brand Mark</span><h2>Logos</h2><div class="bar"></div></div><p>SVG for print and design work, PNG (transparent, 2000px wide) for Word, PowerPoint and email.</p></div>
+  <div class="logos" id="logoGrid"></div>
+</div></section>
+
+<section class="band alt" id="color"><div class="c">
+  <div class="sh"><div><span class="eyebrow">Palette</span><h2>Color</h2><div class="bar"></div></div><p>Green is the highlight, about 10% of a layout. Grey carries the structure. Click a swatch to copy its hex code.</p></div>
+  <div class="pri">
+    <div class="pc"><div class="sw" style="background:#76bd1d">Eagle Green</div>
+      <dl><dt>HEX</dt><dd>#76BD1D</dd><dt>PMS</dt><dd>368</dd><dt>CMYK</dt><dd>59 / 2 / 100 / 0</dd><dt>RGB</dt><dd>119 / 188 / 31</dd></dl>
+      <p class="note">Accents, keylines, underscores, icons. Too light for white text: buttons with white text use the darker Green 700 (#4A7812).</p></div>
+    <div class="pc"><div class="sw" style="background:#53585a">Eagle Grey</div>
+      <dl><dt>HEX</dt><dd>#53585A</dd><dt>PMS</dt><dd>425</dd><dt>CMYK</dt><dd>65 / 56 / 53 / 29</dd><dt>RGB</dt><dd>85 / 87 / 89</dd></dl>
+      <p class="note">Body text, secondary UI and dividers. Headings and dark bands use Grey 900 (#2A2D2E). Pure black is never a background.</p></div>
+  </div>
+  <p class="rlabel">Green Ramp</p><div class="ramp" id="rampG"></div>
+  <p class="rlabel">Grey Ramp</p><div class="ramp" id="rampK"></div>
+  <p class="rlabel">Status Colors</p><div class="sem" id="sem"></div>
+  <p class="hint2">Status colors are for messages (saved, warning, error). Success is a different green from the brand on purpose.</p>
+</div></section>
+
+<section class="band" id="type"><div class="c">
+  <div class="sh"><div><span class="eyebrow">Typography</span><h2>Type</h2><div class="bar"></div></div><p>All three are free Google Fonts. The logo's own lettering is a licensed face used only in the logo.</p></div>
+  <div class="types">
+    <div class="tc"><span class="big" style="font:800 56px/1 var(--display);text-transform:uppercase">Aa</span><b>Jost</b><p>Headings, eyebrows and buttons. Headings are always uppercase, bold to extra bold.</p><a href="https://fonts.google.com/specimen/Jost" target="_blank" rel="noopener">Get Jost on Google Fonts</a></div>
+    <div class="tc"><span class="big" style="font:400 56px/1 var(--body)">Aa</span><b>Open Sans</b><p>Body copy in sentence case. Regular, semibold and bold.</p><a href="https://fonts.google.com/specimen/Open+Sans" target="_blank" rel="noopener">Get Open Sans on Google Fonts</a></div>
+    <div class="tc"><span class="big" style="font:500 56px/1 var(--mono)">Aa</span><b>IBM Plex Mono</b><p>SKUs, item numbers, quantities and decorating specs.</p><a href="https://fonts.google.com/specimen/IBM+Plex+Mono" target="_blank" rel="noopener">Get IBM Plex Mono on Google Fonts</a></div>
+  </div>
+  <div class="scale">
+    <div><code>Hero · 66 / 800</code><span style="font:800 44px/1.05 var(--display);text-transform:uppercase">Team &amp; Spirit Apparel</span></div>
+    <div><code>H2 · 40 / 700</code><span style="font:700 32px/1.2 var(--display);text-transform:uppercase">Company Stores &amp; Rewards</span></div>
+    <div><code>H3 · 26 / 700</code><span style="font:700 24px/1.2 var(--display);text-transform:uppercase">Access to Thousands of Suppliers!</span></div>
+    <div><code>Eyebrow · 12 / 600</code><span style="font:600 12px/1.5 var(--display);text-transform:uppercase;letter-spacing:.18em;color:var(--g700)">Corporate Branding</span></div>
+    <div><code>Body · 16 / 400</code><span style="font:400 16px/1.7 var(--body)">We are your direct source for screen printing, embroidery and promotional products.</span></div>
+    <div><code>Mono · 14 / 400</code><span style="font:400 14px/1.5 var(--mono)">PC54 · Navy · 2XL · Qty 24</span></div>
+  </div>
+</div></section>
+
+<section class="band alt" id="rules"><div class="c">
+  <div class="sh"><div><span class="eyebrow">Usage</span><h2>Rules</h2><div class="bar"></div></div><p>The short list. These keep everything looking and sounding like one company.</p></div>
+  <div class="rules">
+    <div class="rule"><h3>Logo</h3><ul>
+      <li>Give it clear space equal to the height of the "E" on all sides.</li>
+      <li>Keep the full logo at least 120px wide on screen.</li>
+      <li>Green and grey on light backgrounds, green and white on dark backgrounds or photos.</li>
+      <li>The eagle head alone works for icons and watermarks (4–8% opacity).</li>
+      <li class="no">Never stretch it, re-space the letters, add shadows or glows, or put the green version on green.</li>
+    </ul></div>
+    <div class="rule"><h3>Color &amp; Layout</h3><ul>
+      <li>Alternate backgrounds white, light grey, dark grey down a page.</li>
+      <li>Green is for accents and CTA bands, never a full-page background.</li>
+      <li>Corners stay squared: 2–6px, nothing soft and bubbly.</li>
+      <li>The 3px green underline under a heading is our signature detail.</li>
+      <li class="no">No brand-color gradients, patterns or textures.</li>
+    </ul></div>
+    <div class="rule"><h3>Voice</h3><ul>
+      <li>"We" for Eagle, "you" for the client. Not "customers" in body copy.</li>
+      <li>Hero headlines in ALL CAPS, section headings in Title Case, body in sentence case.</li>
+      <li>Ampersands over "and" in headings and navigation: <span class="ex">Signs &amp; Trade Show Displays</span>.</li>
+      <li>One exclamation point per block, at most: <span class="ex">Call us today!</span></li>
+      <li>Short CTAs: <span class="ex">Request Demo</span>, <span class="ex">Get Your Demo</span>.</li>
+      <li class="no">No emoji. No "platform", "seamless", "leverage" or "empower".</li>
+    </ul></div>
+  </div>
+</div></section>
+
+<footer><div class="c">Eagle Graphics Design System · Internal use only</div></footer>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+function toast(t){const e=$("toast");e.textContent=t;e.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("on"),1600)}
+async function copy(hex){try{await navigator.clipboard.writeText(hex)}catch{const a=document.createElement("textarea");a.value=hex;document.body.appendChild(a);a.select();document.execCommand("copy");a.remove()}toast("Copied "+hex)}
+const LOGOS=[
+ ["logo-lockup-green-grey","Full Logo · Green & Grey","Primary. White and light backgrounds.","#fff"],
+ ["logo-lockup-green-white","Full Logo · Green & White","Dark backgrounds and photos.","#2a2d2e"],
+ ["logo-lockup-white","Full Logo · White","One color on green, photos or dark grey.","#4a7812"],
+ ["logo-lockup-black","Full Logo · Black","One-color print and single-ink decorating.","#fff"],
+ ["eagle-head-green-grey","Eagle Head · Green & Grey","Icons, favicons and small spaces on light backgrounds.","#fff"],
+ ["eagle-head-green-white","Eagle Head · Green & White","Icons on dark backgrounds.","#2a2d2e"],
+ ["eagle-head-white","Eagle Head · White","Watermarks and one-color reversed use.","#4a7812"],
+ ["eagle-head-black","Eagle Head · Black","One-color print.","#fff"]];
+$("logoGrid").innerHTML=LOGOS.map(([f,n,d,bg])=>`<div class="logo"><div class="pv" style="background:${bg}"><img src="/brand/${f}.svg" alt="${n}"></div><div class="lb"><div><b>${n}</b><small>${d}</small></div><div class="dl"><a class="btn" href="/brand/${f}.svg" download>SVG</a><a class="btn" href="/brand/${f}.png" download>PNG</a></div></div></div>`).join("");
+const G=[["50","#f5fbec"],["100","#e9f6d6"],["200","#d1ebac"],["300","#b2dd79"],["400","#94cf4a"],["500","#76bd1d"],["600","#5f9a17"],["700","#4a7812"],["800","#365711"],["900","#20340a"]];
+const K=[["50","#f7f8f8"],["100","#f0f1f2"],["200","#e1e3e4"],["300","#c5c8c9"],["400","#9ca0a2"],["500","#7d8183"],["600","#63676a"],["700","#53585a"],["800","#3a3e40"],["900","#2a2d2e"]];
+const ramp=(id,list,darkFrom)=>$(id).innerHTML=list.map(([s,h],i)=>`<button type="button" data-hex="${h.toUpperCase()}" style="background:${h};color:${i>=darkFrom?"#fff":"#2a2d2e"}" title="Copy ${h.toUpperCase()}"><span>${s}</span>${h.toUpperCase()}</button>`).join("");
+ramp("rampG",G,6);ramp("rampK",K,5);
+const S=[["Success","#1f8a4c"],["Success Background","#e4f3ea"],["Warning","#d98800"],["Warning Background","#fdf1dc"],["Danger","#c0392b"],["Danger Background","#fae6e3"],["Info","#2a6fa8"],["Info Background","#e5eef6"]];
+$("sem").innerHTML=S.map(([n,h])=>`<button type="button" data-hex="${h.toUpperCase()}"><i style="background:${h};border:1px solid rgba(0,0,0,.06)"></i><span>${n}<code>${h.toUpperCase()}</code></span></button>`).join("");
+document.addEventListener("click",e=>{const b=e.target.closest("[data-hex]");if(b)copy(b.dataset.hex)});
+</script>
+</body>
+</html>

@@ -1,0 +1,1751 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eagle Graphics — Customer Inventory Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700;800&family=Open+Sans:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   EAGLE GRAPHICS DESIGN TOKENS
+   ============================================================ */
+:root{
+  --eg-green-50:#f5fbec; --eg-green-100:#e9f6d6; --eg-green-200:#d1ebac; --eg-green-300:#b2dd79;
+  --eg-green-400:#94cf4a; --eg-green-500:#76bd1d; --eg-green-600:#5f9a17; --eg-green-700:#4a7812;
+  --eg-green-800:#365711; --eg-green-900:#20340a;
+  --eg-grey-50:#f7f8f8; --eg-grey-100:#f0f1f2; --eg-grey-200:#e1e3e4; --eg-grey-300:#c5c8c9;
+  --eg-grey-400:#9ca0a2; --eg-grey-500:#7d8183; --eg-grey-600:#63676a; --eg-grey-700:#53585a;
+  --eg-grey-800:#3a3e40; --eg-grey-900:#2a2d2e;
+  --eg-black:#141516; --eg-white:#ffffff;
+  --eg-success:#1f8a4c; --eg-success-bg:#e4f3ea;
+  --eg-warning:#d98800; --eg-warning-bg:#fdf1dc;
+  --eg-danger:#c0392b; --eg-danger-bg:#fae6e3;
+  --eg-info:#2a6fa8; --eg-info-bg:#e5eef6;
+
+  --brand-fill:var(--eg-green-700); --brand-fill-hover:var(--eg-green-800); --brand-fill-press:var(--eg-green-900);
+  --brand-indicator:var(--eg-green-600); --brand-tint:var(--eg-green-100); --brand-ink:var(--eg-green-800);
+
+  --text-heading:var(--eg-grey-900); --text-body:var(--eg-grey-700); --text-muted:var(--eg-grey-600);
+  --text-inverse:var(--eg-white); --text-brand:var(--eg-green-700); --text-link:var(--eg-green-700);
+
+  --surface-page:var(--eg-white); --surface-sunken:var(--eg-grey-100); --surface-card:var(--eg-white);
+  --surface-inverse:var(--eg-grey-900); --surface-brand:var(--eg-green-500);
+  --surface-overlay:rgba(20,21,22,.62);
+
+  --border-subtle:var(--eg-grey-200); --border-default:var(--eg-grey-300); --border-strong:var(--eg-grey-500);
+  --border-brand:var(--eg-green-600);
+  --focus-ring:rgba(118,189,29,.40);
+
+  --font-display:"Jost","Century Gothic","Futura",system-ui,sans-serif;
+  --font-body:"Open Sans","Helvetica Neue",Arial,sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+
+  --radius-xs:2px; --radius-sm:3px; --radius-md:4px; --radius-lg:6px; --radius-pill:999px;
+  --radius-control:3px; --radius-card:4px; --radius-media:2px;
+
+  --shadow-xs:0 1px 2px rgba(20,21,22,.06);
+  --shadow-sm:0 1px 3px rgba(20,21,22,.10);
+  --shadow-md:0 3px 10px rgba(20,21,22,.10);
+  --shadow-lg:0 10px 28px rgba(20,21,22,.14);
+  --shadow-modal:0 24px 60px rgba(20,21,22,.28);
+
+  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px; --space-5:20px; --space-6:24px;
+  --space-8:32px; --space-10:40px; --space-12:48px; --space-16:64px; --space-20:80px;
+
+  --container-max:1240px;
+
+  /* Per-customer accent — overridden at runtime, defaults to Eagle green */
+  --accent-500:var(--eg-green-500);
+  --accent-600:var(--eg-green-600);
+  --accent-700:var(--eg-green-700);
+  --accent-800:var(--eg-green-800);
+  --accent-100:var(--eg-green-100);
+  --accent-on:var(--eg-white);
+  --accent-2:var(--eg-grey-700);
+}
+
+*,*::before,*::after{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--surface-sunken);
+  color:var(--text-body);
+  font-family:var(--font-body);
+  font-size:16px;
+  line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{
+  font-family:var(--font-display);
+  color:var(--text-heading);
+  margin:0;
+  letter-spacing:-0.01em;
+}
+p{margin:0 0 var(--space-4);}
+button,input,select{font-family:inherit;font-size:inherit;color:inherit;}
+a{color:var(--text-link);}
+table{border-collapse:collapse;width:100%;}
+img{max-width:100%;display:block;}
+
+.eyebrow{
+  font-family:var(--font-display);
+  font-weight:600;
+  font-size:12px;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  color:var(--text-muted);
+}
+.underscore{
+  width:48px; height:3px; background:var(--accent-500); border:0; margin:var(--space-2) 0 var(--space-4);
+}
+.underscore.accent2{ background:linear-gradient(to right, var(--accent-500) 50%, var(--accent-2) 50%); }
+
+.container{max-width:var(--container-max); margin:0 auto; padding:0 var(--space-6);}
+
+:focus-visible{
+  outline:3px solid var(--focus-ring);
+  outline-offset:2px;
+  border-radius:var(--radius-xs);
+}
+
+/* ---------- Buttons ---------- */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:var(--space-2);
+  height:var(--control-h-md,42px);
+  padding:0 var(--space-5);
+  border-radius:var(--radius-control);
+  border:1px solid transparent;
+  font-family:var(--font-body); font-weight:700; font-size:14px;
+  cursor:pointer;
+  transition:background-color 140ms cubic-bezier(.4,0,.2,1), color 140ms cubic-bezier(.4,0,.2,1), border-color 140ms cubic-bezier(.4,0,.2,1), transform 140ms cubic-bezier(.4,0,.2,1);
+  white-space:nowrap;
+}
+.btn-primary{ background:var(--brand-fill); color:#fff; }
+.btn-primary:hover{ background:var(--brand-fill-hover); }
+.btn-primary:active{ background:var(--brand-fill-press); transform:translateY(1px); }
+.btn-primary:disabled{ background:var(--eg-grey-200); color:var(--eg-grey-400); cursor:not-allowed; }
+
+.btn-outline{ background:transparent; color:var(--eg-grey-800); border-color:var(--border-default); }
+.btn-outline:hover{ background:var(--eg-grey-100); border-color:var(--border-strong); }
+.btn-outline:active{ transform:translateY(1px); }
+
+.btn-ghost{ background:transparent; color:var(--text-muted); border-color:transparent; height:36px; padding:0 var(--space-3); font-weight:600; }
+.btn-ghost:hover{ color:var(--text-heading); background:var(--eg-grey-100); }
+
+.btn-sm{ height:32px; padding:0 var(--space-3); font-size:13px; }
+
+/* ---------- Icons (hand-drawn, outline, 2px stroke — Lucide-style substitution) ---------- */
+.icon{ width:20px; height:20px; stroke:currentColor; stroke-width:2; fill:none; stroke-linecap:round; stroke-linejoin:round; flex:none; }
+.icon-sm{ width:16px; height:16px; }
+.icon-lg{ width:28px; height:28px; }
+
+/* ---------- Cards ---------- */
+.card{
+  background:var(--surface-card);
+  border:1px solid var(--border-subtle);
+  border-radius:var(--radius-card);
+  box-shadow:var(--shadow-none,none);
+}
+
+/* ---------- Badges / tier pills ---------- */
+.badge{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:4px 10px;
+  border-radius:var(--radius-pill);
+  font-weight:700; font-size:12px;
+  letter-spacing:0.02em;
+  white-space:nowrap;
+}
+.badge .icon{width:13px;height:13px;}
+.badge-critical{ background:var(--eg-danger-bg); color:var(--eg-danger); }
+.badge-watch{ background:var(--eg-warning-bg); color:var(--eg-warning); }
+.badge-healthy{ background:var(--eg-success-bg); color:var(--eg-success); }
+.badge-neutral{ background:var(--eg-grey-100); color:var(--eg-grey-600); }
+.badge-info{ background:var(--eg-info-bg); color:var(--eg-info); }
+
+.trend-up{ color:var(--eg-success); }
+.trend-down{ color:var(--eg-danger); }
+.trend-flat{ color:var(--text-muted); }
+
+/* ============================================================
+   APP SHELL
+   ============================================================ */
+#app{min-height:100vh;}
+
+/* ---------- Setup screen ---------- */
+.setup-wrap{
+  max-width:760px; margin:0 auto; padding:var(--space-16) var(--space-6) var(--space-20);
+}
+.setup-header{ text-align:center; margin-bottom:var(--space-12); }
+.setup-header .mark{ height:56px; margin:0 auto var(--space-5); }
+.setup-header h1{
+  font-size:34px; font-weight:800; text-transform:uppercase; line-height:1.1; margin-bottom:var(--space-2);
+}
+.setup-header .sub{ color:var(--text-muted); font-size:16px; }
+
+.step-card{
+  background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-card);
+  padding:var(--space-6); margin-bottom:var(--space-5);
+}
+.step-head{ display:flex; align-items:center; gap:var(--space-3); margin-bottom:var(--space-4); }
+.step-num{
+  width:28px; height:28px; border-radius:50%; background:var(--eg-grey-900); color:#fff;
+  display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-weight:700; font-size:14px; flex:none;
+}
+.step-card.done .step-num{ background:var(--eg-success); }
+.step-title{ font-family:var(--font-display); font-weight:700; font-size:18px; text-transform:uppercase; letter-spacing:0.01em; }
+.step-hint{ color:var(--text-muted); font-size:13px; margin-top:2px; }
+
+.field label{ display:block; font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px; }
+.field input[type=text],.field input[type=url],.field select{
+  width:100%; height:42px; border:1px solid var(--border-default); border-radius:var(--radius-control);
+  padding:0 var(--space-3); background:#fff; color:var(--text-heading);
+}
+.field select{ font-weight:600; cursor:pointer; }
+.field select:disabled{ color:var(--text-muted); cursor:wait; }
+.field input:focus,.field select:focus{ border-color:var(--border-brand); }
+
+.dropzone{
+  border:2px dashed var(--border-default); border-radius:var(--radius-card);
+  padding:var(--space-8) var(--space-4); text-align:center; cursor:pointer;
+  transition:border-color 140ms, background-color 140ms;
+  background:var(--surface-sunken);
+}
+.dropzone:hover,.dropzone.drag{ border-color:var(--brand-indicator); background:var(--accent-100,var(--eg-green-50)); }
+.dropzone .icon{ width:32px; height:32px; margin:0 auto var(--space-2); color:var(--text-muted); }
+.dropzone .dz-title{ font-weight:700; color:var(--text-heading); margin-bottom:2px; }
+.dropzone .dz-sub{ font-size:13px; color:var(--text-muted); }
+.dropzone input[type=file]{ display:none; }
+
+.file-chip{
+  display:flex; align-items:center; gap:var(--space-2); justify-content:space-between;
+  background:var(--eg-success-bg); border:1px solid transparent; border-radius:var(--radius-control);
+  padding:var(--space-3); margin-top:var(--space-3); font-size:13px;
+}
+.file-chip .name{ font-weight:700; color:var(--eg-grey-900); display:flex; align-items:center; gap:8px; min-width:0; }
+.file-chip .name span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.file-chip .icon{ color:var(--eg-success); flex:none; }
+.file-chip button{ background:none; border:0; color:var(--text-muted); cursor:pointer; padding:4px; }
+.file-chip button:hover{ color:var(--eg-danger); }
+
+.inline-error{
+  display:flex; gap:8px; align-items:flex-start; background:var(--eg-danger-bg); color:var(--eg-danger);
+  border-radius:var(--radius-control); padding:var(--space-3); font-size:13px; margin-top:var(--space-3);
+}
+.inline-error .icon{ flex:none; margin-top:1px; }
+.inline-note{
+  display:flex; gap:8px; align-items:flex-start; background:var(--eg-info-bg); color:var(--eg-info);
+  border-radius:var(--radius-control); padding:var(--space-3); font-size:13px; margin-top:var(--space-3);
+}
+.inline-note .icon{ flex:none; margin-top:1px; }
+
+.brand-toggle{
+  display:flex; align-items:center; gap:8px; cursor:pointer; font-size:13px; font-weight:700; color:var(--text-muted);
+  margin-bottom:var(--space-3); user-select:none;
+}
+.brand-toggle .icon{ transition:transform 140ms; }
+.brand-toggle.open .icon{ transform:rotate(90deg); }
+.brand-settings{ display:none; }
+.brand-settings.open{ display:block; }
+
+.brand-preview{
+  display:flex; align-items:center; gap:var(--space-3); margin-top:var(--space-4);
+  padding:var(--space-3); border-radius:var(--radius-control); background:var(--surface-sunken);
+}
+.brand-preview .swatch-row{ display:flex; gap:6px; }
+.swatch{ width:22px; height:22px; border-radius:50%; border:1px solid rgba(0,0,0,.08); flex:none; }
+.brand-preview .logo-thumb{ width:40px; height:40px; object-fit:contain; background:#fff; border-radius:var(--radius-xs); border:1px solid var(--border-subtle); padding:4px; flex:none; }
+.brand-preview .meta{ font-size:13px; }
+.brand-preview .meta .cust{ font-weight:700; color:var(--text-heading); }
+.brand-preview .meta .note{ color:var(--text-muted); font-size:12px; }
+
+.generate-row{ display:flex; justify-content:center; margin-top:var(--space-6); }
+.generate-row .btn{ height:52px; padding:0 var(--space-10); font-size:15px; }
+
+/* ============================================================
+   REPORT SCREEN
+   ============================================================ */
+.report-toolbar{
+  position:sticky; top:0; z-index:20;
+  background:rgba(255,255,255,.96); backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--border-subtle);
+}
+.report-toolbar .inner{
+  max-width:var(--container-max); margin:0 auto; padding:var(--space-3) var(--space-6);
+  display:flex; align-items:center; justify-content:space-between; gap:var(--space-4); flex-wrap:wrap;
+}
+.toolbar-left{ display:flex; align-items:center; gap:var(--space-3); min-width:0; }
+.toolbar-left .eg-mark{ height:26px; flex:none; }
+.toolbar-left .divider{ width:1px; height:22px; background:var(--border-subtle); }
+.toolbar-left .cust-name{ font-family:var(--font-display); font-weight:700; font-size:15px; color:var(--text-heading); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.toolbar-right{ display:flex; align-items:center; gap:var(--space-2); }
+
+.cost-toggle{ display:flex; align-items:center; gap:8px; font-size:13px; font-weight:700; color:var(--text-muted); cursor:pointer; user-select:none; }
+.switch{ width:36px; height:20px; border-radius:999px; background:var(--eg-grey-300); position:relative; transition:background-color 140ms; flex:none; }
+.switch::after{ content:""; position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%; background:#fff; transition:transform 140ms; box-shadow:var(--shadow-xs); }
+.cost-toggle.on .switch{ background:var(--brand-indicator); }
+.cost-toggle.on .switch::after{ transform:translateX(16px); }
+
+.report-header{ padding:var(--space-8) 0 var(--space-6); }
+.report-header .top-row{ display:flex; justify-content:space-between; align-items:center; gap:var(--space-6); flex-wrap:wrap; }
+.brand-block{ display:flex; align-items:center; gap:var(--space-5); }
+.brand-block .cust-logo{ max-height:92px; max-width:240px; object-fit:contain; }
+.brand-block .eg-x{ color:var(--text-muted); font-size:22px; font-weight:300; }
+.brand-block .eg-logo{ width:120px; height:auto; flex:none; }
+.header-titles h1{ font-size:30px; font-weight:800; text-transform:uppercase; }
+.header-titles .eyebrow{ margin-bottom:4px; }
+.report-meta{ text-align:right; font-size:13px; color:var(--text-muted); }
+.report-meta div{ margin-bottom:2px; }
+.report-meta b{ color:var(--text-heading); }
+.header-underscore{ height:3px; margin-top:var(--space-6); background:linear-gradient(to right, var(--accent-500), var(--accent-500) 48px, var(--border-subtle) 48px); }
+
+/* ---------- Summary stat grid ---------- */
+.stat-grid{
+  display:grid; grid-template-columns:repeat(5,1fr); gap:var(--space-4);
+  margin:var(--space-6) 0 var(--space-10);
+}
+.stat-card{
+  background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:var(--radius-card);
+  padding:var(--space-5);
+}
+.stat-card .label{ font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px; }
+.stat-card .value{ font-family:var(--font-display); font-weight:800; font-size:28px; color:var(--text-heading); line-height:1; }
+.stat-card .value.cost-only{ display:none; }
+.cost-visible .stat-card .value.cost-only{ display:block; }
+.cost-visible .stat-card .value.base-only{ display:none; }
+.stat-card.tier-critical .value{ color:var(--eg-danger); }
+.stat-card.tier-watch .value{ color:var(--eg-warning); }
+.stat-card.tier-healthy .value{ color:var(--eg-success); }
+.stat-card .sub{ font-size:12px; color:var(--text-muted); margin-top:4px; }
+
+/* ---------- Section heading device ---------- */
+.section{ margin-bottom:var(--space-12); }
+.section-head{ margin-bottom:var(--space-5); }
+.section-head h2{ font-size:24px; font-weight:700; text-transform:uppercase; }
+.section-head .eyebrow{ margin-bottom:2px; }
+.section-head .count{ color:var(--text-muted); font-family:var(--font-body); font-weight:400; font-size:15px; text-transform:none; letter-spacing:0; }
+
+/* ---------- Priority list (reorder + slow movers) ---------- */
+.priority-list{ display:flex; flex-direction:column; gap:var(--space-3); }
+.priority-row{
+  display:grid; grid-template-columns:auto 1fr auto auto auto; align-items:center; gap:var(--space-4);
+  background:#fff; border:1px solid var(--border-subtle); border-left:4px solid var(--eg-grey-300);
+  border-radius:var(--radius-card); padding:var(--space-4) var(--space-5);
+}
+.priority-row.critical{ border-left-color:var(--eg-danger); }
+.priority-row.watch{ border-left-color:var(--eg-warning); }
+.priority-row.slow{ border-left-color:var(--eg-grey-500); }
+.priority-row .pname{ font-weight:700; color:var(--text-heading); font-size:14px; }
+.priority-row .pmeta{ font-size:12px; color:var(--text-muted); margin-top:2px; }
+.priority-row .pmeta code{ font-family:var(--font-mono); background:var(--eg-grey-100); padding:1px 5px; border-radius:2px; font-size:11px; }
+.priority-row .pstat{ text-align:right; min-width:92px; }
+.priority-row .pstat .n{ font-family:var(--font-mono); font-weight:600; font-size:14px; color:var(--text-heading); }
+.priority-row .pstat .l{ font-size:10px; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted); }
+
+.empty-state{
+  text-align:center; padding:var(--space-10); color:var(--text-muted); font-size:14px;
+  background:var(--surface-sunken); border-radius:var(--radius-card); border:1px dashed var(--border-default);
+}
+.empty-state .icon{ width:28px;height:28px; margin:0 auto var(--space-2); color:var(--eg-success); }
+
+/* ---------- Integrity callout ---------- */
+.integrity-banner{
+  display:flex; align-items:flex-start; gap:var(--space-3); background:var(--eg-warning-bg); color:var(--eg-grey-900);
+  border:1px solid rgba(217,136,0,.3); border-radius:var(--radius-card); padding:var(--space-4) var(--space-5);
+  margin-bottom:var(--space-10); font-size:14px;
+}
+.integrity-banner .icon{ color:var(--eg-warning); flex:none; margin-top:2px; }
+.integrity-banner b{ color:var(--text-heading); }
+
+/* ---------- Table controls ---------- */
+.table-controls{
+  display:flex; align-items:center; gap:var(--space-3); margin-bottom:var(--space-4); flex-wrap:wrap;
+}
+.search-box{ position:relative; flex:1; min-width:220px; }
+.search-box .icon{ position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted); }
+.search-box input{
+  width:100%; height:40px; border:1px solid var(--border-default); border-radius:var(--radius-control);
+  padding:0 var(--space-3) 0 38px; background:#fff;
+}
+.search-box input:focus{ border-color:var(--border-brand); }
+.table-controls select{
+  height:40px; border:1px solid var(--border-default); border-radius:var(--radius-control);
+  padding:0 var(--space-3); background:#fff; font-weight:600; font-size:13px;
+}
+.chk-label{ display:flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:var(--text-muted); white-space:nowrap; cursor:pointer; }
+.chk-label input{ width:16px; height:16px; accent-color:var(--brand-indicator); }
+.result-count{ font-size:12px; color:var(--text-muted); margin-left:auto; white-space:nowrap; }
+
+/* ---------- Main table ---------- */
+.table-scroll{ overflow-x:auto; border:1px solid var(--border-subtle); border-radius:var(--radius-card); }
+table.inv-table{ font-size:12px; width:100%; min-width:0; table-layout:auto; }
+.inv-table thead th{
+  position:sticky; top:0; background:var(--eg-grey-900); color:#fff; z-index:2;
+  text-align:left; padding:8px 6px; font-size:10px; font-weight:600; letter-spacing:0.02em; text-transform:uppercase;
+  white-space:nowrap; cursor:pointer; user-select:none; border-bottom:1px solid var(--eg-grey-900);
+}
+.inv-table thead th:hover{ background:var(--eg-grey-800); }
+.inv-table thead th .arrow{ opacity:0.4; margin-left:3px; font-size:9px; }
+.inv-table thead th.sorted .arrow{ opacity:1; }
+.inv-table thead th.num,.inv-table td.num{ text-align:right; }
+.inv-table tbody td{ padding:6px 6px; border-bottom:1px solid var(--border-subtle); vertical-align:middle; white-space:nowrap; }
+.inv-table tbody tr:nth-child(even){ background:var(--eg-grey-50); }
+.inv-table tbody tr:hover{ background:var(--accent-100,var(--eg-green-50)); }
+.inv-table td.name-cell{ white-space:normal; min-width:150px; }
+.inv-table td.name-cell .pname{ font-weight:700; color:var(--text-heading); }
+.inv-table td.name-cell .pvariant{ font-size:11px; color:var(--text-muted); }
+.inv-table td.mono{ font-family:var(--font-mono); font-size:12px; color:var(--text-muted); }
+.inv-table td.col-cost{ display:none; }
+.cost-visible .inv-table td.col-cost,.cost-visible .inv-table th.col-cost{ display:table-cell; }
+.inv-table th.col-cost{ display:none; }
+.integrity-flag{ color:var(--eg-warning); display:inline-flex; vertical-align:middle; margin-left:4px; }
+
+/* ---------- Footer ---------- */
+.report-footer{
+  margin-top:var(--space-16); padding:var(--space-8) 0; border-top:1px solid var(--border-subtle);
+  display:flex; justify-content:space-between; align-items:center; gap:var(--space-4); flex-wrap:wrap;
+}
+.report-footer .eg-logo{ width:88px; height:auto; flex:none; }
+.report-footer .fine{ font-size:12px; color:var(--text-muted); text-align:right; }
+
+/* ============================================================
+   PRINT
+   ============================================================ */
+@media print{
+  @page{ size:letter landscape; margin:0.5in; }
+  html,body{ background:#fff !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  #setup-screen, .report-toolbar, .no-print, .table-controls .chk-label, .table-controls select{ display:none !important; }
+  .container{ padding:0; max-width:100%; }
+  .report-header{ padding-top:0; }
+  .stat-grid{ grid-template-columns:repeat(5,1fr); break-inside:avoid; }
+  .section{ margin-bottom:var(--space-8); }
+  .section-head{ break-after:avoid; break-inside:avoid; }
+  .priority-row{ break-inside:avoid; }
+  .table-scroll{ border:1px solid #999; overflow:visible; }
+  table.inv-table{ min-width:0; font-size:10.5px; }
+  .inv-table thead th{ position:static; background:var(--eg-grey-900) !important; color:#fff !important; }
+  .inv-table tbody tr{ break-inside:avoid; }
+  thead{ display:table-header-group; }
+  a{ text-decoration:none; color:inherit; }
+  .search-box{ display:none; }
+  .result-count{ display:none; }
+  .card,.stat-card,.priority-row,.table-scroll{ box-shadow:none !important; }
+}
+
+/* ---------- Responsive (screen only — must not fire during print, where a
+   landscape letter page's printable width is itself under 1000px) ---------- */
+@media screen and (max-width:1000px){
+  .stat-grid{ grid-template-columns:repeat(2,1fr); }
+  .priority-row{ grid-template-columns:1fr; text-align:left; }
+  .priority-row .pstat{ text-align:left; }
+  .report-meta{ text-align:left; }
+  .report-header .top-row{ flex-direction:column; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ================= SETUP SCREEN ================= -->
+<section id="setup-screen">
+  <div class="setup-wrap">
+    <div class="setup-header">
+      <svg class="mark" viewBox="0 0 406.37 276.69" xmlns="http://www.w3.org/2000/svg" aria-label="Eagle Graphics">
+        <path fill="#53585A" d="M25.5,237.31v-96.78h51.99v17.15h-34.05v22.79h32.61v17.15h-32.61v22.53h34.05v17.15H25.5Z"></path>
+        <path fill="#53585A" d="M160.91,237.31l-10.34-25.01h-34.44l-10.74,25.01h-19.77l40.33-96.78h14.15l40.59,96.78h-19.77ZM133.02,165.8l-10.35,29.33h20.69l-10.34-29.33Z"></path>
+        <path fill="#53585A" d="M233.6,239.01c-29.73,0-52.64-22-52.64-50.29s22.66-49.9,50.94-49.9c21.08,0,40.99,12.7,47.27,30.12h-21.09c-6.02-8.38-15.32-12.83-26.58-12.83-19.12,0-32.48,14.67-32.48,32.87s14.54,32.74,33.53,32.74c12.7,0,23.18-6.28,28.42-17.02h-40.07v-16.76h63.25v2.36c0,26.32-22,48.72-50.55,48.72Z"></path>
+        <path fill="#53585A" d="M353.56,237.31v-96.78h51.99v17.15h-34.05v22.79h32.61v17.15h-32.61v22.53h34.05v17.15h-51.99Z"></path>
+        <path fill="#76BD1D" d="M25.67,251.52c0-1.05.28-1.9.85-2.53.57-.63,1.42-.95,2.56-.95h8.2l.99,5.33h-6.3c-.34,0-.52.18-.52.55v16.99c0,.37.17.55.52.55h2.61v-11.3h5.59v16.52h-10.02c-1.66,0-2.83-.34-3.49-1.03-.66-.69-.99-1.82-.99-3.4v-20.74Z"></path>
+        <path fill="#76BD1D" d="M94.45,265.03c0,.63-.22,1.21-.65,1.74-.44.53-1.08.79-1.92.79l3.01,9.13h-5.94l-2.77-9.13h-.75v9.13h-5.75v-28.65h10.9c1.35,0,2.33.34,2.95,1.01.62.67.93,1.57.93,2.71v13.28ZM85.42,253.06v9.88h2.81c.37,0,.56-.2.56-.59v-8.69c0-.39-.19-.59-.56-.59h-2.81Z"></path>
+        <path fill="#76BD1D" d="M139.39,273.13l-.52,3.56h-5.79l5.19-28.65h6.14l5.19,28.65h-5.78l-.52-3.56h-3.92ZM140.02,268.59h2.65l-1.31-10.15-1.35,10.15Z"></path>
+        <path fill="#76BD1D" d="M199.73,248.04c1.14,0,1.99.32,2.56.95.57.63.85,1.48.85,2.53v13.71c0,.55-.06,1.06-.18,1.52-.12.46-.34.86-.65,1.21-.32.34-.74.61-1.27.81-.53.2-1.19.3-1.98.3h-4.91v7.63h-5.71v-28.65h11.29ZM194.15,253.06v11.26h2.85c.24,0,.39-.04.46-.14.07-.09.1-.24.1-.45v-10.11c0-.37-.17-.55-.52-.55h-2.89Z"></path>
+        <path fill="#76BD1D" d="M257.5,276.69h-5.86v-11.46h-3.13v11.46h-5.86v-28.65h5.86v12.25h3.13v-12.25h5.86v28.65Z"></path>
+        <path fill="#76BD1D" d="M297.13,248.04h5.75v28.65h-5.75v-28.65Z"></path>
+        <path fill="#76BD1D" d="M346.97,276.69c-1.66,0-2.83-.34-3.49-1.03-.66-.69-.99-1.82-.99-3.4v-20.7c0-1.13.32-2,.97-2.61.65-.6,1.45-.91,2.4-.91h7.57l.99,5.33h-5.51c-.34,0-.52.18-.52.55v16.87c0,.37.17.55.52.55h5.51l-1.03,5.33h-6.42Z"></path>
+        <path fill="#76BD1D" d="M394.88,276.69l-1.03-5.33h6.18c.45,0,.67-.2.67-.59v-5.22c0-.39-.08-.63-.24-.71-.16-.08-.44-.12-.83-.12h-2.97c-.42,0-.82-.03-1.21-.1-.38-.07-.73-.22-1.03-.45-.3-.24-.54-.57-.71-.99-.17-.42-.26-.99-.26-1.7v-9.72c0-1.13.31-2.03.93-2.71.62-.67,1.61-1.01,2.95-1.01h7.93l.99,5.33h-6.5c-.47,0-.71.21-.71.63v5.21c0,.29.07.49.22.59.14.11.36.16.65.16h3.61c.92,0,1.63.22,2.12.65.49.43.73,1.19.73,2.27v9.44c0,1.58-.32,2.7-.97,3.36-.65.66-1.79.99-3.43.99h-7.09Z"></path>
+        <polygon fill="#53585A" points="313.88 220.15 313.88 158.64 295.94 148.79 295.94 237.31 343.48 237.31 343.48 220.15 313.88 220.15"></polygon>
+        <path fill="#53585A" d="M0,35.87s40.31,39.02,168.4,35.17c128.09-3.85,173.84,81.37,173.84,81.37,0,0-74.93-65.41-159.94-67.51C97.28,82.82,42.68,80.09,0,35.87Z"></path>
+        <path fill="#76BD1D" d="M117.53,66.85s32.58,2.27,51.76,1.04c0,0-56.52-7.19-96.09-32.78,0,0,14.51,21.14,44.32,31.74Z"></path>
+        <path fill="#76BD1D" d="M35.04,67.24s29.79,14.84,67.38,17.07c0,0,22.57,11.59,69.71,12.64,0,0-93.43,12.5-137.09-29.71Z"></path>
+        <path fill="#53585A" d="M280.75,118.26c16.38,6.72,30.68,16.31,43.84,26,0,0-67.91-32.46-155.72-21.97,0,0,14.02,6.15,29.4,5.62,0,0-77.9,27.39-155-31.67,0,0,64.1,23.91,128.05,13.89,63.94-10.02,93.06,1.41,109.44,8.13Z"></path>
+        <path fill="#76BD1D" d="M105.34,0s47.37,33.91,104.14,45.98c40.57,8.63,79.09,41.54,79.09,41.54,0,0-16.5-3.62-21.25-.52,0,0-13.28-6.59-24.33-9.52,0,0-15.55-19.85-60.21-28.09C143.43,42.13,105.34,0,105.34,0Z"></path>
+        <path fill="#53585A" d="M114.48,12.34s23.44,21.93,39.54,29.83c0,0,2.34,9.44,23.54,18.46,0,0-43.44-12.15-63.07-48.29Z"></path>
+        <path fill="#76BD1D" d="M233.75,123.37s81.99,27.82,105.78,29.46c0,0,14.46,9.46-.11,37.5,0,0-.17-23.52-30.07-32.97-29.89-9.45-67.78-28.42-75.6-33.99Z"></path>
+      </svg>
+      <h1>Customer Inventory Report Builder</h1>
+      <div class="sub">Turn a Brightsites snapshot and log export into a branded report in three steps.</div>
+    </div>
+
+    <!-- STEP 1 — customer -->
+    <div class="step-card" id="step-customer">
+      <div class="step-head">
+        <div class="step-num">1</div>
+        <div>
+          <div class="step-title">Customer</div>
+          <div class="step-hint">Used for the report header and to look up a brand accent color and logo.</div>
+        </div>
+      </div>
+      <div class="field">
+        <label for="customerNameText">Customer name</label>
+        <input type="text" id="customerNameText" placeholder="e.g. Smart Care Solutions" autocomplete="off">
+      </div>
+    </div>
+
+    <!-- STEP 1b — brand (optional) -->
+    <div class="step-card" id="step-brand">
+      <div class="step-head">
+        <div class="step-num">&#9733;</div>
+        <div>
+          <div class="step-title">Brand (optional)</div>
+          <div class="step-hint">Drop in this customer's logo and accent color. Leave blank for standard Eagle Graphics branding.</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-5)">
+        <div>
+          <div class="dropzone" id="dz-logo" tabindex="0" role="button" style="padding:var(--space-5) var(--space-3)">
+            <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+            <div class="dz-title">Customer logo</div>
+            <div class="dz-sub">PNG, JPG or SVG &mdash; drop or click</div>
+            <input type="file" id="file-logo" accept="image/*">
+          </div>
+          <div id="logo-result"></div>
+        </div>
+        <div class="field">
+          <label for="brandColorHex">Accent color</label>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input type="color" id="brandColorPicker" value="#76bd1d" style="width:42px;height:42px;padding:2px;border:1px solid var(--border-default);border-radius:var(--radius-control);cursor:pointer;flex:none">
+            <input type="text" id="brandColorHex" placeholder="#76BD1D" style="height:42px;border:1px solid var(--border-default);border-radius:var(--radius-control);padding:0 var(--space-3);flex:1;font-family:var(--font-mono)">
+          </div>
+          <div class="step-hint" style="margin-top:8px">Leave as Eagle green if this customer has no brand color on file.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2 — snapshot -->
+    <div class="step-card" id="step-snapshot">
+      <div class="step-head">
+        <div class="step-num">2</div>
+        <div>
+          <div class="step-title">Inventory snapshot</div>
+          <div class="step-hint">Brightsites snapshot export (.csv) &mdash; current on-hand, triggers, pricing.</div>
+        </div>
+      </div>
+      <div class="dropzone" id="dz-snapshot" tabindex="0" role="button">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+        <div class="dz-title">Drop the snapshot CSV here</div>
+        <div class="dz-sub">or click to browse</div>
+        <input type="file" id="file-snapshot" accept=".csv,text/csv">
+      </div>
+      <div id="snapshot-result"></div>
+    </div>
+
+    <!-- STEP 3 — logs -->
+    <div class="step-card" id="step-logs">
+      <div class="step-head">
+        <div class="step-num">3</div>
+        <div>
+          <div class="step-title">Inventory logs</div>
+          <div class="step-hint">Brightsites activity log export (.csv) &mdash; sales and adjustment history.</div>
+        </div>
+      </div>
+      <div class="dropzone" id="dz-logs" tabindex="0" role="button">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+        <div class="dz-title">Drop the logs CSV here</div>
+        <div class="dz-sub">or click to browse</div>
+        <input type="file" id="file-logs" accept=".csv,text/csv">
+      </div>
+      <div id="logs-result"></div>
+    </div>
+
+    <div class="generate-row">
+      <button class="btn btn-primary" id="btn-generate" disabled>Generate Report</button>
+    </div>
+    <div id="generate-error"></div>
+  </div>
+</section>
+
+<!-- ================= REPORT SCREEN ================= -->
+<section id="report-screen" hidden>
+  <div class="report-toolbar no-print">
+    <div class="inner">
+      <div class="toolbar-left">
+        <svg class="eg-mark" viewBox="0 0 406.37 276.69" xmlns="http://www.w3.org/2000/svg" aria-label="Eagle Graphics">
+          <path fill="#53585A" d="M25.5,237.31v-96.78h51.99v17.15h-34.05v22.79h32.61v17.15h-32.61v22.53h34.05v17.15H25.5Z"></path>
+          <path fill="#53585A" d="M160.91,237.31l-10.34-25.01h-34.44l-10.74,25.01h-19.77l40.33-96.78h14.15l40.59,96.78h-19.77ZM133.02,165.8l-10.35,29.33h20.69l-10.34-29.33Z"></path>
+          <path fill="#53585A" d="M233.6,239.01c-29.73,0-52.64-22-52.64-50.29s22.66-49.9,50.94-49.9c21.08,0,40.99,12.7,47.27,30.12h-21.09c-6.02-8.38-15.32-12.83-26.58-12.83-19.12,0-32.48,14.67-32.48,32.87s14.54,32.74,33.53,32.74c12.7,0,23.18-6.28,28.42-17.02h-40.07v-16.76h63.25v2.36c0,26.32-22,48.72-50.55,48.72Z"></path>
+          <path fill="#53585A" d="M353.56,237.31v-96.78h51.99v17.15h-34.05v22.79h32.61v17.15h-32.61v22.53h34.05v17.15h-51.99Z"></path>
+          <path fill="#76BD1D" d="M25.67,251.52c0-1.05.28-1.9.85-2.53.57-.63,1.42-.95,2.56-.95h8.2l.99,5.33h-6.3c-.34,0-.52.18-.52.55v16.99c0,.37.17.55.52.55h2.61v-11.3h5.59v16.52h-10.02c-1.66,0-2.83-.34-3.49-1.03-.66-.69-.99-1.82-.99-3.4v-20.74Z"></path>
+          <path fill="#76BD1D" d="M94.45,265.03c0,.63-.22,1.21-.65,1.74-.44.53-1.08.79-1.92.79l3.01,9.13h-5.94l-2.77-9.13h-.75v9.13h-5.75v-28.65h10.9c1.35,0,2.33.34,2.95,1.01.62.67.93,1.57.93,2.71v13.28ZM85.42,253.06v9.88h2.81c.37,0,.56-.2.56-.59v-8.69c0-.39-.19-.59-.56-.59h-2.81Z"></path>
+          <path fill="#76BD1D" d="M139.39,273.13l-.52,3.56h-5.79l5.19-28.65h6.14l5.19,28.65h-5.78l-.52-3.56h-3.92ZM140.02,268.59h2.65l-1.31-10.15-1.35,10.15Z"></path>
+          <path fill="#76BD1D" d="M199.73,248.04c1.14,0,1.99.32,2.56.95.57.63.85,1.48.85,2.53v13.71c0,.55-.06,1.06-.18,1.52-.12.46-.34.86-.65,1.21-.32.34-.74.61-1.27.81-.53.2-1.19.3-1.98.3h-4.91v7.63h-5.71v-28.65h11.29ZM194.15,253.06v11.26h2.85c.24,0,.39-.04.46-.14.07-.09.1-.24.1-.45v-10.11c0-.37-.17-.55-.52-.55h-2.89Z"></path>
+          <path fill="#76BD1D" d="M257.5,276.69h-5.86v-11.46h-3.13v11.46h-5.86v-28.65h5.86v12.25h3.13v-12.25h5.86v28.65Z"></path>
+          <path fill="#76BD1D" d="M297.13,248.04h5.75v28.65h-5.75v-28.65Z"></path>
+          <path fill="#76BD1D" d="M346.97,276.69c-1.66,0-2.83-.34-3.49-1.03-.66-.69-.99-1.82-.99-3.4v-20.7c0-1.13.32-2,.97-2.61.65-.6,1.45-.91,2.4-.91h7.57l.99,5.33h-5.51c-.34,0-.52.18-.52.55v16.87c0,.37.17.55.52.55h5.51l-1.03,5.33h-6.42Z"></path>
+          <path fill="#76BD1D" d="M394.88,276.69l-1.03-5.33h6.18c.45,0,.67-.2.67-.59v-5.22c0-.39-.08-.63-.24-.71-.16-.08-.44-.12-.83-.12h-2.97c-.42,0-.82-.03-1.21-.1-.38-.07-.73-.22-1.03-.45-.3-.24-.54-.57-.71-.99-.17-.42-.26-.99-.26-1.7v-9.72c0-1.13.31-2.03.93-2.71.62-.67,1.61-1.01,2.95-1.01h7.93l.99,5.33h-6.5c-.47,0-.71.21-.71.63v5.21c0,.29.07.49.22.59.14.11.36.16.65.16h3.61c.92,0,1.63.22,2.12.65.49.43.73,1.19.73,2.27v9.44c0,1.58-.32,2.7-.97,3.36-.65.66-1.79.99-3.43.99h-7.09Z"></path>
+          <polygon fill="#53585A" points="313.88 220.15 313.88 158.64 295.94 148.79 295.94 237.31 343.48 237.31 343.48 220.15 313.88 220.15"></polygon>
+          <path fill="#53585A" d="M0,35.87s40.31,39.02,168.4,35.17c128.09-3.85,173.84,81.37,173.84,81.37,0,0-74.93-65.41-159.94-67.51C97.28,82.82,42.68,80.09,0,35.87Z"></path>
+          <path fill="#76BD1D" d="M117.53,66.85s32.58,2.27,51.76,1.04c0,0-56.52-7.19-96.09-32.78,0,0,14.51,21.14,44.32,31.74Z"></path>
+          <path fill="#76BD1D" d="M35.04,67.24s29.79,14.84,67.38,17.07c0,0,22.57,11.59,69.71,12.64,0,0-93.43,12.5-137.09-29.71Z"></path>
+          <path fill="#53585A" d="M280.75,118.26c16.38,6.72,30.68,16.31,43.84,26,0,0-67.91-32.46-155.72-21.97,0,0,14.02,6.15,29.4,5.62,0,0-77.9,27.39-155-31.67,0,0,64.1,23.91,128.05,13.89,63.94-10.02,93.06,1.41,109.44,8.13Z"></path>
+          <path fill="#76BD1D" d="M105.34,0s47.37,33.91,104.14,45.98c40.57,8.63,79.09,41.54,79.09,41.54,0,0-16.5-3.62-21.25-.52,0,0-13.28-6.59-24.33-9.52,0,0-15.55-19.85-60.21-28.09C143.43,42.13,105.34,0,105.34,0Z"></path>
+          <path fill="#53585A" d="M114.48,12.34s23.44,21.93,39.54,29.83c0,0,2.34,9.44,23.54,18.46,0,0-43.44-12.15-63.07-48.29Z"></path>
+          <path fill="#76BD1D" d="M233.75,123.37s81.99,27.82,105.78,29.46c0,0,14.46,9.46-.11,37.5,0,0-.17-23.52-30.07-32.97-29.89-9.45-67.78-28.42-75.6-33.99Z"></path>
+        </svg>
+        <div class="divider"></div>
+        <div class="cust-name" id="tb-customer-name"></div>
+      </div>
+      <div class="toolbar-right">
+        <div class="cost-toggle" id="costToggle">
+          <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          Show cost
+          <div class="switch"></div>
+        </div>
+        <button class="btn btn-outline btn-sm" id="btn-export-xlsx">
+          <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="19"></line><line x1="16" y1="13" x2="8" y2="19"></line></svg>
+          Export to Excel
+        </button>
+        <button class="btn btn-outline btn-sm" id="btn-print">
+          <svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+          Print / Save PDF
+        </button>
+        <button class="btn btn-ghost btn-sm" id="btn-new-report">New report</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="report-header">
+      <div class="top-row">
+        <div class="brand-block">
+          <img class="cust-logo" id="rh-cust-logo" alt="" hidden>
+          <div class="eg-x" id="rh-x" hidden>&times;</div>
+          <svg class="eg-logo" id="rh-eg-logo" viewBox="0 0 406.37 276.69" xmlns="http://www.w3.org/2000/svg" aria-label="Eagle Graphics">
+            <path fill="#53585A" d="M25.5,237.31v-96.78h51.99v17.15h-34.05v22.79h32.61v17.15h-32.61v22.53h34.05v17.15H25.5Z"></path>
+            <path fill="#53585A" d="M160.91,237.31l-10.34-25.01h-34.44l-10.74,25.01h-19.77l40.33-96.78h14.15l40.59,96.78h-19.77ZM133.02,165.8l-10.35,29.33h20.69l-10.34-29.33Z"></path>
+            <path fill="#53585A" d="M233.6,239.01c-29.73,0-52.64-22-52.64-50.29s22.66-49.9,50.94-49.9c21.08,0,40.99,12.7,47.27,30.12h-21.09c-6.02-8.38-15.32-12.83-26.58-12.83-19.12,0-32.48,14.67-32.48,32.87s14.54,32.74,33.53,32.74c12.7,0,23.18-6.28,28.42-17.02h-40.07v-16.76h63.25v2.36c0,26.32-22,48.72-50.55,48.72Z"></path>
+            <path fill="#53585A" d="M353.56,237.31v-96.78h51.99v17.15h-34.05v22.79h32.61v17.15h-32.61v22.53h34.05v17.15h-51.99Z"></path>
+            <path fill="#76BD1D" d="M25.67,251.52c0-1.05.28-1.9.85-2.53.57-.63,1.42-.95,2.56-.95h8.2l.99,5.33h-6.3c-.34,0-.52.18-.52.55v16.99c0,.37.17.55.52.55h2.61v-11.3h5.59v16.52h-10.02c-1.66,0-2.83-.34-3.49-1.03-.66-.69-.99-1.82-.99-3.4v-20.74Z"></path>
+            <path fill="#76BD1D" d="M94.45,265.03c0,.63-.22,1.21-.65,1.74-.44.53-1.08.79-1.92.79l3.01,9.13h-5.94l-2.77-9.13h-.75v9.13h-5.75v-28.65h10.9c1.35,0,2.33.34,2.95,1.01.62.67.93,1.57.93,2.71v13.28ZM85.42,253.06v9.88h2.81c.37,0,.56-.2.56-.59v-8.69c0-.39-.19-.59-.56-.59h-2.81Z"></path>
+            <path fill="#76BD1D" d="M139.39,273.13l-.52,3.56h-5.79l5.19-28.65h6.14l5.19,28.65h-5.78l-.52-3.56h-3.92ZM140.02,268.59h2.65l-1.31-10.15-1.35,10.15Z"></path>
+            <path fill="#76BD1D" d="M199.73,248.04c1.14,0,1.99.32,2.56.95.57.63.85,1.48.85,2.53v13.71c0,.55-.06,1.06-.18,1.52-.12.46-.34.86-.65,1.21-.32.34-.74.61-1.27.81-.53.2-1.19.3-1.98.3h-4.91v7.63h-5.71v-28.65h11.29ZM194.15,253.06v11.26h2.85c.24,0,.39-.04.46-.14.07-.09.1-.24.1-.45v-10.11c0-.37-.17-.55-.52-.55h-2.89Z"></path>
+            <path fill="#76BD1D" d="M257.5,276.69h-5.86v-11.46h-3.13v11.46h-5.86v-28.65h5.86v12.25h3.13v-12.25h5.86v28.65Z"></path>
+            <path fill="#76BD1D" d="M297.13,248.04h5.75v28.65h-5.75v-28.65Z"></path>
+            <path fill="#76BD1D" d="M346.97,276.69c-1.66,0-2.83-.34-3.49-1.03-.66-.69-.99-1.82-.99-3.4v-20.7c0-1.13.32-2,.97-2.61.65-.6,1.45-.91,2.4-.91h7.57l.99,5.33h-5.51c-.34,0-.52.18-.52.55v16.87c0,.37.17.55.52.55h5.51l-1.03,5.33h-6.42Z"></path>
+            <path fill="#76BD1D" d="M394.88,276.69l-1.03-5.33h6.18c.45,0,.67-.2.67-.59v-5.22c0-.39-.08-.63-.24-.71-.16-.08-.44-.12-.83-.12h-2.97c-.42,0-.82-.03-1.21-.1-.38-.07-.73-.22-1.03-.45-.3-.24-.54-.57-.71-.99-.17-.42-.26-.99-.26-1.7v-9.72c0-1.13.31-2.03.93-2.71.62-.67,1.61-1.01,2.95-1.01h7.93l.99,5.33h-6.5c-.47,0-.71.21-.71.63v5.21c0,.29.07.49.22.59.14.11.36.16.65.16h3.61c.92,0,1.63.22,2.12.65.49.43.73,1.19.73,2.27v9.44c0,1.58-.32,2.7-.97,3.36-.65.66-1.79.99-3.43.99h-7.09Z"></path>
+            <polygon fill="#53585A" points="313.88 220.15 313.88 158.64 295.94 148.79 295.94 237.31 343.48 237.31 343.48 220.15 313.88 220.15"></polygon>
+            <path fill="#53585A" d="M0,35.87s40.31,39.02,168.4,35.17c128.09-3.85,173.84,81.37,173.84,81.37,0,0-74.93-65.41-159.94-67.51C97.28,82.82,42.68,80.09,0,35.87Z"></path>
+            <path fill="#76BD1D" d="M117.53,66.85s32.58,2.27,51.76,1.04c0,0-56.52-7.19-96.09-32.78,0,0,14.51,21.14,44.32,31.74Z"></path>
+            <path fill="#76BD1D" d="M35.04,67.24s29.79,14.84,67.38,17.07c0,0,22.57,11.59,69.71,12.64,0,0-93.43,12.5-137.09-29.71Z"></path>
+            <path fill="#53585A" d="M280.75,118.26c16.38,6.72,30.68,16.31,43.84,26,0,0-67.91-32.46-155.72-21.97,0,0,14.02,6.15,29.4,5.62,0,0-77.9,27.39-155-31.67,0,0,64.1,23.91,128.05,13.89,63.94-10.02,93.06,1.41,109.44,8.13Z"></path>
+            <path fill="#76BD1D" d="M105.34,0s47.37,33.91,104.14,45.98c40.57,8.63,79.09,41.54,79.09,41.54,0,0-16.5-3.62-21.25-.52,0,0-13.28-6.59-24.33-9.52,0,0-15.55-19.85-60.21-28.09C143.43,42.13,105.34,0,105.34,0Z"></path>
+            <path fill="#53585A" d="M114.48,12.34s23.44,21.93,39.54,29.83c0,0,2.34,9.44,23.54,18.46,0,0-43.44-12.15-63.07-48.29Z"></path>
+            <path fill="#76BD1D" d="M233.75,123.37s81.99,27.82,105.78,29.46c0,0,14.46,9.46-.11,37.5,0,0-.17-23.52-30.07-32.97-29.89-9.45-67.78-28.42-75.6-33.99Z"></path>
+          </svg>
+        </div>
+        <div class="header-titles">
+          <div class="eyebrow">Customer Inventory Report</div>
+          <h1 id="rh-customer-name">&nbsp;</h1>
+        </div>
+        <div class="report-meta">
+          <div><b>Report generated:</b> <span id="rh-report-date"></span></div>
+          <div><b>Data as of:</b> <span id="rh-data-date"></span></div>
+          <div><b>Prepared by:</b> Eagle Graphics</div>
+        </div>
+      </div>
+      <div class="header-underscore"></div>
+    </div>
+
+    <div id="integrity-banner-slot"></div>
+
+    <!-- STATS -->
+    <div class="stat-grid" id="stat-grid"></div>
+
+    <!-- REORDER PRIORITY -->
+    <div class="section">
+      <div class="section-head">
+        <div class="eyebrow">Needs attention first</div>
+        <h2>Reorder Priority <span class="count" id="reorder-count"></span></h2>
+      </div>
+      <div class="priority-list" id="reorder-list"></div>
+    </div>
+
+    <!-- SLOW MOVERS -->
+    <div class="section">
+      <div class="section-head">
+        <div class="eyebrow">Capital sitting on the shelf</div>
+        <h2>Slow-Movers &amp; Dead Stock <span class="count" id="slowmover-count"></span></h2>
+      </div>
+      <div class="priority-list" id="slowmover-list"></div>
+    </div>
+
+    <!-- FULL TABLE -->
+    <div class="section">
+      <div class="section-head">
+        <div class="eyebrow">Every SKU</div>
+        <h2>Full Inventory</h2>
+      </div>
+      <div class="table-controls no-print">
+        <div class="search-box">
+          <svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" id="tbl-search" placeholder="Search item #, name, color&hellip;">
+        </div>
+        <select id="tbl-tier-filter">
+          <option value="">All tiers</option>
+          <option value="critical">Critical only</option>
+          <option value="watch">Watch only</option>
+          <option value="healthy">Healthy only</option>
+        </select>
+        <label class="chk-label"><input type="checkbox" id="tbl-integrity-only"> Flagged only</label>
+        <div class="result-count" id="tbl-result-count"></div>
+      </div>
+      <div class="table-scroll">
+        <table class="inv-table" id="inv-table">
+          <thead>
+            <tr>
+              <th data-key="name">Item <span class="arrow">&#9650;</span></th>
+              <th data-key="itemNo">Item #</th>
+              <th class="num" data-key="onHand">On Hand <span class="arrow">&#9650;</span></th>
+              <th class="num" data-key="trigger">Trigger <span class="arrow">&#9650;</span></th>
+              <th data-key="tier">Status <span class="arrow">&#9650;</span></th>
+              <th class="num" data-key="sellThrough">Sell-Thru <span class="arrow">&#9650;</span></th>
+              <th class="num" data-key="velocity">Vel/Day <span class="arrow">&#9650;</span></th>
+              <th class="num" data-key="daysOfSupply">Days Left <span class="arrow">&#9650;</span></th>
+              <th data-key="trend">Trend <span class="arrow">&#9650;</span></th>
+              <th class="num" data-key="basePrice">Price <span class="arrow">&#9650;</span></th>
+              <th class="num col-cost" data-key="unitCost">Cost <span class="arrow">&#9650;</span></th>
+              <th class="num" data-key="invValueBase">Val (Price) <span class="arrow">&#9650;</span></th>
+              <th class="num col-cost" data-key="invValueCost">Val (Cost) <span class="arrow">&#9650;</span></th>
+            </tr>
+          </thead>
+          <tbody id="inv-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="report-footer">
+      <svg class="eg-logo" viewBox="0 0 406.37 276.69" xmlns="http://www.w3.org/2000/svg" aria-label="Eagle Graphics">
+        <path fill="#53585A" d="M25.5,237.31v-96.78h51.99v17.15h-34.05v22.79h32.61v17.15h-32.61v22.53h34.05v17.15H25.5Z"></path>
+        <path fill="#53585A" d="M160.91,237.31l-10.34-25.01h-34.44l-10.74,25.01h-19.77l40.33-96.78h14.15l40.59,96.78h-19.77ZM133.02,165.8l-10.35,29.33h20.69l-10.34-29.33Z"></path>
+        <path fill="#53585A" d="M233.6,239.01c-29.73,0-52.64-22-52.64-50.29s22.66-49.9,50.94-49.9c21.08,0,40.99,12.7,47.27,30.12h-21.09c-6.02-8.38-15.32-12.83-26.58-12.83-19.12,0-32.48,14.67-32.48,32.87s14.54,32.74,33.53,32.74c12.7,0,23.18-6.28,28.42-17.02h-40.07v-16.76h63.25v2.36c0,26.32-22,48.72-50.55,48.72Z"></path>
+        <path fill="#53585A" d="M353.56,237.31v-96.78h51.99v17.15h-34.05v22.79h32.61v17.15h-32.61v22.53h34.05v17.15h-51.99Z"></path>
+        <path fill="#76BD1D" d="M25.67,251.52c0-1.05.28-1.9.85-2.53.57-.63,1.42-.95,2.56-.95h8.2l.99,5.33h-6.3c-.34,0-.52.18-.52.55v16.99c0,.37.17.55.52.55h2.61v-11.3h5.59v16.52h-10.02c-1.66,0-2.83-.34-3.49-1.03-.66-.69-.99-1.82-.99-3.4v-20.74Z"></path>
+        <path fill="#76BD1D" d="M94.45,265.03c0,.63-.22,1.21-.65,1.74-.44.53-1.08.79-1.92.79l3.01,9.13h-5.94l-2.77-9.13h-.75v9.13h-5.75v-28.65h10.9c1.35,0,2.33.34,2.95,1.01.62.67.93,1.57.93,2.71v13.28ZM85.42,253.06v9.88h2.81c.37,0,.56-.2.56-.59v-8.69c0-.39-.19-.59-.56-.59h-2.81Z"></path>
+        <path fill="#76BD1D" d="M139.39,273.13l-.52,3.56h-5.79l5.19-28.65h6.14l5.19,28.65h-5.78l-.52-3.56h-3.92ZM140.02,268.59h2.65l-1.31-10.15-1.35,10.15Z"></path>
+        <path fill="#76BD1D" d="M199.73,248.04c1.14,0,1.99.32,2.56.95.57.63.85,1.48.85,2.53v13.71c0,.55-.06,1.06-.18,1.52-.12.46-.34.86-.65,1.21-.32.34-.74.61-1.27.81-.53.2-1.19.3-1.98.3h-4.91v7.63h-5.71v-28.65h11.29ZM194.15,253.06v11.26h2.85c.24,0,.39-.04.46-.14.07-.09.1-.24.1-.45v-10.11c0-.37-.17-.55-.52-.55h-2.89Z"></path>
+        <path fill="#76BD1D" d="M257.5,276.69h-5.86v-11.46h-3.13v11.46h-5.86v-28.65h5.86v12.25h3.13v-12.25h5.86v28.65Z"></path>
+        <path fill="#76BD1D" d="M297.13,248.04h5.75v28.65h-5.75v-28.65Z"></path>
+        <path fill="#76BD1D" d="M346.97,276.69c-1.66,0-2.83-.34-3.49-1.03-.66-.69-.99-1.82-.99-3.4v-20.7c0-1.13.32-2,.97-2.61.65-.6,1.45-.91,2.4-.91h7.57l.99,5.33h-5.51c-.34,0-.52.18-.52.55v16.87c0,.37.17.55.52.55h5.51l-1.03,5.33h-6.42Z"></path>
+        <path fill="#76BD1D" d="M394.88,276.69l-1.03-5.33h6.18c.45,0,.67-.2.67-.59v-5.22c0-.39-.08-.63-.24-.71-.16-.08-.44-.12-.83-.12h-2.97c-.42,0-.82-.03-1.21-.1-.38-.07-.73-.22-1.03-.45-.3-.24-.54-.57-.71-.99-.17-.42-.26-.99-.26-1.7v-9.72c0-1.13.31-2.03.93-2.71.62-.67,1.61-1.01,2.95-1.01h7.93l.99,5.33h-6.5c-.47,0-.71.21-.71.63v5.21c0,.29.07.49.22.59.14.11.36.16.65.16h3.61c.92,0,1.63.22,2.12.65.49.43.73,1.19.73,2.27v9.44c0,1.58-.32,2.7-.97,3.36-.65.66-1.79.99-3.43.99h-7.09Z"></path>
+        <polygon fill="#53585A" points="313.88 220.15 313.88 158.64 295.94 148.79 295.94 237.31 343.48 237.31 343.48 220.15 313.88 220.15"></polygon>
+        <path fill="#53585A" d="M0,35.87s40.31,39.02,168.4,35.17c128.09-3.85,173.84,81.37,173.84,81.37,0,0-74.93-65.41-159.94-67.51C97.28,82.82,42.68,80.09,0,35.87Z"></path>
+        <path fill="#76BD1D" d="M117.53,66.85s32.58,2.27,51.76,1.04c0,0-56.52-7.19-96.09-32.78,0,0,14.51,21.14,44.32,31.74Z"></path>
+        <path fill="#76BD1D" d="M35.04,67.24s29.79,14.84,67.38,17.07c0,0,22.57,11.59,69.71,12.64,0,0-93.43,12.5-137.09-29.71Z"></path>
+        <path fill="#53585A" d="M280.75,118.26c16.38,6.72,30.68,16.31,43.84,26,0,0-67.91-32.46-155.72-21.97,0,0,14.02,6.15,29.4,5.62,0,0-77.9,27.39-155-31.67,0,0,64.1,23.91,128.05,13.89,63.94-10.02,93.06,1.41,109.44,8.13Z"></path>
+        <path fill="#76BD1D" d="M105.34,0s47.37,33.91,104.14,45.98c40.57,8.63,79.09,41.54,79.09,41.54,0,0-16.5-3.62-21.25-.52,0,0-13.28-6.59-24.33-9.52,0,0-15.55-19.85-60.21-28.09C143.43,42.13,105.34,0,105.34,0Z"></path>
+        <path fill="#53585A" d="M114.48,12.34s23.44,21.93,39.54,29.83c0,0,2.34,9.44,23.54,18.46,0,0-43.44-12.15-63.07-48.29Z"></path>
+        <path fill="#76BD1D" d="M233.75,123.37s81.99,27.82,105.78,29.46c0,0,14.46,9.46-.11,37.5,0,0-.17-23.52-30.07-32.97-29.89-9.45-67.78-28.42-75.6-33.99Z"></path>
+      </svg>
+      <div class="fine">Eagle Graphics, LLC &middot; 1200 Prospect Lane, Kaukauna, WI &middot; 920-759-1092 &middot; egpromo.com<br>This report reflects inventory activity as of the date above and is subject to change.</div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   CONFIGURATION
+   Branding is entered by hand per report (logo upload + color
+   picker) rather than looked up from anywhere — no external
+   sheet, no fetch, no network dependency at all for this part.
+   ============================================================ */
+
+var WINDOW_DAYS = 30;              // velocity / trend window
+var CRITICAL_LEAD_DAYS = 14;       // projected-to-hit-trigger horizon
+var WATCH_BAND = 1.2;              // within 20% above trigger = watch
+var SLOW_VELOCITY_MAX = 0.15;      // units/day or less = "slow"
+var DEAD_STOCK_MIN_VALUE = 100;    // $ sitting in inventory to flag as dead stock
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+function $(sel, root){ return (root||document).querySelector(sel); }
+function $all(sel, root){ return Array.prototype.slice.call((root||document).querySelectorAll(sel)); }
+function escapeHtml(s){
+  return String(s==null?"":s).replace(/[&<>"']/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+  });
+}
+function parseNum(s){
+  if (s == null) return null;
+  var t = String(s).trim();
+  if (t === "" || /^n\/?a$/i.test(t)) return null;
+  var cleaned = t.replace(/[,$\s]/g,"");
+  var n = parseFloat(cleaned);
+  return isNaN(n) ? null : n;
+}
+function parseMoney(s){ return parseNum(s); }
+function parseDateMDY(s){
+  if (!s) return null;
+  var m = String(s).trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (!m) return null;
+  return new Date(Number(m[3]), Number(m[1])-1, Number(m[2]));
+}
+function fmtDate(d){
+  if (!d) return "—";
+  return d.toLocaleDateString("en-US", { month:"short", day:"numeric", year:"numeric" });
+}
+function fmtMoney(n){
+  if (n == null || isNaN(n)) return "—";
+  return "$" + n.toLocaleString("en-US", { minimumFractionDigits:2, maximumFractionDigits:2 });
+}
+function fmtMoney0(n){
+  if (n == null || isNaN(n)) return "—";
+  return "$" + Math.round(n).toLocaleString("en-US");
+}
+function fmtPct(n){
+  if (n == null || isNaN(n)) return "—";
+  return Math.round(n*100) + "%";
+}
+function fmtNum(n, d){
+  if (n == null || isNaN(n)) return "—";
+  return n.toLocaleString("en-US", { minimumFractionDigits:d||0, maximumFractionDigits:d||0 });
+}
+function fmtDays(n){
+  if (n == null || isNaN(n)) return "—";
+  if (!isFinite(n)) return "∞";
+  return Math.round(n) + "d";
+}
+function normHeader(s){ return String(s||"").toLowerCase().replace(/[^a-z0-9]/g,""); }
+
+function buildColumnIndex(headerRow, map){
+  var normed = headerRow.map(normHeader);
+  var idx = {};
+  Object.keys(map).forEach(function(key){
+    var candidates = map[key];
+    var found = -1;
+    for (var i=0;i<candidates.length;i++){
+      var pos = normed.indexOf(candidates[i]);
+      if (pos !== -1){ found = pos; break; }
+    }
+    idx[key] = found;
+  });
+  return idx;
+}
+
+/* ---------- Color utilities ---------- */
+function hexToRgb(hex){
+  if (!hex) return null;
+  var h = hex.trim().replace(/^#/,"");
+  if (h.length === 3) h = h.split("").map(function(c){return c+c;}).join("");
+  if (!/^[0-9a-fA-F]{6}$/.test(h)) return null;
+  return { r: parseInt(h.slice(0,2),16), g: parseInt(h.slice(2,4),16), b: parseInt(h.slice(4,6),16) };
+}
+function rgbToHsl(r,g,b){
+  r/=255; g/=255; b/=255;
+  var max=Math.max(r,g,b), min=Math.min(r,g,b);
+  var h,s,l=(max+min)/2;
+  if (max===min){ h=s=0; }
+  else {
+    var d=max-min;
+    s = l>0.5 ? d/(2-max-min) : d/(max+min);
+    switch(max){
+      case r: h=(g-b)/d+(g<b?6:0); break;
+      case g: h=(b-r)/d+2; break;
+      case b: h=(r-g)/d+4; break;
+    }
+    h/=6;
+  }
+  return [h*360,s*100,l*100];
+}
+function hslToHex(h,s,l){
+  h/=360; s/=100; l/=100;
+  function hue2rgb(p,q,t){
+    if (t<0) t+=1; if (t>1) t-=1;
+    if (t<1/6) return p+(q-p)*6*t;
+    if (t<1/2) return q;
+    if (t<2/3) return p+(q-p)*(2/3-t)*6;
+    return p;
+  }
+  var r,g,b;
+  if (s===0){ r=g=b=l; }
+  else {
+    var q = l<0.5 ? l*(1+s) : l+s-l*s;
+    var p = 2*l-q;
+    r = hue2rgb(p,q,h+1/3); g = hue2rgb(p,q,h); b = hue2rgb(p,q,h-1/3);
+  }
+  function toHex(x){ var v=Math.round(x*255); return (v<16?"0":"")+v.toString(16); }
+  return "#"+toHex(r)+toHex(g)+toHex(b);
+}
+function shade(hex, deltaL){
+  var rgb = hexToRgb(hex);
+  if (!rgb) return hex;
+  var hsl = rgbToHsl(rgb.r,rgb.g,rgb.b);
+  var l = Math.max(0, Math.min(100, hsl[2] + deltaL));
+  return hslToHex(hsl[0], hsl[1], l);
+}
+function tint(hex, amount){
+  var rgb = hexToRgb(hex);
+  if (!rgb) return hex;
+  var hsl = rgbToHsl(rgb.r,rgb.g,rgb.b);
+  var l = Math.max(0, Math.min(96, hsl[2] + amount));
+  var s = Math.max(0, hsl[1]*0.55);
+  return hslToHex(hsl[0], s, l);
+}
+function relLuminance(hex){
+  var rgb = hexToRgb(hex);
+  if (!rgb) return 1;
+  function lin(c){ c/=255; return c<=0.03928 ? c/12.92 : Math.pow((c+0.055)/1.055,2.4); }
+  return 0.2126*lin(rgb.r)+0.7152*lin(rgb.g)+0.0722*lin(rgb.b);
+}
+function contrastRatio(hexA, hexB){
+  var la = relLuminance(hexA)+0.05, lb = relLuminance(hexB)+0.05;
+  return la>lb ? la/lb : lb/la;
+}
+function accentFillFor(hex){
+  // Pick a shade of the brand color (darkening toward Eagle's own
+  // green-700 relationship) that clears 4.5:1 against white text.
+  var candidate = hex, l = 0;
+  for (var i=0;i<12;i++){
+    if (contrastRatio(candidate, "#ffffff") >= 4.5) break;
+    l -= 8;
+    candidate = shade(hex, l);
+  }
+  return candidate;
+}
+
+/* ============================================================
+   CSV PARSER (RFC4180-ish: quoted fields, escaped quotes, commas/newlines inside quotes)
+   ============================================================ */
+function parseCSV(text){
+  var rows = [], row = [], field = "", inQuotes = false;
+  text = text.replace(/^﻿/, ""); // strip BOM
+  for (var i=0;i<text.length;i++){
+    var c = text[i];
+    if (inQuotes){
+      if (c === '"'){
+        if (text[i+1] === '"'){ field += '"'; i++; }
+        else inQuotes = false;
+      } else field += c;
+    } else {
+      if (c === '"') inQuotes = true;
+      else if (c === ','){ row.push(field); field=""; }
+      else if (c === '\r'){ /* skip, handled by \n */ }
+      else if (c === '\n'){ row.push(field); rows.push(row); row=[]; field=""; }
+      else field += c;
+    }
+  }
+  if (field.length || row.length){ row.push(field); rows.push(row); }
+  return rows.filter(function(r){ return !(r.length===1 && r[0].trim()==="") && r.length>1; });
+}
+
+/* ============================================================
+   SNAPSHOT PARSING
+   ============================================================ */
+var SNAPSHOT_HEADER_MAP = {
+  itemNo: ["item"], internalId: ["internalid"], name: ["productname"], size: ["size"],
+  color: ["color","colour"], options: ["productoptions"],
+  starting: ["starting"], adj: ["adj","adjustment"], sold: ["inventorysold"],
+  onHand: ["onhand"], trigger: ["trigger"], unitCost: ["unitcost"], basePrice: ["baseprice"],
+  invValueBase: ["invvaluebaseprice"], msrp: ["msrp"], invValueMsrp: ["invvaluemsrp"]
+};
+var SNAPSHOT_REQUIRED = ["itemNo","name","starting","adj","sold","onHand"];
+
+function parseSnapshot(text){
+  var rows = parseCSV(text);
+  if (!rows.length) throw new Error("The file appears to be empty.");
+  var header = rows[0];
+  var col = buildColumnIndex(header, SNAPSHOT_HEADER_MAP);
+  var missing = SNAPSHOT_REQUIRED.filter(function(k){ return col[k]===-1; });
+  if (missing.length) throw new Error("Couldn't find these expected columns: " + missing.join(", ") + ". Is this the inventory snapshot export?");
+  var items = [];
+  for (var i=1;i<rows.length;i++){
+    var r = rows[i];
+    var itemNo = col.itemNo!==-1 ? (r[col.itemNo]||"").trim() : "";
+    if (!itemNo) continue; // duplicate value row or blank spacer row
+    items.push({
+      itemNo: itemNo,
+      internalId: col.internalId!==-1 ? (r[col.internalId]||"").trim() : "",
+      name: col.name!==-1 ? (r[col.name]||"").trim() : "",
+      size: col.size!==-1 ? (r[col.size]||"").trim() : "",
+      color: col.color!==-1 ? (r[col.color]||"").trim() : "",
+      options: col.options!==-1 ? (r[col.options]||"").trim() : "",
+      startingRaw: parseNum(r[col.starting]) || 0,
+      adj: parseNum(r[col.adj]) || 0,
+      sold: parseNum(r[col.sold]) || 0,
+      onHand: parseNum(r[col.onHand]) || 0,
+      trigger: col.trigger!==-1 ? parseNum(r[col.trigger]) : null,
+      unitCost: col.unitCost!==-1 ? parseMoney(r[col.unitCost]) : null,
+      basePrice: col.basePrice!==-1 ? parseMoney(r[col.basePrice]) : null,
+      invValueBase: col.invValueBase!==-1 ? parseMoney(r[col.invValueBase]) : null,
+      msrp: col.msrp!==-1 ? parseMoney(r[col.msrp]) : null,
+      invValueMsrp: col.invValueMsrp!==-1 ? parseMoney(r[col.invValueMsrp]) : null
+    });
+  }
+  if (!items.length) throw new Error("No item rows were found in this file.");
+  return items;
+}
+
+/* ============================================================
+   LOGS PARSING
+   ============================================================ */
+var LOGS_HEADER_MAP = {
+  logId: ["logid"], date: ["date"], itemNo: ["item"], type: ["type"],
+  startingAmount: ["startingamount"], adjustment: ["adjustment"], sold: ["sold"], endingAmount: ["endingamount"]
+};
+var LOGS_REQUIRED = ["logId","date","itemNo","type","adjustment","sold"];
+
+function parseLogs(text){
+  var rows = parseCSV(text);
+  if (!rows.length) throw new Error("The file appears to be empty.");
+  var header = rows[0];
+  var col = buildColumnIndex(header, LOGS_HEADER_MAP);
+  var missing = LOGS_REQUIRED.filter(function(k){ return col[k]===-1; });
+  if (missing.length) throw new Error("Couldn't find these expected columns: " + missing.join(", ") + ". Is this the inventory logs export?");
+  var logs = [];
+  for (var i=1;i<rows.length;i++){
+    var r = rows[i];
+    var itemNo = (r[col.itemNo]||"").trim();
+    if (!itemNo) continue;
+    logs.push({
+      logId: parseInt((r[col.logId]||"").replace(/[^0-9-]/g,""),10) || 0,
+      date: parseDateMDY(r[col.date]),
+      itemNo: itemNo,
+      type: (r[col.type]||"").trim().toLowerCase(),
+      startingAmount: col.startingAmount!==-1 ? (parseNum(r[col.startingAmount])||0) : 0,
+      adjustment: parseNum(r[col.adjustment]) || 0,
+      sold: parseNum(r[col.sold]) || 0,
+      endingAmount: col.endingAmount!==-1 ? (parseNum(r[col.endingAmount])||0) : 0
+    });
+  }
+  if (!logs.length) throw new Error("No log rows were found in this file.");
+  return logs;
+}
+
+/* ============================================================
+   REPORT COMPUTATION
+   ============================================================ */
+function buildReport(items, logs){
+  var logsByItem = {};
+  var maxDate = null;
+  logs.forEach(function(l){
+    if (!logsByItem[l.itemNo]) logsByItem[l.itemNo] = [];
+    logsByItem[l.itemNo].push(l);
+    if (l.date && (!maxDate || l.date > maxDate)) maxDate = l.date;
+  });
+  Object.keys(logsByItem).forEach(function(k){
+    logsByItem[k].sort(function(a,b){ return a.logId - b.logId; });
+  });
+  var asOf = maxDate || new Date();
+  var windowStart = new Date(asOf); windowStart.setDate(windowStart.getDate() - WINDOW_DAYS);
+  var priorStart = new Date(asOf); priorStart.setDate(priorStart.getDate() - WINDOW_DAYS*2);
+
+  var computed = items.map(function(item){
+    var logsForItem = logsByItem[item.itemNo] || [];
+    var soldLogs = logsForItem.filter(function(l){ return l.type === "sold"; });
+
+    // 1. corrected starting inventory
+    var correctedStarting = item.startingRaw;
+    if (!correctedStarting || correctedStarting === 0){
+      var firstAdj = logsForItem.filter(function(l){ return l.type === "adjustment"; })[0];
+      if (firstAdj) correctedStarting = firstAdj.adjustment;
+    }
+
+    // 2. velocity (sold-type logs only) + trend
+    function sumInRange(start, end){
+      return soldLogs.filter(function(l){ return l.date && l.date >= start && l.date <= end; })
+                      .reduce(function(s,l){ return s + (l.sold||0); }, 0);
+    }
+    var recentSold = sumInRange(windowStart, asOf);
+    var priorSold = sumInRange(priorStart, windowStart);
+    var velocity;
+    if (recentSold > 0){
+      velocity = recentSold / WINDOW_DAYS;
+    } else if (soldLogs.length){
+      var firstDate = soldLogs.reduce(function(min,l){ return (l.date && (!min || l.date<min)) ? l.date : min; }, null);
+      var spanDays = firstDate ? Math.max(1, (asOf - firstDate) / 86400000) : WINDOW_DAYS;
+      var totalSold = soldLogs.reduce(function(s,l){ return s+(l.sold||0); }, 0);
+      velocity = totalSold / spanDays;
+    } else {
+      velocity = 0;
+    }
+    var trend;
+    if (recentSold === 0 && priorSold === 0) trend = "steady";
+    else if (priorSold === 0 && recentSold > 0) trend = "accelerating";
+    else if (recentSold === 0 && priorSold > 0) trend = "slowing";
+    else {
+      var ratio = recentSold / priorSold;
+      trend = ratio >= 1.15 ? "accelerating" : (ratio <= 0.85 ? "slowing" : "steady");
+    }
+
+    // 3. sell-through
+    var sellThrough = (correctedStarting && correctedStarting > 0) ? (item.sold / correctedStarting) : null;
+
+    // 4. days of supply
+    var daysOfSupply = velocity > 0 ? (item.onHand / velocity) : (item.onHand > 0 ? Infinity : 0);
+
+    // 5. reorder tier
+    var tier;
+    var trig = item.trigger;
+    if (trig == null){
+      tier = "healthy";
+    } else if (item.onHand <= trig){
+      tier = "critical";
+    } else if (velocity > 0 && ((item.onHand - trig) / velocity) <= CRITICAL_LEAD_DAYS){
+      tier = "critical";
+    } else if (trig > 0 && item.onHand <= trig * WATCH_BAND){
+      tier = "watch";
+    } else {
+      tier = "healthy";
+    }
+
+    // 6. slow mover / dead stock
+    var invValueBase = item.invValueBase != null ? item.invValueBase : (item.basePrice != null ? item.onHand*item.basePrice : null);
+    var invValueCost = item.unitCost != null ? item.onHand*item.unitCost : null;
+    var isSlowMover = item.onHand > 0 && velocity <= SLOW_VELOCITY_MAX && (invValueBase||0) >= DEAD_STOCK_MIN_VALUE;
+
+    // 7. data integrity
+    var expected = (item.startingRaw||0) + (item.adj||0) - (item.sold||0);
+    var integrityOk = expected === item.onHand;
+
+    return Object.assign({}, item, {
+      correctedStarting: correctedStarting,
+      velocity: velocity, trend: trend, sellThrough: sellThrough, daysOfSupply: daysOfSupply,
+      tier: tier, isSlowMover: isSlowMover, integrityOk: integrityOk, expectedOnHand: expected,
+      invValueBase: invValueBase, invValueCost: invValueCost,
+      logCount: logsForItem.length
+    });
+  });
+
+  var summary = {
+    asOf: asOf,
+    itemCount: computed.length,
+    totalValueBase: computed.reduce(function(s,i){ return s + (i.invValueBase||0); }, 0),
+    totalValueCost: computed.reduce(function(s,i){ return s + (i.invValueCost||0); }, 0),
+    critical: computed.filter(function(i){ return i.tier==="critical"; }).length,
+    watch: computed.filter(function(i){ return i.tier==="watch"; }).length,
+    healthy: computed.filter(function(i){ return i.tier==="healthy"; }).length,
+    integrityIssues: computed.filter(function(i){ return !i.integrityOk; }),
+    slowMovers: computed.filter(function(i){ return i.isSlowMover; })
+      .sort(function(a,b){ return (b.invValueBase||0)-(a.invValueBase||0); }),
+    reorderList: computed.filter(function(i){ return i.tier==="critical" || i.tier==="watch"; })
+      .sort(function(a,b){
+        var rank = { critical:0, watch:1 };
+        if (rank[a.tier]!==rank[b.tier]) return rank[a.tier]-rank[b.tier];
+        return (a.daysOfSupply==null?Infinity:a.daysOfSupply) - (b.daysOfSupply==null?Infinity:b.daysOfSupply);
+      })
+  };
+
+  return { items: computed, summary: summary };
+}
+
+/* ============================================================
+   BRAND INPUT (manual — logo file + color picker, no lookup)
+   ============================================================ */
+function extractHex(s){
+  if (!s) return null;
+  var m = String(s).match(/#?[0-9a-fA-F]{6}\b|#?[0-9a-fA-F]{3}\b/);
+  if (!m) return null;
+  var h = m[0].replace("#","");
+  if (h.length === 3) h = h.split("").map(function(c){return c+c;}).join("");
+  return "#" + h;
+}
+// Reads an uploaded logo as a data: URL so it's embedded directly in the
+// report with no external reference — works fully offline, nothing to host.
+function readLogoAsDataUrl(file){
+  return new Promise(function(resolve, reject){
+    var reader = new FileReader();
+    reader.onload = function(){ resolve(reader.result); };
+    reader.onerror = function(){ reject(new Error("Couldn't read that image.")); };
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ============================================================
+   APP STATE
+   ============================================================ */
+var state = {
+  customerName: "",
+  snapshotItems: null,
+  logEntries: null,
+  brand: null,       // { color1, logo } — set directly from the logo upload + color picker
+  report: null,
+  costVisible: false,
+  sort: { key: "tier", dir: 1 },
+  filter: { text: "", tier: "", integrityOnly: false }
+};
+
+var TIER_RANK = { critical:0, watch:1, healthy:2 };
+
+/* ============================================================
+   SETUP SCREEN WIRING
+   ============================================================ */
+var el = {
+  customerNameText: $("#customerNameText"),
+  dzLogo: $("#dz-logo"),
+  fileLogo: $("#file-logo"),
+  logoResult: $("#logo-result"),
+  brandColorPicker: $("#brandColorPicker"),
+  brandColorHex: $("#brandColorHex"),
+  dzSnapshot: $("#dz-snapshot"),
+  fileSnapshot: $("#file-snapshot"),
+  snapshotResult: $("#snapshot-result"),
+  dzLogs: $("#dz-logs"),
+  fileLogs: $("#file-logs"),
+  logsResult: $("#logs-result"),
+  btnGenerate: $("#btn-generate"),
+  generateError: $("#generate-error")
+};
+
+function updateGenerateEnabled(){
+  el.btnGenerate.disabled = !(state.customerName.trim() && state.snapshotItems && state.logEntries);
+}
+
+el.customerNameText.addEventListener("input", function(){
+  state.customerName = el.customerNameText.value;
+  updateGenerateEnabled();
+});
+
+/* ---------- brand: color picker (logo dropzone wired below, after wireDropzone is defined) ---------- */
+el.brandColorPicker.addEventListener("input", function(){
+  el.brandColorHex.value = el.brandColorPicker.value;
+});
+el.brandColorHex.addEventListener("input", function(){
+  var hex = extractHex(el.brandColorHex.value);
+  if (hex) el.brandColorPicker.value = hex;
+});
+
+/* ---------- file drop zones ---------- */
+function wireDropzone(dz, input, onFile){
+  dz.addEventListener("click", function(){ input.click(); });
+  dz.addEventListener("keydown", function(e){ if (e.key==="Enter"||e.key===" "){ e.preventDefault(); input.click(); } });
+  ["dragenter","dragover"].forEach(function(evt){
+    dz.addEventListener(evt, function(e){ e.preventDefault(); dz.classList.add("drag"); });
+  });
+  ["dragleave","drop"].forEach(function(evt){
+    dz.addEventListener(evt, function(e){ e.preventDefault(); dz.classList.remove("drag"); });
+  });
+  dz.addEventListener("drop", function(e){
+    var f = e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) onFile(f);
+  });
+  input.addEventListener("change", function(){
+    if (input.files && input.files[0]) onFile(input.files[0]);
+  });
+}
+
+function readFileText(file){
+  return new Promise(function(resolve, reject){
+    var reader = new FileReader();
+    reader.onload = function(){ resolve(reader.result); };
+    reader.onerror = function(){ reject(new Error("Couldn't read that file.")); };
+    reader.readAsText(file);
+  });
+}
+
+function showFileChip(container, file, onRemove){
+  container.innerHTML = "";
+  var chip = document.createElement("div");
+  chip.className = "file-chip";
+  chip.innerHTML =
+    '<div class="name"><svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg><span>' +
+    escapeHtml(file.name) + "</span></div>" +
+    '<button type="button" aria-label="Remove file"><svg class="icon icon-sm" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>';
+  chip.querySelector("button").addEventListener("click", onRemove);
+  container.appendChild(chip);
+}
+function showInlineError(container, msg){
+  container.innerHTML = '<div class="inline-error"><svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><div>' + escapeHtml(msg) + "</div></div>";
+}
+
+wireDropzone(el.dzSnapshot, el.fileSnapshot, function(file){
+  el.snapshotResult.innerHTML = "";
+  readFileText(file).then(function(text){
+    try {
+      var items = parseSnapshot(text);
+      state.snapshotItems = items;
+      $("#step-snapshot").classList.add("done");
+      showFileChip(el.snapshotResult, file, function(){
+        state.snapshotItems = null;
+        $("#step-snapshot").classList.remove("done");
+        el.snapshotResult.innerHTML = "";
+        el.fileSnapshot.value = "";
+        updateGenerateEnabled();
+      });
+      var note = document.createElement("div");
+      note.className = "inline-note";
+      note.innerHTML = '<svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg><div>Parsed <b>' + items.length + '</b> items.</div>';
+      el.snapshotResult.appendChild(note);
+      updateGenerateEnabled();
+    } catch(err){
+      state.snapshotItems = null;
+      $("#step-snapshot").classList.remove("done");
+      showInlineError(el.snapshotResult, err.message);
+      updateGenerateEnabled();
+    }
+  }).catch(function(err){ showInlineError(el.snapshotResult, err.message); });
+});
+
+wireDropzone(el.dzLogs, el.fileLogs, function(file){
+  el.logsResult.innerHTML = "";
+  readFileText(file).then(function(text){
+    try {
+      var logs = parseLogs(text);
+      state.logEntries = logs;
+      $("#step-logs").classList.add("done");
+      showFileChip(el.logsResult, file, function(){
+        state.logEntries = null;
+        $("#step-logs").classList.remove("done");
+        el.logsResult.innerHTML = "";
+        el.fileLogs.value = "";
+        updateGenerateEnabled();
+      });
+      var note = document.createElement("div");
+      note.className = "inline-note";
+      note.innerHTML = '<svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg><div>Parsed <b>' + logs.length + '</b> log entries.</div>';
+      el.logsResult.appendChild(note);
+      updateGenerateEnabled();
+    } catch(err){
+      state.logEntries = null;
+      $("#step-logs").classList.remove("done");
+      showInlineError(el.logsResult, err.message);
+      updateGenerateEnabled();
+    }
+  }).catch(function(err){ showInlineError(el.logsResult, err.message); });
+});
+
+wireDropzone(el.dzLogo, el.fileLogo, function(file){
+  el.logoResult.innerHTML = "";
+  readLogoAsDataUrl(file).then(function(dataUrl){
+    state.brand = state.brand || {};
+    state.brand.logo = dataUrl;
+    $("#step-brand").classList.add("done");
+    showFileChip(el.logoResult, file, function(){
+      if (state.brand) state.brand.logo = null;
+      $("#step-brand").classList.remove("done");
+      el.logoResult.innerHTML = "";
+      el.fileLogo.value = "";
+    });
+  }).catch(function(err){ showInlineError(el.logoResult, err.message); });
+});
+
+/* ---------- generate ---------- */
+el.btnGenerate.addEventListener("click", function(){
+  el.generateError.innerHTML = "";
+  if (!state.snapshotItems || !state.logEntries || !state.customerName.trim()){
+    return;
+  }
+  try {
+    state.brand = state.brand || {};
+    var pickedHex = extractHex(el.brandColorHex.value) || el.brandColorPicker.value;
+    state.brand.color1 = (pickedHex && pickedHex.toLowerCase() !== "#76bd1d") ? pickedHex : null;
+    state.report = buildReport(state.snapshotItems, state.logEntries);
+    applyBrandTheme(state.brand);
+    renderReport();
+    $("#setup-screen").hidden = true;
+    $("#report-screen").hidden = false;
+    window.scrollTo(0,0);
+  } catch(err){
+    showInlineError(el.generateError, "Something went wrong building the report: " + err.message);
+  }
+});
+
+/* ============================================================
+   THEME
+   ============================================================ */
+function applyBrandTheme(brand){
+  var root = document.documentElement.style;
+  var accent = (brand && brand.color1) ? brand.color1 : "#76bd1d";
+  var accent2 = (brand && brand.color2) ? brand.color2 : "#53585a";
+  root.setProperty("--accent-500", accent);
+  root.setProperty("--accent-600", shade(accent, -10));
+  root.setProperty("--accent-700", accentFillFor(accent));
+  root.setProperty("--accent-800", shade(accentFillFor(accent), -10));
+  root.setProperty("--accent-100", tint(accent, 38));
+  root.setProperty("--accent-2", accent2);
+  // Buttons/indicators still use Eagle's own brand-fill for primary actions —
+  // only the report's decorative accent (header bar, hovers, table highlight) picks up the customer color.
+  root.setProperty("--brand-indicator", accent);
+}
+
+/* ============================================================
+   REPORT RENDERING
+   ============================================================ */
+function renderReport(){
+  var data = state.report;
+  var s = data.summary;
+
+  $("#tb-customer-name").textContent = state.customerName;
+  $("#rh-customer-name").textContent = state.customerName;
+  $("#rh-report-date").textContent = fmtDate(new Date());
+  $("#rh-data-date").textContent = fmtDate(s.asOf);
+
+  var custLogo = $("#rh-cust-logo"), xMark = $("#rh-x");
+  if (state.brand && state.brand.logo){
+    custLogo.src = state.brand.logo;
+    custLogo.hidden = false;
+    custLogo.onerror = function(){ custLogo.hidden = true; xMark.hidden = true; };
+    xMark.hidden = false;
+  } else {
+    custLogo.hidden = true;
+    xMark.hidden = true;
+  }
+
+  // integrity banner
+  var banner = $("#integrity-banner-slot");
+  if (s.integrityIssues.length){
+    banner.innerHTML = '<div class="integrity-banner"><svg class="icon" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>' +
+      '<div><b>' + s.integrityIssues.length + ' item' + (s.integrityIssues.length===1?"":"s") + '</b> don&rsquo;t reconcile in the snapshot export (Starting + Adj. &minus; Sold &ne; On Hand). These are flagged in the table below with ' +
+      '<svg class="icon icon-sm integrity-flag" viewBox="0 0 24 24" style="display:inline;vertical-align:-3px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> and worth a quick check against Brightsites before sending.</div></div>';
+  } else {
+    banner.innerHTML = "";
+  }
+
+  // stat grid
+  $("#stat-grid").innerHTML = [
+    statCard("Total On-Hand Value", fmtMoney0(s.totalValueBase), fmtMoney0(s.totalValueCost), "base-only/cost-only"),
+    statCard("Items Tracked", String(s.itemCount)),
+    statCard("Critical", String(s.critical), null, null, "tier-critical"),
+    statCard("Watch", String(s.watch), null, null, "tier-watch"),
+    statCard("Healthy", String(s.healthy), null, null, "tier-healthy")
+  ].join("");
+
+  function statCard(label, baseVal, costVal, mode, tierClass){
+    var valueHtml;
+    if (costVal != null){
+      valueHtml = '<div class="value base-only">' + baseVal + '</div><div class="value cost-only">' + costVal + ' <span style="font-size:13px;font-weight:600;color:var(--text-muted)">at cost</span></div>';
+    } else {
+      valueHtml = '<div class="value">' + baseVal + '</div>';
+    }
+    return '<div class="stat-card ' + (tierClass||"") + '"><div class="label">' + escapeHtml(label) + '</div>' + valueHtml + '</div>';
+  }
+
+  // reorder priority list
+  var reorderList = $("#reorder-list");
+  $("#reorder-count").textContent = s.reorderList.length ? "(" + s.reorderList.length + ")" : "";
+  if (!s.reorderList.length){
+    reorderList.innerHTML = '<div class="empty-state"><svg class="icon" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>Nothing needs reordering right now.</div>';
+  } else {
+    reorderList.innerHTML = s.reorderList.map(priorityRow).join("");
+  }
+
+  // slow movers
+  var slowList = $("#slowmover-list");
+  $("#slowmover-count").textContent = s.slowMovers.length ? "(" + s.slowMovers.length + ")" : "";
+  if (!s.slowMovers.length){
+    slowList.innerHTML = '<div class="empty-state"><svg class="icon" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>No slow-moving or dead stock flagged.</div>';
+  } else {
+    slowList.innerHTML = s.slowMovers.map(slowRow).join("");
+  }
+
+  renderTable();
+}
+
+function tierBadge(tier){
+  var map = {
+    critical: ['badge-critical','Critical'],
+    watch: ['badge-watch','Watch'],
+    healthy: ['badge-healthy','Healthy']
+  };
+  var m = map[tier] || ['badge-neutral', tier];
+  return '<span class="badge ' + m[0] + '">' + m[1] + '</span>';
+}
+function trendIcon(trend){
+  if (trend === "accelerating") return '<span class="trend-up">&#9650; Accelerating</span>';
+  if (trend === "slowing") return '<span class="trend-down">&#9660; Slowing</span>';
+  return '<span class="trend-flat">&#9644; Steady</span>';
+}
+
+function priorityRow(item){
+  return '<div class="priority-row ' + item.tier + '">' +
+    '<div>' + tierBadge(item.tier) + '</div>' +
+    '<div><div class="pname">' + escapeHtml(item.name) + (item.color ? " &mdash; " + escapeHtml(item.color) : "") + '</div>' +
+    '<div class="pmeta"><code>' + escapeHtml(item.itemNo) + '</code> &middot; ' + (item.integrityOk ? "" : '<span style="color:var(--eg-warning)">data check flagged &middot; </span>') + trendIcon(item.trend) + '</div></div>' +
+    '<div class="pstat"><div class="n">' + item.onHand + '</div><div class="l">On Hand</div></div>' +
+    '<div class="pstat"><div class="n">' + (item.trigger==null?"—":item.trigger) + '</div><div class="l">Trigger</div></div>' +
+    '<div class="pstat"><div class="n">' + fmtDays(item.daysOfSupply) + '</div><div class="l">Days Left</div></div>' +
+    '</div>';
+}
+function slowRow(item){
+  return '<div class="priority-row slow">' +
+    '<div><span class="badge badge-neutral">Slow</span></div>' +
+    '<div><div class="pname">' + escapeHtml(item.name) + (item.color ? " &mdash; " + escapeHtml(item.color) : "") + '</div>' +
+    '<div class="pmeta"><code>' + escapeHtml(item.itemNo) + '</code> &middot; ' + item.velocity.toFixed(2) + ' units/day</div></div>' +
+    '<div class="pstat"><div class="n">' + item.onHand + '</div><div class="l">On Hand</div></div>' +
+    '<div class="pstat"><div class="n">' + fmtMoney0(item.invValueBase) + '</div><div class="l">Tied Up</div></div>' +
+    '<div class="pstat"><div class="n">' + fmtDays(item.daysOfSupply) + '</div><div class="l">Days Left</div></div>' +
+    '</div>';
+}
+
+/* ---------- table ---------- */
+function getFilteredSorted(){
+  var items = state.report.items.slice();
+  var f = state.filter;
+  if (f.text){
+    var q = f.text.toLowerCase();
+    items = items.filter(function(i){
+      return (i.name||"").toLowerCase().indexOf(q)!==-1 ||
+             (i.itemNo||"").toLowerCase().indexOf(q)!==-1 ||
+             (i.color||"").toLowerCase().indexOf(q)!==-1 ||
+             (i.size||"").toLowerCase().indexOf(q)!==-1;
+    });
+  }
+  if (f.tier) items = items.filter(function(i){ return i.tier === f.tier; });
+  if (f.integrityOnly) items = items.filter(function(i){ return !i.integrityOk; });
+
+  var key = state.sort.key, dir = state.sort.dir;
+  items.sort(function(a,b){
+    var av = a[key], bv = b[key];
+    if (key === "tier"){ av = TIER_RANK[a.tier]; bv = TIER_RANK[b.tier]; }
+    if (av == null && bv == null) return 0;
+    if (av == null) return 1;
+    if (bv == null) return -1;
+    if (typeof av === "string") return av.localeCompare(bv) * dir;
+    if (av === Infinity && bv === Infinity) return 0;
+    if (av === Infinity) return 1*dir;
+    if (bv === Infinity) return -1*dir;
+    return (av - bv) * dir;
+  });
+  return items;
+}
+
+function renderTable(){
+  var items = getFilteredSorted();
+  $("#tbl-result-count").textContent = items.length + " of " + state.report.items.length + " items";
+  var rows = items.map(function(i){
+    return "<tr>" +
+      '<td class="name-cell"><div class="pname">' + escapeHtml(i.name) + (!i.integrityOk ? ' <svg class="icon icon-sm integrity-flag" viewBox="0 0 24 24" title="Starting + Adj. − Sold ≠ On Hand"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>' : "") + '</div>' +
+      '<div class="pvariant">' + [i.color,i.size].filter(Boolean).map(escapeHtml).join(" &middot; ") + '</div></td>' +
+      '<td class="mono">' + escapeHtml(i.itemNo) + "</td>" +
+      '<td class="num">' + i.onHand + "</td>" +
+      '<td class="num">' + (i.trigger==null?"—":i.trigger) + "</td>" +
+      "<td>" + tierBadge(i.tier) + "</td>" +
+      '<td class="num">' + fmtPct(i.sellThrough) + "</td>" +
+      '<td class="num">' + i.velocity.toFixed(2) + "</td>" +
+      '<td class="num">' + fmtDays(i.daysOfSupply) + "</td>" +
+      "<td>" + trendIcon(i.trend) + "</td>" +
+      '<td class="num">' + fmtMoney(i.basePrice) + "</td>" +
+      '<td class="num col-cost">' + fmtMoney(i.unitCost) + "</td>" +
+      '<td class="num">' + fmtMoney0(i.invValueBase) + "</td>" +
+      '<td class="num col-cost">' + fmtMoney0(i.invValueCost) + "</td>" +
+      "</tr>";
+  }).join("");
+  $("#inv-tbody").innerHTML = rows || '<tr><td colspan="13" style="text-align:center;padding:32px;color:var(--text-muted)">No items match these filters.</td></tr>';
+
+  $all("#inv-table thead th").forEach(function(th){
+    th.classList.toggle("sorted", th.dataset.key === state.sort.key);
+    var arrow = th.querySelector(".arrow");
+    if (arrow) arrow.innerHTML = (th.dataset.key===state.sort.key && state.sort.dir===-1) ? "&#9660;" : "&#9650;";
+  });
+}
+
+$all("#inv-table thead th").forEach(function(th){
+  th.addEventListener("click", function(){
+    var key = th.dataset.key;
+    if (state.sort.key === key) state.sort.dir *= -1;
+    else { state.sort.key = key; state.sort.dir = (key==="tier"?1:1); }
+    renderTable();
+  });
+});
+
+$("#tbl-search").addEventListener("input", function(e){ state.filter.text = e.target.value; renderTable(); });
+$("#tbl-tier-filter").addEventListener("change", function(e){ state.filter.tier = e.target.value; renderTable(); });
+$("#tbl-integrity-only").addEventListener("change", function(e){ state.filter.integrityOnly = e.target.checked; renderTable(); });
+
+/* ---------- cost toggle ---------- */
+var costToggle = $("#costToggle");
+costToggle.addEventListener("click", function(){
+  state.costVisible = !state.costVisible;
+  costToggle.classList.toggle("on", state.costVisible);
+  document.body.classList.toggle("cost-visible", state.costVisible);
+});
+
+/* ============================================================
+   XLSX EXPORT — minimal, dependency-free .xlsx writer.
+   No library, no CDN: this file stays fully offline/self-contained.
+   An .xlsx is just a zip of small XML parts; we build that zip by
+   hand using the "store" method (no compression needed for files
+   this size) and write just enough OOXML for a clean, formatted
+   single-sheet workbook.
+   ============================================================ */
+function crc32(bytes){
+  if (!crc32.table){
+    var t = new Uint32Array(256);
+    for (var n=0;n<256;n++){
+      var c = n;
+      for (var k=0;k<8;k++){ c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1); }
+      t[n] = c >>> 0;
+    }
+    crc32.table = t;
+  }
+  var c = 0xFFFFFFFF;
+  for (var i=0;i<bytes.length;i++){ c = crc32.table[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8); }
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+function u16le(n){ return new Uint8Array([n & 0xFF, (n>>>8) & 0xFF]); }
+function u32le(n){ return new Uint8Array([n & 0xFF, (n>>>8) & 0xFF, (n>>>16) & 0xFF, (n>>>24) & 0xFF]); }
+function concatBytes(arrays){
+  var total = arrays.reduce(function(s,a){ return s+a.length; }, 0);
+  var out = new Uint8Array(total);
+  var offset = 0;
+  arrays.forEach(function(a){ out.set(a, offset); offset += a.length; });
+  return out;
+}
+function buildXlsxBlob(files){
+  var localParts = [], centralParts = [], offset = 0;
+  var names = Object.keys(files);
+  names.forEach(function(name){
+    var nameBytes = new TextEncoder().encode(name);
+    var dataBytes = new TextEncoder().encode(files[name]);
+    var crc = crc32(dataBytes);
+    var localHeader = concatBytes([
+      u32le(0x04034b50), u16le(20), u16le(0x0800), u16le(0), u16le(0), u16le(0),
+      u32le(crc), u32le(dataBytes.length), u32le(dataBytes.length),
+      u16le(nameBytes.length), u16le(0), nameBytes
+    ]);
+    localParts.push(localHeader, dataBytes);
+    centralParts.push(concatBytes([
+      u32le(0x02014b50), u16le(20), u16le(20), u16le(0x0800), u16le(0), u16le(0), u16le(0),
+      u32le(crc), u32le(dataBytes.length), u32le(dataBytes.length),
+      u16le(nameBytes.length), u16le(0), u16le(0), u16le(0), u16le(0), u32le(0),
+      u32le(offset), nameBytes
+    ]));
+    offset += localHeader.length + dataBytes.length;
+  });
+  var centralDir = concatBytes(centralParts);
+  var eocd = concatBytes([
+    u32le(0x06054b50), u16le(0), u16le(0), u16le(names.length), u16le(names.length),
+    u32le(centralDir.length), u32le(offset), u16le(0)
+  ]);
+  return new Blob([concatBytes(localParts.concat([centralDir, eocd]))],
+    { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+}
+
+function colLetter(n){
+  var s = "", m = n+1;
+  while(m>0){ var r = (m-1)%26; s = String.fromCharCode(65+r)+s; m = Math.floor((m-1)/26); }
+  return s;
+}
+function xlXmlEscape(s){
+  return String(s==null?"":s).replace(/[&<>]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c]; });
+}
+function xlCellNum(ref, style, value){
+  if (value==null || isNaN(value)) return '<c r="'+ref+'" s="'+style+'"/>';
+  return '<c r="'+ref+'" s="'+style+'"><v>'+value+'</v></c>';
+}
+function xlCellStr(ref, style, text){
+  return '<c r="'+ref+'" t="inlineStr" s="'+style+'"><is><t xml:space="preserve">'+xlXmlEscape(text)+'</t></is></c>';
+}
+var XLSX_HEADERS = ["Item","Variant","Item #","On Hand","Trigger","Status","Sell-Through","Velocity/Day","Days Left","Trend","Price","Unit Cost","Value (Price)","Value (Cost)","Data OK"];
+var TIER_LABEL = { critical:"Critical", watch:"Watch", healthy:"Healthy" };
+var TREND_LABEL = { accelerating:"Accelerating", slowing:"Slowing", steady:"Steady" };
+function buildXlsxSheetRows(items){
+  var rows = ['<row r="1">' + XLSX_HEADERS.map(function(h,ci){ return xlCellStr(colLetter(ci)+"1", 1, h); }).join("") + '</row>'];
+  items.forEach(function(it, idx){
+    var r = idx+2, L = colLetter;
+    var cells = [
+      xlCellStr(L(0)+r, 0, it.name||""),
+      xlCellStr(L(1)+r, 0, [it.color,it.size].filter(Boolean).join(" / ")),
+      xlCellStr(L(2)+r, 0, it.itemNo||""),
+      xlCellNum(L(3)+r, 5, it.onHand),
+      it.trigger==null ? '<c r="'+L(4)+r+'" s="5"/>' : xlCellNum(L(4)+r,5,it.trigger),
+      xlCellStr(L(5)+r, 0, TIER_LABEL[it.tier]||it.tier),
+      it.sellThrough==null ? '<c r="'+L(6)+r+'" s="3"/>' : xlCellNum(L(6)+r,3,it.sellThrough),
+      xlCellNum(L(7)+r,4,it.velocity),
+      (it.daysOfSupply==null||isNaN(it.daysOfSupply)) ? '<c r="'+L(8)+r+'" s="5"/>'
+        : (!isFinite(it.daysOfSupply) ? xlCellStr(L(8)+r,0,"∞") : xlCellNum(L(8)+r,5,Math.round(it.daysOfSupply))),
+      xlCellStr(L(9)+r, 0, TREND_LABEL[it.trend]||it.trend),
+      it.basePrice==null ? '<c r="'+L(10)+r+'" s="2"/>' : xlCellNum(L(10)+r,2,it.basePrice),
+      it.unitCost==null ? '<c r="'+L(11)+r+'" s="2"/>' : xlCellNum(L(11)+r,2,it.unitCost),
+      it.invValueBase==null ? '<c r="'+L(12)+r+'" s="2"/>' : xlCellNum(L(12)+r,2,it.invValueBase),
+      it.invValueCost==null ? '<c r="'+L(13)+r+'" s="2"/>' : xlCellNum(L(13)+r,2,it.invValueCost),
+      xlCellStr(L(14)+r, 0, it.integrityOk ? "Yes" : "No")
+    ];
+    rows.push('<row r="'+r+'">'+cells.join("")+'</row>');
+  });
+  return rows.join("");
+}
+function buildXlsxWorksheet(items){
+  var lastCol = colLetter(XLSX_HEADERS.length-1), lastRow = items.length+1;
+  var colsXml = '<cols>' +
+    '<col min="1" max="1" width="30" customWidth="1"/>' +
+    '<col min="2" max="3" width="16" customWidth="1"/>' +
+    '<col min="4" max="5" width="10" customWidth="1"/>' +
+    '<col min="6" max="6" width="11" customWidth="1"/>' +
+    '<col min="7" max="7" width="12" customWidth="1"/>' +
+    '<col min="8" max="8" width="11" customWidth="1"/>' +
+    '<col min="9" max="9" width="10" customWidth="1"/>' +
+    '<col min="10" max="10" width="13" customWidth="1"/>' +
+    '<col min="11" max="14" width="12" customWidth="1"/>' +
+    '<col min="15" max="15" width="9" customWidth="1"/>' +
+    '</cols>';
+  return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
+    '<dimension ref="A1:'+lastCol+lastRow+'"/>' +
+    '<sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>' +
+    colsXml + '<sheetData>' + buildXlsxSheetRows(items) + '</sheetData>' +
+    '<autoFilter ref="A1:'+lastCol+lastRow+'"/>' +
+    '</worksheet>';
+}
+var XLSX_CONTENT_TYPES = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>';
+var XLSX_RELS = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>';
+var XLSX_WORKBOOK = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Inventory" sheetId="1" r:id="rId1"/></sheets></workbook>';
+var XLSX_WORKBOOK_RELS = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>';
+var XLSX_STYLES = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
+  '<numFmts count="4"><numFmt numFmtId="164" formatCode="$#,##0.00"/><numFmt numFmtId="165" formatCode="0.0%"/><numFmt numFmtId="166" formatCode="0.00"/><numFmt numFmtId="167" formatCode="0"/></numFmts>' +
+  '<fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font></fonts>' +
+  '<fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF2A2D2E"/><bgColor indexed="64"/></patternFill></fill></fills>' +
+  '<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>' +
+  '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>' +
+  '<cellXfs count="6">' +
+  '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>' +
+  '<xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/>' +
+  '<xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>' +
+  '<xf numFmtId="165" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>' +
+  '<xf numFmtId="166" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>' +
+  '<xf numFmtId="167" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>' +
+  '</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
+
+function exportToXlsx(){
+  if (!state.report) return;
+  var items = state.report.items.slice().sort(function(a,b){
+    var rank = { critical:0, watch:1, healthy:2 };
+    if (rank[a.tier]!==rank[b.tier]) return rank[a.tier]-rank[b.tier];
+    return (a.daysOfSupply==null?Infinity:a.daysOfSupply) - (b.daysOfSupply==null?Infinity:b.daysOfSupply);
+  });
+  var files = {
+    "[Content_Types].xml": XLSX_CONTENT_TYPES,
+    "_rels/.rels": XLSX_RELS,
+    "xl/workbook.xml": XLSX_WORKBOOK,
+    "xl/_rels/workbook.xml.rels": XLSX_WORKBOOK_RELS,
+    "xl/styles.xml": XLSX_STYLES,
+    "xl/worksheets/sheet1.xml": buildXlsxWorksheet(items)
+  };
+  var blob = buildXlsxBlob(files);
+  var name = (state.customerName||"Inventory Report").trim().replace(/[\\/:*?"<>|]+/g,"_") || "Inventory Report";
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = name + " - Inventory Export.xlsx";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+}
+$("#btn-export-xlsx").addEventListener("click", exportToXlsx);
+
+/* ---------- print / new report ---------- */
+$("#btn-print").addEventListener("click", function(){ window.print(); });
+$("#btn-new-report").addEventListener("click", function(){
+  $("#report-screen").hidden = true;
+  $("#setup-screen").hidden = false;
+  window.scrollTo(0,0);
+});
+
+})();
+</script>
+</body>
+</html>

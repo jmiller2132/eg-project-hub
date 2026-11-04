@@ -1,0 +1,1107 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Eagle Quote Builder</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@500;600;700&family=Open+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: quote + item form on the left, scrolling stack of quote pages (cover, one page per item, closing) on the right */
+  :root {
+    --bg: #EEF0F1; --surface: #FFFFFF; --panel: #2A2D2E; --panel-fg: #FFFFFF; --panel-muted: #9AA0A3;
+    --fg: #2A2D2E; --muted: #6A7073; --line: #DDE0E2; --tile: #F0F1F2;
+    --green: #76BD1D; --green-dark: #4A7812; --input-bg: #FFFFFF;
+    --warn-bg: #FFF4D6; --warn-fg: #7A5200;
+    /* quote pages stay paper-white in both themes, like the printed deck */
+    --pg-bg: #FFFFFF; --pg-fg: #2A2D2E; --pg-muted: #6A7073; --pg-line: #DDE0E2; --pg-tile: #F0F1F2; --pg-green-text: #4A7812; --pg-dark: #2A2D2E;
+    --display: 'Jost', 'Helvetica Neue', Arial, sans-serif;
+    --body: 'Open Sans', system-ui, sans-serif;
+    --mono: 'IBM Plex Mono', ui-monospace, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #151718; --surface: #1F2223; --fg: #ECEEEF; --muted: #98A0A3; --line: #343839;
+      --tile: #2A2D2E; --input-bg: #262A2B; --green-dark: #8FD62F; --panel: #101213;
+      --warn-bg: #3A3016; --warn-fg: #F2D488; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #151718; --surface: #1F2223; --fg: #ECEEEF; --muted: #98A0A3; --line: #343839;
+    --tile: #2A2D2E; --input-bg: #262A2B; --green-dark: #8FD62F; --panel: #101213;
+    --warn-bg: #3A3016; --warn-fg: #F2D488; color-scheme: dark;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.5 var(--body); }
+  .topbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--panel); color: var(--panel-fg); display: flex; align-items: center; gap: 14px; padding: 10px 20px; border-bottom: 3px solid var(--green); flex-wrap: wrap; }
+  .wordmark { font: 700 18px/1 var(--display); letter-spacing: .04em; text-transform: uppercase; }
+  .wordmark b { color: var(--green); font-weight: 700; }
+  .topbar .tool { font: 500 11px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--panel-muted); }
+  .topbar .status { margin-left: auto; font: 500 11px var(--mono); color: var(--green); letter-spacing: .06em; }
+  .topbar .newq { background: transparent; color: var(--panel-fg); border: 1px solid #5B6063; border-radius: 3px; padding: 5px 10px; font: 600 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; cursor: pointer; }
+  .topbar .newq.armed { border-color: var(--green); color: var(--green); }
+
+  .wrap { max-width: 1320px; margin: 0 auto; padding: 22px 20px 48px; display: grid; grid-template-columns: minmax(0, 470px) minmax(0, 1fr); gap: 22px; align-items: start; }
+  @media (max-width: 960px) { .wrap { grid-template-columns: minmax(0, 1fr); } }
+  .form { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  #itemForm { display: flex; flex-direction: column; gap: 14px; }
+  fieldset { border: 1px solid var(--line); background: var(--surface); border-radius: 4px; margin: 0; padding: 14px 16px 16px; min-width: 0; }
+  legend { font: 600 11px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--green-dark); padding: 0 6px; margin-left: -6px; }
+  .field { display: flex; flex-direction: column; gap: 4px; margin-top: 10px; min-width: 0; }
+  fieldset > .field:first-of-type { margin-top: 0; }
+  .row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .row.r3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  @media (max-width: 480px) { .row.r3 { grid-template-columns: minmax(0, 1fr); } }
+  label, .lbl { font: 600 12px var(--body); color: var(--fg); }
+  .hint { font-size: 11px; color: var(--muted); }
+  input[type=text], input[type=number], input[type=url], textarea, select { width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 3px; background: var(--input-bg); color: var(--fg); font: 400 13px var(--body); }
+  input[type=number] { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  input:focus-visible, select:focus-visible, button:focus-visible, .ed:focus-visible { outline: 2px solid var(--green); outline-offset: 1px; }
+  .check { display: flex; gap: 8px; align-items: flex-start; font: 400 13px var(--body); margin-top: 8px; cursor: pointer; }
+  .check input { margin-top: 3px; accent-color: var(--green); }
+
+  .tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tab { max-width: 100%; padding: 7px 12px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 3px; font: 600 12px var(--display); letter-spacing: .04em; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tab[aria-current=true] { background: var(--panel); color: var(--green); border-color: var(--panel); }
+  .tab.plus { border-style: dashed; color: var(--muted); }
+  .tab-actions { display: flex; gap: 14px; margin-top: 8px; }
+  .link { background: none; border: 0; color: var(--muted); font: 400 12px var(--body); cursor: pointer; text-decoration: underline; padding: 0; }
+  .link.armed { color: #C0392B; font-weight: 600; }
+
+  .seg { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); border-radius: 3px; overflow: hidden; }
+  .seg button { padding: 9px 4px; border: 0; border-right: 1px solid var(--line); background: var(--input-bg); color: var(--muted); font: 600 12px var(--display); letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
+  .seg button:last-child { border-right: 0; }
+  .seg button[aria-pressed=true] { background: var(--panel); color: var(--green); }
+  .loc { border: 1px dashed var(--line); border-radius: 3px; padding: 10px; margin-top: 10px; }
+  .loc-h { display: flex; justify-content: space-between; align-items: center; font: 600 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .add { margin-top: 10px; width: 100%; padding: 8px; border: 1px dashed var(--muted); background: transparent; color: var(--fg); border-radius: 3px; font: 600 12px var(--body); cursor: pointer; }
+  .add:hover { border-color: var(--green); color: var(--green-dark); }
+  .qtys { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+  @media (max-width: 480px) { .qtys { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .qtys input { text-align: center; padding-right: 22px; }
+  .qwrap { position: relative; min-width: 0; }
+  .qx { position: absolute; right: 3px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; border: 0; border-radius: 50%; background: transparent; color: var(--muted); font: 400 16px/1 var(--body); cursor: pointer; padding: 0; }
+  .qx:hover { background: var(--tile); color: var(--fg); }
+  .disc { display: flex; align-items: center; gap: 8px; }
+  .disc input { width: 84px; text-align: center; }
+
+  .drop { display: flex; align-items: center; gap: 10px; border: 1px dashed var(--muted); border-radius: 3px; padding: 10px; background: var(--input-bg); cursor: pointer; min-width: 0; }
+  .drop.over { border-color: var(--green); background: var(--tile); }
+  .drop img { width: 44px; height: 44px; object-fit: contain; background: var(--tile); border-radius: 2px; flex: none; }
+  .drop span { font-size: 12px; color: var(--muted); min-width: 0; overflow-wrap: anywhere; }
+  .drop input { display: none; }
+  .thumbs-edit { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+  .te { position: relative; width: 64px; height: 64px; background: var(--tile); border: 1px solid var(--line); border-radius: 2px; }
+  .te img { width: 100%; height: 100%; object-fit: contain; }
+  .te button { position: absolute; top: -7px; right: -7px; width: 18px; height: 18px; border-radius: 50%; border: 0; background: var(--panel); color: #fff; font: 400 13px/1 var(--body); cursor: pointer; padding: 0; }
+  .te small { position: absolute; left: 3px; bottom: 2px; font: 500 8px var(--mono); background: var(--panel); color: var(--green); padding: 0 3px; letter-spacing: .08em; }
+
+  .rt-bar { display: flex; gap: 4px; margin-bottom: 4px; }
+  .rt-bar button { min-width: 32px; padding: 4px 8px; border: 1px solid var(--line); background: var(--input-bg); color: var(--fg); border-radius: 3px; font: 600 12px var(--body); cursor: pointer; }
+  .ed { min-height: 96px; max-height: 220px; overflow-y: auto; padding: 8px 10px; border: 1px solid var(--line); border-radius: 3px; background: var(--input-bg); color: var(--fg); font: 400 13px/1.45 var(--body); }
+  .ed ul, .ed ol { margin: 4px 0; padding-left: 20px; }
+  .ed p, .ed div { margin: 0; }
+
+  /* stage and pages */
+  .stage { min-width: 0; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 62px); }
+  @media (max-width: 960px) { .stage { position: static; } }
+  .pane { max-height: calc(100vh - 150px); overflow: auto; padding: 2px 4px 8px 2px; }
+  @media (max-width: 960px) { .pane { max-height: none; overflow: visible; } }
+  .page { background: var(--pg-bg); color: var(--pg-fg); border: 1px solid var(--pg-line); box-shadow: 0 6px 24px rgba(0,0,0,.14); min-width: 0; margin-bottom: 18px; }
+  .p-head { display: flex; align-items: center; gap: 12px; padding: 10px 18px; border-bottom: 3px solid var(--green); flex-wrap: wrap; }
+  .p-head .wordmark { font-size: 15px; }
+  .p-head .cat { font: 600 11px var(--mono); letter-spacing: .16em; text-transform: uppercase; padding-left: 12px; border-left: 1px solid var(--pg-line); }
+  .p-head .num { margin-left: auto; font: 400 11px var(--mono); color: var(--pg-muted); }
+  .dark-page { background: var(--pg-dark); color: #fff; border-color: var(--pg-dark); display: flex; flex-direction: column; justify-content: space-between; gap: 26px; padding: 28px 30px 0; min-height: 420px; }
+  .dark-page .caps { margin-top: 26px; max-width: 560px; }
+  .dark-page .caps ul { list-style: none; margin: 0; padding: 0; columns: 2; column-gap: 28px; font-size: 12px; color: #E4E6E7; }
+  .dark-page .caps li { break-inside: avoid; padding: 2px 0 2px 12px; position: relative; }
+  .dark-page .caps li::before { content: ""; position: absolute; left: 0; top: 9px; width: 5px; height: 5px; background: var(--green); }
+  .dark-page .caps-note { margin-top: 10px; font-size: 11px; color: #AEB3B5; }
+  .qband { background: var(--pg-dark); color: #fff; }
+  .qhead { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 4px 20px; padding: 18px 22px 0; }
+  .qhead .biglogo { height: 52px; width: auto; display: block; }
+  .qhead .for, .qclose .for { font: 600 9px var(--mono); letter-spacing: .2em; text-transform: uppercase; color: var(--green); }
+  .qhead .for { margin: 14px 0 6px; }
+  .qhead .cust { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .qhead .cust img { max-height: 44px; max-width: 130px; object-fit: contain; }
+  .qhead .nm { font: 700 15px var(--display); text-transform: uppercase; overflow-wrap: anywhere; }
+  .qh-right { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; text-align: right; min-width: 0; }
+  .qh-right h1 { margin: 0; font: 700 24px/1.05 var(--display); text-transform: uppercase; overflow-wrap: anywhere; }
+  .qh-right .qnote { margin: 0; font-size: 12px; color: #C9CDCF; max-width: 320px; }
+  .qh-right .repblk { border: 0; border-right: 3px solid var(--green); padding: 0 10px 0 0; margin-top: auto; }
+  .qh-right .repblk .k { font: 500 9px var(--mono); letter-spacing: .2em; text-transform: uppercase; color: var(--green); }
+  .qh-right .repblk .n { font: 700 16px var(--display); margin-top: 2px; }
+  .qh-right .repblk div { font-size: 12px; }
+  .qh-foot { grid-column: 1 / -1; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: 11px; color: #AEB3B5; padding: 12px 0; }
+  .qhead .dark-bar { grid-column: 1 / -1; margin: 0 -22px; }
+  .qclose { padding: 16px 22px 14px; border-top: 4px solid var(--green); }
+  .qclose .msg { margin: 0; font-size: 13px; line-height: 1.55; color: #E4E6E7; }
+  .qclose .msg b { color: #fff; }
+  .qclose ul { list-style: none; margin: 0; padding: 0; }
+  .qclose .terms { margin-top: 8px; font-size: 12px; font-weight: 600; display: flex; flex-wrap: wrap; gap: 0 26px; }
+  .qclose li { position: relative; padding: 2px 0 2px 13px; break-inside: avoid; }
+  .qclose li::before { content: ""; position: absolute; left: 0; top: 9px; width: 5px; height: 5px; background: var(--green); }
+  .qclose .caps { margin-top: 9px; padding-top: 8px; border-top: 1px solid #44494B; }
+  .qclose .caps ul { columns: 5; column-gap: 10px; margin-top: 5px; font-size: 10.5px; color: #C9CDCF; }
+  .qclose .caps li { padding: 1px 0 1px 11px; }
+  .qclose .caps li::before { top: 7px; width: 4px; height: 4px; }
+  .qclose .caps-note { margin-top: 6px; font-size: 10px; color: #9AA0A3; }
+  .cat-tag { text-transform: uppercase; letter-spacing: .12em; color: var(--pg-green-text); font-weight: 600; }
+  @media (max-width: 640px) { .qhead { grid-template-columns: minmax(0, 1fr); } .qh-right { align-items: flex-start; text-align: left; } .qh-right .repblk { border-right: 0; border-left: 3px solid var(--green); padding: 0 0 0 10px; } .qclose .caps ul { columns: 2; } }
+  .item.plight .pricebar { background: #fff; color: var(--pg-fg); border: 1px solid var(--pg-line); border-top: 3px solid var(--green); }
+  .item.plight .pb-k, .item.plight .pricebar th { color: var(--pg-muted); }
+  .item.plight .pb-v.g, .item.plight .pricebar td.each { color: var(--pg-green-text); }
+  .item.plight .pb-msg { color: var(--pg-muted); }
+  .item.plight .pricebar th { border-bottom: 1px solid var(--pg-line); }
+  .item.plight .pricebar td { border-bottom: 1px solid var(--pg-line); }
+  .item.plight .pricebar td.was { color: var(--pg-muted); }
+  .loc-other { margin-top: 6px; }
+  textarea { resize: vertical; font-family: var(--body); }
+  .brand { display: inline-flex; align-items: center; gap: 8px; }
+  .brand img { height: 20px; width: auto; display: block; }
+  .topbar .brand img { height: 22px; }
+  .p-head .brand img { height: 18px; }
+  .dark-page .biglogo { height: 96px; width: auto; display: block; }
+  .dark-page .for { font: 600 10px var(--mono); letter-spacing: .2em; text-transform: uppercase; color: var(--green); margin-bottom: 8px; }
+  .dark-page .cust { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .dark-page .cust img { max-height: 70px; max-width: 200px; object-fit: contain; }
+  .dark-page .cust .nm { font: 700 20px/1.1 var(--display); text-transform: uppercase; overflow-wrap: anywhere; }
+  .dark-page h1 { margin: 6px 0 0; font: 700 34px/1.05 var(--display); text-transform: uppercase; text-wrap: balance; overflow-wrap: anywhere; }
+  .dark-page h1::after { content: ""; display: block; width: 44px; height: 3px; background: var(--green); margin-top: 14px; }
+  .dark-page .lead { font-size: 13px; color: #C9CDCF; max-width: 46ch; }
+  .dark-page .repblk { border-left: 3px solid var(--green); padding-left: 12px; }
+  .dark-page .repblk .k { font: 500 9px var(--mono); letter-spacing: .2em; text-transform: uppercase; color: var(--green); }
+  .dark-page .repblk .n { font: 700 18px var(--display); margin-top: 2px; }
+  .dark-page .repblk div { font-size: 12px; }
+  .dark-foot { display: flex; justify-content: space-between; align-items: end; gap: 12px; flex-wrap: wrap; font-size: 11px; color: #AEB3B5; padding-bottom: 16px; }
+  .dark-bar { height: 6px; background: var(--green); margin: 0 -30px; }
+
+  .item { display: grid; grid-template-columns: minmax(0, 46%) minmax(0, 1fr); grid-template-rows: auto 1fr; gap: 18px 22px; padding: 20px 22px; }
+  .item.compact { grid-template-columns: minmax(0, 30%) minmax(0, 1fr); grid-template-rows: auto auto; align-items: start; }
+  .item.compact > .gal { grid-column: 1; grid-row: 1; }
+  .item.compact > .info { grid-column: 2; grid-row: 1; }
+  .item.compact > .pricebar { grid-column: 1 / -1; grid-row: 2; align-self: start; }
+  .item.compact .gal .tile, .item.compact .gal.g3 .fig:first-child .tile { aspect-ratio: 1; }
+  @media (max-width: 640px) { .item.compact { grid-template-columns: minmax(0, 1fr); } .item.compact > .gal, .item.compact > .info, .item.compact > .pricebar { grid-column: 1; grid-row: auto; } }
+  .item.wide { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; }
+  .item.wide > .gal, .item.wide > .info, .item.wide > .pricebar { grid-column: 1; grid-row: auto; }
+  .item.wide > .gal { grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); grid-auto-flow: column; }
+  .item.wide .gal .tile, .item.wide .gal.g3 .fig:first-child .tile { aspect-ratio: 16 / 10; }
+  .item.wide .gal.g3 .fig:first-child { grid-column: auto; }
+  .item.colors { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: auto auto; }
+  .item.colors > .gal { grid-column: 1 / -1; grid-row: 1; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); grid-auto-flow: column; }
+  .item.colors > .info { grid-column: 1; grid-row: 2; }
+  .item.colors > .pricebar { grid-column: 2; grid-row: 2; align-self: start; }
+  .item.colors .gal .tile, .item.colors .gal.g3 .fig:first-child .tile { aspect-ratio: 1; }
+  .item.colors .gal.g3 .fig:first-child { grid-column: auto; }
+  .item.colors .fig figcaption { font-size: 12px; font-weight: 600; color: var(--pg-fg); }
+  @media (max-width: 640px) { .item.colors { grid-template-columns: minmax(0, 1fr); } .item.colors > .info, .item.colors > .pricebar { grid-column: 1; grid-row: auto; } .item.wide > .gal, .item.colors > .gal { grid-auto-flow: row; grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .item > .gal { grid-column: 1; grid-row: 1 / span 2; }
+  .item > .info { grid-column: 2; grid-row: 1; min-width: 0; }
+  .item > .pricebar { grid-column: 2; grid-row: 2; align-self: end; }
+  @media (max-width: 640px) { .item { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; } .item > .gal, .item > .info, .item > .pricebar { grid-column: 1; grid-row: auto; } }
+  .tile { background: var(--pg-tile); aspect-ratio: 4 / 5; display: flex; align-items: center; justify-content: center; color: var(--pg-muted); font: 500 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; text-align: center; padding: 10px; max-width: 100%; }
+  .tile img { max-width: 100%; max-height: 100%; object-fit: contain; }
+  .gal { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; align-content: start; }
+  .gal.g1 { grid-template-columns: minmax(0, 1fr); }
+  .gal.g3 .fig:first-child { grid-column: 1 / -1; }
+  .fig { margin: 0; min-width: 0; }
+  .fig figcaption { margin-top: 4px; text-align: center; font: 500 10px/1.3 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--pg-muted); overflow-wrap: anywhere; }
+  .te-row { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 10px; align-items: center; width: 100%; }
+  .gal .tile { padding: 4px; }
+  .gal.g2 .tile { aspect-ratio: 2 / 3; }
+  .gal.g4 .tile, .gal.g3 .fig:not(:first-child) .tile { aspect-ratio: 1; }
+  .gal.g3 .fig:first-child .tile { aspect-ratio: 4 / 3; }
+  .thumbs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 6px; }
+  .thumbs .tile { padding: 3px; }
+  .tags { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font: 500 11px var(--mono); }
+  .hit { background: var(--pg-dark); color: #fff; padding: 1px 6px; letter-spacing: .08em; text-transform: uppercase; }
+  .tags a { color: var(--pg-green-text); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; text-decoration: none; }
+  .item h3 { margin: 6px 0 4px; font: 700 20px/1.15 var(--display); text-transform: uppercase; overflow-wrap: anywhere; text-wrap: balance; }
+  .desc { font-size: 12px; margin-top: 8px; overflow-wrap: anywhere; }
+  .desc ul, .desc ol { list-style: none; margin: 4px 0; padding: 0; }
+  .desc li { padding-left: 14px; position: relative; margin-bottom: 3px; }
+  .desc ul li::before { content: ""; position: absolute; left: 0; top: 7px; width: 5px; height: 5px; background: var(--green); }
+  .desc ol { counter-reset: n; }
+  .desc ol li { counter-increment: n; }
+  .desc ol li::before { content: counter(n) "."; position: absolute; left: 0; color: var(--pg-green-text); font-weight: 600; }
+  .desc p, .desc div { margin: 0 0 4px; }
+  .imprint-line { margin-top: 10px; font: 500 11px/1.4 var(--mono); color: var(--pg-muted); overflow-wrap: anywhere; }
+  .loc-line { margin-top: 3px; }
+  .dark-foot { margin-top: 14px; }
+  .imprint-line b { color: var(--pg-fg); font-weight: 600; }
+  .pricebar { background: var(--pg-dark); color: #fff; padding: 12px 16px; }
+  .pb-top { display: flex; justify-content: space-between; align-items: end; gap: 12px; flex-wrap: wrap; }
+  .pb-k { font: 500 9px var(--mono); letter-spacing: .2em; text-transform: uppercase; color: #9AA0A3; }
+  .pb-v { font: 700 24px/1.1 var(--display); }
+  .pb-v.g { color: var(--green); }
+  .pb-msg { font-size: 12px; color: #C9CDCF; }
+  .tbl-wrap { overflow-x: auto; margin-top: 10px; }
+  .pricebar table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  .pricebar th { font: 500 9px var(--mono); letter-spacing: .18em; text-transform: uppercase; color: #9AA0A3; text-align: right; padding: 6px 8px; border-bottom: 1px solid #44494B; }
+  .pricebar td { text-align: right; padding: 7px 8px; font: 500 13px var(--mono); border-bottom: 1px solid #3A3E40; }
+  .pricebar th:first-child, .pricebar td:first-child { text-align: left; }
+  .pricebar td.each { color: var(--green); }
+  .pricebar td.was { color: #9AA0A3; text-decoration: line-through; }
+  .extras { padding: 0 22px 14px; }
+  .extras div { display: flex; justify-content: space-between; gap: 10px; border-bottom: 1px solid var(--pg-line); padding: 5px 0; font-size: 12px; }
+  .extras span:last-child { font-family: var(--mono); text-align: right; }
+  .p-foot { padding: 10px 22px 14px; font-size: 10px; color: var(--pg-muted); }
+
+
+  .steps { display: flex; gap: 4px; margin-left: 8px; }
+  .steps button { background: transparent; color: var(--panel-muted); border: 1px solid #44494B; border-radius: 3px; padding: 6px 12px; font: 600 12px var(--display); letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
+  .steps button[aria-current=true] { background: var(--green); color: #14200A; border-color: var(--green); }
+  .adj { border: 1px dashed var(--line); border-radius: 3px; padding: 10px; margin-top: 10px; }
+  .adj .loc-h { margin-bottom: 6px; }
+  .preset-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+  .btn.sm { padding: 8px 14px; font-size: 12px; }
+  .btn.ghost { background: transparent; color: var(--fg); border: 1px solid var(--line); }
+  .btn.ghost:hover { border-color: var(--green); background: transparent; }
+  .goto-note { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
+  .sumbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+  .sum { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; margin-bottom: 14px; padding: 14px 16px; min-width: 0; }
+  .sum h3 { margin: 0; font: 700 17px/1.2 var(--display); text-transform: uppercase; overflow-wrap: anywhere; }
+  .sum .sub { margin-top: 3px; font: 500 11px/1.4 var(--mono); color: var(--muted); }
+  .sum .tw { overflow-x: auto; margin-top: 10px; }
+  .sum table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  .sum th { font: 500 9px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); text-align: right; padding: 6px 8px; border-bottom: 2px solid var(--line); white-space: nowrap; }
+  .sum td { text-align: right; padding: 8px; font: 500 13px var(--mono); border-bottom: 1px solid var(--line); white-space: nowrap; }
+  .sum th:first-child, .sum td:first-child { text-align: left; }
+  .sum td.each { color: var(--green-dark); font-weight: 500; }
+  .sum td.was { color: var(--muted); text-decoration: line-through; }
+  .sum .notes { margin-top: 10px; font-size: 12px; color: var(--muted); display: flex; flex-direction: column; gap: 3px; }
+  .sum .notes b { color: var(--fg); font-weight: 600; }
+  .sum-msg { margin: 12px 0 0; color: var(--muted); font-size: 13px; }
+
+  .mt { margin-top: 12px; }
+  .mt summary { cursor: pointer; font: 600 12px var(--body); color: var(--green-dark); }
+  .mt .mt-note { margin: 8px 0; font-size: 11px; color: var(--muted); }
+  .mt .tw2 { overflow-x: auto; margin-bottom: 10px; }
+  .mt table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  .mt th { font: 500 9px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); text-align: right; padding: 4px 6px; border-bottom: 2px solid var(--line); white-space: nowrap; }
+  .mt td { text-align: right; padding: 5px 6px; font: 500 12px var(--mono); border-bottom: 1px solid var(--line); white-space: nowrap; }
+  .mt th:first-child, .mt td:first-child { text-align: left; }
+  .mt .base { color: var(--muted); font-size: 10px; margin-left: 4px; }
+  .below { display: flex; gap: 10px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
+  .btn { background: var(--green); color: #14200A; border: 0; border-radius: 3px; padding: 10px 18px; font: 700 13px var(--display); letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
+  .btn:hover { background: #8AD12E; }
+  .note { font-size: 11px; color: var(--muted); }
+  .warn { background: var(--warn-bg); color: var(--warn-fg); padding: 8px 10px; border-radius: 3px; font-size: 12px; margin-top: 10px; }
+  .toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); background: var(--panel); color: #fff; padding: 9px 16px; border-radius: 3px; font-size: 13px; opacity: 0; pointer-events: none; transition: opacity .2s; border-left: 3px solid var(--green); z-index: 40; }
+  .toast.show { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
+
+  @media print {
+    @page { size: letter portrait; margin: 0; }
+    html, body { background: #fff !important; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .topbar, #left, #sumPane, .below, .toast { display: none !important; }
+    .wrap { display: block; max-width: none; margin: 0; padding: 0; }
+    .stage { position: static; }
+    .pane { max-height: none; overflow: visible; padding: 0; }
+    .page { box-shadow: none; border: 0; margin: 0; width: 100%; min-height: 10.96in; display: flex; flex-direction: column; break-after: page; page-break-after: always; break-inside: avoid; }
+    .page:last-child { break-after: auto; page-break-after: auto; }
+    .page .p-foot { margin-top: auto; }
+    .dark-page { padding: .6in .6in 0; }
+    .dark-bar { margin: 0 -.6in; }
+    .p-head { padding: .16in .55in; }
+    .qhead { padding: .26in .55in 0; gap: 2px .4in; }
+    .qhead .biglogo { height: .56in; }
+    .qhead .for { margin: 8px 0 4px; }
+    .qh-foot { padding: 6px 0 8px; }
+    .qhead .nm { font-size: 18px; }
+    .qhead .cust img { max-height: .55in; }
+    .qh-right h1 { font-size: 30px; }
+    .qh-right .qnote { font-size: 13px; }
+    .qh-right .repblk .n { font-size: 18px; }
+    .qh-right .repblk div { font-size: 13px; }
+    .qhead .dark-bar { margin: 0 -.55in; }
+    .qh-foot { font-size: 11px; }
+    .qclose { padding: .16in .55in .12in; }
+    .qclose .msg { font-size: 13px; line-height: 1.5; }
+    .qclose .terms { font-size: 12.5px; }
+    .qclose .caps ul { font-size: 10.5px; }
+    .qclose .caps-note { font-size: 10px; margin-top: 4px; }
+    .item.side.ig1 .gal .tile { aspect-ratio: 5 / 6; }
+    .item.side.ig2 { grid-template-columns: minmax(0, 3.7in) minmax(0, 1fr); gap: .25in; }
+    .item.compact { grid-template-columns: minmax(0, 2.4in) minmax(0, 1fr); }
+    .item.wide, .item.colors { gap: .25in; }
+    .item.wide .gal .tile { aspect-ratio: 16 / 9; }
+    .item.colors .gal .tile { aspect-ratio: 1; }
+    .item { grid-template-columns: minmax(0, 3.7in) minmax(0, 1fr); gap: .18in .3in; padding: .18in .55in; flex: 1; }
+    .pricebar td { font-size: 13px; padding: 8px 6px; }
+    .pricebar th { padding: 6px 6px; }
+    .item h3 { font-size: 26px; }
+    .desc { font-size: 12.5px; }
+    .imprint-line { font-size: 12px; }
+    .pb-v { font-size: 30px; }
+    td { font-size: 14px; padding: 9px 8px; }
+    .pricebar { padding: 9px 14px; }
+    .pricebar td { font-size: 12.5px; padding: 5px 6px; }
+    .pricebar th { padding: 4px 6px; }
+    .pb-v { font-size: 26px; }
+    .tbl-wrap { margin-top: 6px; }
+    .desc li { margin-bottom: 2px; }
+    .extras { padding: 0 .55in 8px; }
+    .extras div { font-size: 12px; padding: 3px 0; }
+    .p-foot { padding: 6px .55in .16in; font-size: 9px; }
+    .fig figcaption { font-size: 11px; }
+  }
+</style>
+
+<div class="topbar">
+  <span class="brand"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzNDUuOTIgMTkwLjMzIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IkVhZ2xlIEdyYXBoaWNzIG1hcmsiIHhtbG5zOmMycGE9Imh0dHA6Ly9jMnBhLm9yZy9tYW5pZmVzdCI+PHRpdGxlPkVhZ2xlIEdyYXBoaWNzIG1hcms8L3RpdGxlPjxwYXRoIGZpbGw9IiNGRkZGRkYiIGQ9Ik0wLDM1Ljg3czQwLjMxLDM5LjAyLDE2OC40LDM1LjE3YzEyOC4wOS0zLjg1LDE3My44NCw4MS4zNywxNzMuODQsODEuMzcsMCwwLTc0LjkzLTY1LjQxLTE1OS45NC02Ny41MUM5Ny4yOCw4Mi44Miw0Mi42OCw4MC4wOSwwLDM1Ljg3WiI+PC9wYXRoPjxwYXRoIGZpbGw9IiM3NkJEMUQiIGQ9Ik0xMTcuNTMsNjYuODVzMzIuNTgsMi4yNyw1MS43NiwxLjA0YzAsMC01Ni41Mi03LjE5LTk2LjA5LTMyLjc4LDAsMCwxNC41MSwyMS4xNCw0NC4zMiwzMS43NFoiPjwvcGF0aD48cGF0aCBmaWxsPSIjNzZCRDFEIiBkPSJNMzUuMDQsNjcuMjRzMjkuNzksMTQuODQsNjcuMzgsMTcuMDdjMCwwLDIyLjU3LDExLjU5LDY5LjcxLDEyLjY0LDAsMC05My40MywxMi41LTEzNy4wOS0yOS43MVoiPjwvcGF0aD48cGF0aCBmaWxsPSIjRkZGRkZGIiBkPSJNMjgwLjc1LDExOC4yNmMxNi4zOCw2LjcyLDMwLjY4LDE2LjMxLDQzLjg0LDI2LDAsMC02Ny45MS0zMi40Ni0xNTUuNzItMjEuOTcsMCwwLDE0LjAyLDYuMTUsMjkuNCw1LjYyLDAsMC03Ny45LDI3LjM5LTE1NS0zMS42NywwLDAsNjQuMSwyMy45MSwxMjguMDUsMTMuODksNjMuOTQtMTAuMDIsOTMuMDYsMS40MSwxMDkuNDQsOC4xM1oiPjwvcGF0aD48cGF0aCBmaWxsPSIjNzZCRDFEIiBkPSJNMTA1LjM0LDBzNDcuMzcsMzMuOTEsMTA0LjE0LDQ1Ljk4YzQwLjU3LDguNjMsNzkuMDksNDEuNTQsNzkuMDksNDEuNTQsMCwwLTE2LjUtMy42Mi0yMS4yNS0uNTIsMCwwLTEzLjI4LTYuNTktMjQuMzMtOS41MiwwLDAtMTUuNTUtMTkuODUtNjAuMjEtMjguMDlDMTQzLjQzLDQyLjEzLDEwNS4zNCwwLDEwNS4zNCwwWiI+PC9wYXRoPjxwYXRoIGZpbGw9IiNGRkZGRkYiIGQ9Ik0xMTQuNDgsMTIuMzRzMjMuNDQsMjEuOTMsMzkuNTQsMjkuODNjMCwwLDIuMzQsOS40NCwyMy41NCwxOC40NiwwLDAtNDMuNDQtMTIuMTUtNjMuMDctNDguMjlaIj48L3BhdGg+PHBhdGggZmlsbD0iIzc2QkQxRCIgZD0iTTIzMy43NSwxMjMuMzdzODEuOTksMjcuODIsMTA1Ljc4LDI5LjQ2YzAsMCwxNC40Niw5LjQ2LS4xMSwzNy41LDAsMC0uMTctMjMuNTItMzAuMDctMzIuOTctMjkuODktOS40NS02Ny43OC0yOC40Mi03NS42LTMzLjk5WiI+PC9wYXRoPjwvc3ZnPg==" alt=""><span class="wordmark">Eagle <b>Graphics</b></span></span>
+  <span class="tool">Quote Builder</span>
+  <div class="steps" role="group" aria-label="Steps">
+    <button type="button" data-step="1" aria-current="true">1 &middot; Quote</button>
+    <button type="button" data-step="2" aria-current="false">2 &middot; Presentation</button>
+  </div>
+  <span class="status" id="status" role="status"></span>
+  <button type="button" class="newq" id="saveQ" title="Download this quote as a file you can open again later">Save</button>
+  <button type="button" class="newq" id="openQ" title="Open a quote you saved earlier">Open</button>
+  <input type="file" id="openFile" accept=".json,application/json" hidden>
+  <button type="button" class="newq" id="newQ">New quote</button>
+</div>
+
+<div class="wrap">
+  <div class="form" id="left">
+
+    <div id="step1Left">
+      <fieldset>
+        <legend>Quote</legend>
+        <div class="field"><label for="q_customer">Customer name <span class="hint">(optional)</span></label><input type="text" id="q_customer" data-qk="customer"></div>
+        <details class="mt"><summary>View margin tables</summary><div id="marginTables"></div></details>
+      </fieldset>
+    </div>
+
+    <div id="step2Left" hidden>
+      <fieldset>
+        <legend>Top and bottom of the quote</legend>
+        <div class="field"><label for="q_customer2">Customer name</label><input type="text" id="q_customer2" data-qk="customer"></div>
+        <div class="field"><label for="q_title">Quote title</label><input type="text" id="q_title" data-qk="title"></div>
+        <div class="field"><span class="lbl">Customer logo <span class="hint">(optional)</span></span>
+          <label class="drop" data-drop="logo" for="logoFile"><img id="logoThumb" alt="" hidden><span id="logoTxt">Drop a PNG logo here or click to choose</span><input type="file" id="logoFile" data-file="logo" accept="image/*"></label>
+          <span class="hint">PNG suggested. A PNG keeps a transparent background. JPG also works, but it shows a white box behind the logo on the dark cover.</span>
+          <button type="button" class="link" id="logoRm" hidden style="align-self:flex-start">Remove logo</button></div>
+        <div class="row">
+          <div class="field"><label for="q_quoteNo">Quote number <span class="hint">(automatic, can be edited)</span></label><input type="text" id="q_quoteNo" data-qk="quoteNo"></div>
+        </div>
+        <div class="row r3">
+          <div class="field"><label for="q_rep">Sales rep</label><input type="text" id="q_rep" data-qk="rep"></div>
+          <div class="field"><label for="q_repEmail">Rep email</label><input type="text" id="q_repEmail" data-qk="repEmail"></div>
+          <div class="field"><label for="q_repPhone">Rep phone</label><input type="text" id="q_repPhone" data-qk="repPhone"></div>
+        </div>
+        <div class="field"><label for="q_coverNote">Note under the title <span class="hint">(optional)</span></label><textarea id="q_coverNote" data-qk="coverNote" rows="2"></textarea></div>
+        <div class="field"><label for="q_thanksMsg">Thank-you message <span class="hint">(blank = standard text)</span></label><textarea id="q_thanksMsg" data-qk="thanksMsg" rows="3" placeholder="Thank you for the opportunity! Once you've reviewed this quote, please contact your account manager..."></textarea></div>
+        <div class="field"><label for="q_terms">Terms at the bottom <span class="hint">(one per line)</span></label><textarea id="q_terms" data-qk="terms" rows="3"></textarea></div>
+        <label class="check"><input type="checkbox" data-pg="noCaps"><span>Leave out the "Everything we do" list</span></label>
+      </fieldset>
+    </div>
+
+    <div>
+      <div class="tabs" id="tabs" role="group" aria-label="Items in this quote"></div>
+      <div class="tab-actions"><button type="button" class="link" id="dupItem">Duplicate this item</button><button type="button" class="link" id="rmItem">Remove this item</button></div>
+    </div>
+
+    <div id="priceForm"></div>
+    <div id="presForm" hidden></div>
+  </div>
+
+  <div class="stage">
+    <div class="pane" id="sumPane">
+      <div class="sumbar"><span class="note">Price summary for this quote</span>
+        <label class="check" style="margin:0"><input type="checkbox" id="showBreak"><span>Show cost breakdown (rep view)</span></label></div>
+      <div id="sums"></div>
+    </div>
+    <div class="pane" id="pane" hidden><div id="pages"></div></div>
+    <div class="below">
+      <button type="button" class="btn" id="savePdf" hidden>Save as PDF</button>
+      <button type="button" class="btn" id="copy">Copy quote text</button>
+      <span class="note" id="stageNote">Prices come from the 2025 price sheet.</span>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status">Copied</div>
+
+<!--PRICING-START-->
+<script id="pricing">
+// 2025 Eagle Graphics price sheet. "use" is the divisor applied to garment cost: sell = cost / use.
+var USE = {
+  under7:   [[1,5,.35],[6,11,.40],[12,23,.45],[24,47,.50],[48,71,.55],[72,143,.60],[144,287,.65],[288,499,.67],[500,1e9,.70]],
+  mid:      [[1,5,.50],[6,11,.55],[12,23,.58],[24,47,.60],[48,71,.62],[72,143,.64],[144,287,.66],[288,499,.68],[500,1e9,.70]],
+  high:     [[1,5,.50],[6,11,.55],[12,23,.58],[24,47,.60],[48,71,.62],[72,143,.65],[144,287,.67],[288,499,.70],[500,1e9,.70]],
+  carhartt: [[1,23,.70],[24,47,.71],[48,71,.72],[72,143,.73],[144,287,.75],[288,499,.75],[500,1e9,.75]]
+};
+var SP_BANDS = [[1,5],[6,11],[12,23],[24,47],[48,71],[72,143],[144,287],[288,499],[500,999],[1000,1e9]];
+var SP = [
+  [8,9,10.75,12,14,16.75,18.75,21],[6.5,8.25,9.75,10.75,13,15.5,17.5,19.5],[3,4,4.85,7.75,12.25,14.75,16.75,18.75],
+  [2.5,3,4.25,5.75,7.75,9.65,11.75,13.75],[2.25,2.75,3.35,4.5,5.25,6.5,8.5,10.5],[1.8,2,2.35,3.15,3.75,4.8,6.75,8.75],
+  [1.5,1.65,1.85,2.2,2.5,3.25,4.75,6],[1.25,1.4,1.65,1.8,2.1,2.5,3,3.5],[1,1.15,1.4,1.55,1.65,1.8,2,2.2],[.95,1,1.15,1.2,1.5,1.65,1.85,2]
+];
+var EMB = [[1,5,1.5],[6,11,1],[12,23,.75],[24,47,.65],[48,71,.6],[72,143,.55],[144,1e9,.5]];
+var EMB_MIN_PER_GARMENT = 4, SCREEN_FEE = 20, SMALL_ORDER = 10;
+
+// Prices to the customer round UP to the next $0.05 (the 1e-9 guards floating point noise on exact nickels)
+function nickel(n) { return Math.round(Math.ceil(n * 20 - 1e-9) / 20 * 100) / 100; }
+// Per-quote margin adjustment in points. Margin = 1 - use, so +5 points of margin means use drops by .05 (higher price).
+function adjUse(use, pts) { return Math.min(0.95, Math.max(0.05, use - (pts || 0) / 100)); }
+function band(t, q) { for (var i = 0; i < t.length; i++) if (q >= t[i][0] && q <= t[i][1]) return t[i]; return t[t.length-1]; }
+function useRate(q, cost, carhartt) { var t = carhartt ? USE.carhartt : cost < 7 ? USE.under7 : cost < 20 ? USE.mid : USE.high; return band(t, q)[2]; }
+function spPerPiece(q, colors) { var r = SP_BANDS.findIndex(function(b){return q>=b[0]&&q<=b[1];}); return SP[r<0?9:r][Math.min(Math.max(colors,1),8)-1]; }
+// Embroidery set up charge per location, by stitch count (Josh, Oct 28).
+function embSetup(st) {
+  st = +st || 0;
+  if (st >= 20000) return st / 1000 * 7;
+  if (st >= 15000) return 95;
+  if (st >= 10000) return 75;
+  if (st >= 7000) return 65;
+  return 50;
+}
+function embPerPiece(q, stitches) { return stitches / 1000 * band(EMB, q)[2]; }
+
+// o: {type, cost, carhartt, poly, fold, spLocs:[{colors,dark}], embLocs:[stitches], simpleText, art, ship, sep, disc, waiveSetup, waiveSmall,
+//     marginAdj: points of margin added (+) or removed (-) for this customer,
+//     discKind:'pct'|'pc'|'tot' (% off, $ off each piece, $ off the order total),
+//     adjs:[{sign:1|-1, amt, kind:'pc'|'tot'|'pct', on:'prod'|'imp'}]}
+function price(q, o) {
+  var imprint = 0, setup = 0, i;
+  if (o.type === 'SP') {
+    for (i = 0; i < o.spLocs.length; i++) {
+      var c = o.spLocs[i].colors + (o.spLocs[i].dark ? 1 : 0);
+      var p = spPerPiece(q, c); if (o.poly) p *= 1.25; imprint += p; setup += c * SCREEN_FEE;
+    }
+    if (o.fold) imprint += 1;
+  } else {
+    var e = 0;
+    for (i = 0; i < o.embLocs.length; i++) {
+      e += embPerPiece(q, o.embLocs[i]);
+      setup += o.simpleText ? 25 : embSetup(o.embLocs[i]);
+    }
+    imprint = Math.max(e, EMB_MIN_PER_GARMENT);
+  }
+  if (o.waiveSetup) setup = 0;
+  var small = (q < 12 && !o.waiveSmall) ? SMALL_ORDER : 0;
+  var use = adjUse(useRate(q, o.cost, o.carhartt), o.marginAdj);
+  var garment = o.cost / use;
+  var adj = 0;
+  (o.adjs || []).forEach(function (a) {
+    var amt = +a.amt || 0; if (!amt) return;
+    var v = a.kind === 'pct' ? (a.on === 'prod' ? garment : imprint) * amt / 100 : a.kind === 'tot' ? amt / q : amt;
+    adj += (a.sign < 0 ? -1 : 1) * v;
+  });
+  var lump = o.ship + small + (o.sep ? 0 : setup + o.art);
+  var raw = Math.max(0, garment + imprint + adj + lump / q);
+  var d = o.disc || 0, dk = o.discKind || 'pct';
+  var rawDisc = dk === 'pc' ? Math.max(0, raw - d) : dk === 'tot' ? Math.max(0, raw - d / q) : raw * (1 - d / 100);
+  var each = nickel(raw), eachDisc = nickel(rawDisc);
+  return { q: q, each: each, eachDisc: eachDisc, total: eachDisc * q, raw: raw, use: use, setup: setup, small: small, garment: garment, imprint: imprint, adj: adj, lumpPer: lump / q };
+}
+</script>
+<!--PRICING-END-->
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var KEY = 'eagleQuoteDraft_v1', CKEY = 'eagleQuoteCounter_v1';
+  var TERMS_DEFAULT = 'This quote is valid for 30 days\nShipping charges may be added to the invoices unless otherwise noted';
+  var THANKS_HEAD = 'Thank you for the opportunity!', THANKS_BODY = ' Once you\u2019ve reviewed this quote, please contact your account manager with any questions or to proceed with an order. Order approvals and a proof (if applicable) will be sent to you prior to processing your order.';
+  // Quote numbers: start at 1200 and count up in this browser. A rep can type a higher number and the next quote continues from it.
+  function nextQuoteNo(prev) {
+    var n = 1200;
+    try { var c = parseInt(localStorage.getItem(CKEY), 10); if (c >= 1200) n = c; } catch (e) {}
+    var p = parseInt(prev, 10); if (p >= n) n = p + 1;
+    try { localStorage.setItem(CKEY, String(n + 1)); } catch (e) {}
+    return String(n);
+  }
+  var VENDORS = ['HIT', 'PCNA', 'Primeline', 'SanMar', 'S&S Activewear', 'Alpha Broder', 'Eagle'];
+  var MAX_IMGS = 4;
+  // Common add-ons from the 2025 price sheet. Reps can edit any value after adding one.
+  var PRESETS = [
+    { label: 'Folding and polybagging', sign: 1, amt: 1, kind: 'pc', on: 'imp' },
+    { label: 'Color change within a run', sign: 1, amt: 10, kind: 'tot', on: 'imp' },
+    { label: 'PMS color match', sign: 1, amt: 25, kind: 'tot', on: 'imp' },
+    { label: 'Above or on pocket', sign: 1, amt: 0.5, kind: 'pc', on: 'imp' },
+    { label: 'Specialty ink (shimmer, glitter)', sign: 1, amt: 50, kind: 'pct', on: 'imp' },
+    { label: 'Reflective ink', sign: 1, amt: 200, kind: 'pct', on: 'imp' },
+    { label: 'Left or right chest name', sign: 1, amt: 7.5, kind: 'pc', on: 'imp' },
+    { label: 'Carhartt, bag or hard-to-handle item', sign: 1, amt: 1, kind: 'pc', on: 'imp' }
+  ];
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function money(n) { return '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+
+  // ---- state
+  function newItem() {
+    return { vendor: '', category: '', itemNo: '', name: '', desc: '', link: '', imgs: [], imgLabels: [], cost: 0, carhartt: false, poly: false, fold: false,
+      type: '', spLocs: [{ colors: 1, dark: false, loc: '' }], embLocs: [5000], embNames: [''], layout: '', simpleText: false, art: 0, ship: 0, sep: false, disc: 0, discKind: 'pct', showDisc: false,
+      waiveSetup: false, waiveSmall: false, adjs: [], qtys: [24, 48, 96, 144] };
+  }
+  function sample() {
+    var a = newItem();
+    a.vendor = 'SanMar'; a.category = 'Apparel'; a.itemNo = 'G8000'; a.name = 'Gildan DryBlend T-Shirt'; a.cost = 3.25;
+    a.desc = '<ul><li>50/50 cotton and polyester blend</li><li>Seamless collar, taped neck and shoulders</li><li>Available in 30+ colors</li></ul>';
+    a.type = 'SP'; a.spLocs = [{ colors: 2, dark: false }];
+    var b = newItem();
+    b.vendor = 'SanMar'; b.category = 'Apparel'; b.itemNo = 'K500'; b.name = 'Silk Touch Polo'; b.cost = 14.5; b.type = 'EMB'; b.embLocs = [6000]; b.qtys = [12, 24, 48];
+    b.desc = '<ul><li>5.6 oz easy-care blend</li><li>Flat knit collar and cuffs</li></ul>';
+    return { q: { customer: 'Sample Customer Co.', title: 'Product Quote', rep: 'Your Name', repEmail: 'you@egpromo.com', repPhone: '920-462-5200', logo: '', marginAdj: 0, terms: TERMS_DEFAULT }, items: [a, b], active: 0, step: 1, showBreak: false };
+  }
+  // Brings a saved quote (from the browser draft or a file) up to the current shape. Files are untrusted, so they are also sanitized.
+  function normalize(d, sanitize) {
+    if (!d || typeof d !== 'object' || !d.q || typeof d.q !== 'object' || !Array.isArray(d.items) || !d.items.length) return null;
+    var base = newItem();
+    d.items = d.items.slice(0, 30).map(function (i) {
+      var it = Object.assign(newItem(), i);
+      ['spLocs', 'embLocs', 'embNames', 'adjs', 'qtys', 'imgs', 'imgLabels'].forEach(function (k) { if (!Array.isArray(it[k])) it[k] = base[k]; });
+      if (!it.spLocs.length) it.spLocs = base.spLocs;
+      if (!it.embLocs.length) it.embLocs = base.embLocs;
+      it.embNames = it.embNames.slice(0, it.embLocs.length); while (it.embNames.length < it.embLocs.length) it.embNames.push('');
+      it.spLocs.forEach(function (l) { if (l.loc == null) l.loc = ''; });
+      if (it.fold) { it.fold = false; it.adjs = it.adjs.concat([Object.assign({}, PRESETS[0])]); }
+      if (sanitize) {
+        it.imgs = it.imgs.filter(function (s) { return typeof s === 'string' && /^data:image\//.test(s); }).slice(0, MAX_IMGS);
+        it.desc = clean(String(it.desc || ''));
+      }
+      return it;
+    });
+    if (sanitize && !(typeof d.q.logo === 'string' && /^data:image\//.test(d.q.logo))) d.q.logo = '';
+    d.q.marginAdj = 0; if (d.q.terms == null) d.q.terms = TERMS_DEFAULT;
+    d.active = Math.min(d.active || 0, d.items.length - 1); d.step = d.step === 2 ? 2 : 1;
+    return d;
+  }
+  var state = sample(), loaded = false;
+  try {
+    var raw = localStorage.getItem(KEY);
+    if (raw) {
+      var d = normalize(JSON.parse(raw), false);
+      if (d) { state = d; loaded = true; }
+    }
+  } catch (e) {}
+  var LOCS = ['Left Chest', 'Full Back', 'Right Sleeve', 'Left Sleeve', 'Locker Patch', 'Hat Front', 'Hat Side', 'Hat Back', 'Front (bags & misc. items)', 'Back (bags & misc. items)'];
+  function locSel(attr, i, val) {
+    val = val || ''; var custom = val !== '' && LOCS.indexOf(val) < 0;
+    return '<div class="field"><label for="' + attr + 'L' + i + '">Imprint location</label><select id="' + attr + 'L' + i + '" data-' + attr + 'loc="' + i + '"><option value="">Choose location</option>' + LOCS.map(function (n) { return '<option' + (n === val ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('') + '<option value="__other"' + (custom ? ' selected' : '') + '>Other (type it in)</option></select>' +
+      (custom ? '<input type="text" class="loc-other" data-' + attr + 'loct="' + i + '" value="' + esc(val.trim()) + '" placeholder="e.g. Neck label, Left Leg" aria-label="Custom imprint location">' : '') + '</div>';
+  }
+  if (!(state.q.quoteNo || '').trim()) state.q.quoteNo = nextQuoteNo();
+  function cur() { return state.items[state.active]; }
+  function itemTitle(it, i) { return it.name || ('Item ' + (i + 1)); }
+
+  // ---- rich text
+  var OK = { B: 1, STRONG: 1, I: 1, EM: 1, U: 1, UL: 1, OL: 1, LI: 1, P: 1, DIV: 1 };
+  function walk(node) {
+    var out = '';
+    node.childNodes.forEach(function (n) {
+      if (n.nodeType === 3) out += esc(n.nodeValue);
+      else if (n.nodeType === 1) {
+        var t = n.tagName;
+        if (t === 'SCRIPT' || t === 'STYLE') return;
+        if (t === 'BR') out += '<br>';
+        else if (OK[t]) { var l = t.toLowerCase(); out += '<' + l + '>' + walk(n) + '</' + l + '>'; }
+        else out += walk(n);
+      }
+    });
+    return out;
+  }
+  function clean(html) { var t = document.createElement('template'); t.innerHTML = html; return walk(t.content); }
+
+  // ---- images
+  function shrink(file, max, alpha, cb) {
+    var r = new FileReader();
+    r.onload = function () {
+      var im = new Image();
+      im.onload = function () {
+        var s = Math.min(1, max / Math.max(im.width, im.height)), c = document.createElement('canvas');
+        c.width = Math.max(1, Math.round(im.width * s)); c.height = Math.max(1, Math.round(im.height * s));
+        var x = c.getContext('2d');
+        if (!alpha) { x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); }
+        x.drawImage(im, 0, 0, c.width, c.height);
+        cb(alpha ? c.toDataURL('image/png') : c.toDataURL('image/jpeg', 0.88));
+      };
+      im.onerror = function () { cb(r.result); };
+      im.src = r.result;
+    };
+    r.readAsDataURL(file);
+  }
+  function addFiles(kind, files) {
+    var list = Array.prototype.filter.call(files || [], function (f) { return /^image\//.test(f.type); });
+    if (kind === 'logo') { if (list[0]) shrink(list[0], 420, true, function (d) { state.q.logo = d; renderLogo(); render(); }); return; }
+    var it = cur(), room = MAX_IMGS - it.imgs.length;
+    var batch = list.slice(0, Math.max(room, 0)), out = new Array(batch.length), left = batch.length;
+    batch.forEach(function (f, i) {
+      shrink(f, 900, false, function (d) {
+        out[i] = d;
+        if (--left === 0) { syncLabels(it); out.forEach(function (x) { if (it.imgs.length < MAX_IMGS) { it.imgs.push(x); it.imgLabels.push(''); } }); if (cur() === it) renderImgs(); render(); }
+      });
+    });
+  }
+  function syncLabels(it) { it.imgLabels = it.imgLabels || []; while (it.imgLabels.length < it.imgs.length) it.imgLabels.push(''); it.imgLabels.length = it.imgs.length; }
+  function renderLogo() {
+    $('logoThumb').hidden = !state.q.logo; if (state.q.logo) $('logoThumb').src = state.q.logo;
+    $('logoTxt').textContent = state.q.logo ? 'Logo added. Drop another to replace it.' : 'Drop a PNG logo here or click to choose';
+    $('logoRm').hidden = !state.q.logo;
+  }
+  function renderImgs() {
+    var it = cur(), el = $('imgList'); if (!el) return;
+    syncLabels(it);
+    el.innerHTML = it.imgs.map(function (d, i) {
+      return '<div class="te-row"><div class="te"><img src="' + d + '" alt="">' + (i === 0 ? '<small>MAIN</small>' : '') + '<button type="button" data-rm-img="' + i + '" aria-label="Remove image ' + (i + 1) + '">&times;</button></div>' +
+        '<input type="text" data-imglabel="' + i + '" list="imgLabelList" value="' + esc(it.imgLabels[i]) + '" placeholder="Label (optional), like Front" aria-label="Label for image ' + (i + 1) + '"></div>';
+    }).join('');
+    var t = $('imgTxt'); if (t) t.textContent = it.imgs.length >= MAX_IMGS ? 'Image limit reached (' + MAX_IMGS + ')' : 'Drop images here (front, back, detail) or click to choose';
+  }
+
+  // ---- step 1 form: pricing
+  function renderPriceForm() {
+    var it = cur();
+    $('priceForm').innerHTML =
+      '<fieldset><legend>Item ' + (state.active + 1) + ' pricing</legend>' +
+      '<div class="field"><label for="f_name">Item <span class="hint">(optional, for your reference)</span></label><input type="text" id="f_name" data-k="name" value="' + esc(it.name) + '" placeholder="Gildan 8000"></div>' +
+      '<div class="field"><label for="f_cost">Cost of item (each)</label><input type="number" id="f_cost" data-k="cost" value="' + (it.cost || '') + '" min="0" step="0.01"></div>' +
+      '<label class="check"><input type="checkbox" data-k="carhartt"' + (it.carhartt ? ' checked' : '') + '><span>Carhartt pricing tier</span></label>' +
+      '<label class="check"><input type="checkbox" data-k="poly"' + (it.poly ? ' checked' : '') + '><span>Performance, polyester, nylon, mesh or jacket (adds 25% to print cost)</span></label>' +
+      '</fieldset>' +
+
+      '<fieldset><legend>Imprint</legend>' +
+      '<div class="seg" role="group" aria-label="Imprint type">' + [['SP', 'Screen print'], ['EMB', 'Embroidery'], ['PROMO', 'Promo item']].map(function (p) { return '<button type="button" data-t="' + p[0] + '" aria-pressed="' + (it.type === p[0]) + '">' + p[1] + '</button>'; }).join('') + '</div>' +
+      '<div class="warn" id="imprintPrompt"' + (it.type ? ' hidden' : '') + '>Choose an imprint method to price this item.</div>' +
+      '<div id="spBox"' + (it.type === 'SP' ? '' : ' hidden') + '><div id="spLocs"></div><button type="button" class="add" id="spAdd">+ Add print location</button></div>' +
+      '<div id="embBox"' + (it.type === 'EMB' ? '' : ' hidden') + '><div id="embLocs"></div><button type="button" class="add" id="embAdd">+ Add embroidery location</button>' +
+      '<label class="check"><input type="checkbox" data-k="simpleText"' + (it.simpleText ? ' checked' : '') + '><span>Simple text only (flat $25 setup per location)</span></label></div>' +
+      '<div id="promoBox"' + (it.type === 'PROMO' ? '' : ' hidden') + '><div class="warn">Promo item questions are coming in a later version. This item will show as a custom quote. See Josh or Elliott for pricing.</div></div>' +
+      '<div id="commonBox"' + (it.type && it.type !== 'PROMO' ? '' : ' hidden') + '><div class="row"><div class="field"><label for="f_art">Artwork cost ($)</label><input type="number" id="f_art" data-k="art" value="' + (it.art || 0) + '" min="0" step="1"></div>' +
+      '<div class="field"><label for="f_ship">Shipping ($)</label><input type="number" id="f_ship" data-k="ship" value="' + (it.ship || 0) + '" min="0" step="1"></div></div>' +
+      '<label class="check"><input type="checkbox" data-k="sep"' + (it.sep ? ' checked' : '') + '><span>Show setup and artwork as separate charges (otherwise they are built into the price each)</span></label>' +
+      '<label class="check"><input type="checkbox" data-k="waiveSetup"' + (it.waiveSetup ? ' checked' : '') + '><span>Waive setup charges</span></label>' +
+      '<label class="check"><input type="checkbox" data-k="waiveSmall"' + (it.waiveSmall ? ' checked' : '') + '><span>Waive the small order charge (under 12 pieces)</span></label></div>' +
+      '</fieldset>' +
+
+      '<fieldset id="adjSet"' + (it.type && it.type !== 'PROMO' ? '' : ' hidden') + '><legend>Add-ons and adjustments</legend>' +
+      '<span class="hint">Each add-on raises or lowers the price. Pick one from the list or choose Custom to type your own.</span>' +
+      '<div id="adjList"></div>' +
+      '<div class="field"><label for="presetSel">Add another</label><select id="presetSel"><option value="" selected>Choose an add-on&hellip;</option>' + PRESETS.map(function (p, i) { return '<option value="' + i + '">' + esc(p.label) + '</option>'; }).join('') + '<option value="custom">Custom (type your own)</option></select></div></fieldset>' +
+
+      '<fieldset><legend>Quantities to quote (up to 8)</legend><div class="qtys" id="qtys"></div><button type="button" class="add" id="qAdd">+ Add quantity</button></fieldset>' +
+
+      '<fieldset><legend>Rep discount</legend><div class="row"><div class="field"><label for="f_disc">Amount</label><input type="number" id="f_disc" data-k="disc" value="' + (it.disc || 0) + '" min="0" step="0.01"></div>' +
+      '<div class="field"><label for="f_discKind">Type</label><select id="f_discKind" data-k="discKind">' + [['pct', '% off'], ['pc', '$ off each piece'], ['tot', '$ off the order total']].map(function (o) { return '<option value="' + o[0] + '"' + ((it.discKind || 'pct') === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></div></div>' +
+      '<span class="hint">A % off applies the same to the price each and the total. The customer sees only the reduced price unless you turn on the option below.</span>' +
+      '<label class="check"><input type="checkbox" data-k="showDisc"' + (it.showDisc ? ' checked' : '') + '><span>Show the discount on the customer quote (original price crossed out)</span></label></fieldset>' +
+      '<div class="goto-note"><button type="button" class="btn" data-goto="2">Next: build the presentation</button><span>Pricing carries over automatically.</span></div>';
+    renderSp(); renderEmb(); renderQ(); renderAdj();
+  }
+
+  // ---- step 2 form: presentation
+  function renderPresForm() {
+    var it = cur();
+    $('presForm').innerHTML =
+      '<div class="goto-note"><span>Prices come from step 1.</span><button type="button" class="link" data-goto="1">Edit pricing</button></div>' +
+      '<fieldset><legend>Item ' + (state.active + 1) + ' page</legend>' +
+      '<div class="row"><div class="field"><label for="f_vendor">Vendor tag</label><input type="text" id="f_vendor" data-k="vendor" list="vendorList" value="' + esc(it.vendor) + '" placeholder="HIT"></div>' +
+      '<div class="field"><label for="f_category">Page header (category)</label><input type="text" id="f_category" data-k="category" value="' + esc(it.category) + '" placeholder="Apparel"></div></div>' +
+      '<datalist id="vendorList">' + VENDORS.map(function (v) { return '<option value="' + esc(v) + '">'; }).join('') + '</datalist>' +
+      '<div class="field"><label for="f_name2">Item name</label><input type="text" id="f_name2" data-k="name" value="' + esc(it.name) + '"></div>' +
+      '<div class="field"><label for="f_itemNo">Item / style #</label><input type="text" id="f_itemNo" data-k="itemNo" value="' + esc(it.itemNo) + '"></div>' +
+      '<div class="field"><span class="lbl" id="descLbl">Description</span>' +
+      '<div class="rt-bar"><button type="button" data-cmd="bold" aria-label="Bold"><b>B</b></button><button type="button" data-cmd="italic" aria-label="Italic"><i>I</i></button><button type="button" data-cmd="insertUnorderedList" aria-label="Bulleted list">&bull; List</button><button type="button" data-cmd="insertOrderedList" aria-label="Numbered list">1. List</button></div>' +
+      '<div class="ed" id="ed" contenteditable="true" role="textbox" aria-multiline="true" aria-labelledby="descLbl"></div></div>' +
+      '<div class="field"><label for="f_link">Supplier link</label><input type="url" id="f_link" data-k="link" value="' + esc(it.link) + '" placeholder="https://"></div>' +
+      '<div class="field"><span class="lbl">Item images</span><label class="drop" data-drop="img" for="imgFile"><span id="imgTxt"></span><input type="file" id="imgFile" data-file="img" accept="image/*" multiple></label><div class="thumbs-edit" id="imgList"></div><datalist id="imgLabelList"><option value="Front"><option value="Back"><option value="Side"><option value="Detail"><option value="Sleeve"></datalist>' +
+      '<span class="hint">First image is the main one. Save the image from the supplier page, then drop the file here.</span></div>' +
+      '<div class="field"><label for="f_lay">Image layout</label><select id="f_lay" data-lay="1">' + [['', 'Automatic'], ['side', 'Side gallery (1 to 2 tall photos)'], ['wide', 'Wide (images across the top)'], ['colors', 'Colors (even tiles with color names)'], ['compact', 'Compact (small image, price below)']].map(function (o) { return '<option value="' + o[0] + '"' + ((it.layout || '') === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></div>' +
+      '</fieldset>';
+    $('ed').innerHTML = it.desc;
+    renderImgs();
+  }
+
+  function renderSp() {
+    var it = cur(), el = $('spLocs'); if (!el) return;
+    el.innerHTML = it.spLocs.map(function (l, i) {
+      var o = [1, 2, 3, 4, 5, 6, 7, 8].map(function (n) { return '<option value="' + n + '"' + (n === l.colors ? ' selected' : '') + '>' + n + ' color' + (n > 1 ? 's' : '') + '</option>'; }).join('');
+      return '<div class="loc"><div class="loc-h"><span>Print location ' + (i + 1) + '</span>' + (it.spLocs.length > 1 ? '<button type="button" class="link" data-rm-sp="' + i + '">remove</button>' : '') + '</div>' +
+        locSel('sp', i, l.loc) + '<div class="field"><label for="sc' + i + '">Ink colors</label><select id="sc' + i + '" data-sp="' + i + '">' + o + '</select></div>' +
+        '<label class="check"><input type="checkbox" data-dark="' + i + '"' + (l.dark ? ' checked' : '') + '><span>White first down needed (adds one color to print charge and a screen)</span></label></div>';
+    }).join('');
+    $('spAdd').hidden = it.spLocs.length >= 3;
+  }
+  function renderEmb() {
+    var it = cur(), el = $('embLocs'); if (!el) return;
+    el.innerHTML = it.embLocs.map(function (s, i) {
+      return '<div class="loc"><div class="loc-h"><span>Embroidery location ' + (i + 1) + '</span>' + (it.embLocs.length > 1 ? '<button type="button" class="link" data-rm-emb="' + i + '">remove</button>' : '') + '</div>' +
+        locSel('emb', i, it.embNames[i]) + '<div class="field"><label for="st' + i + '">Stitches</label><input type="number" id="st' + i + '" data-st="' + i + '" value="' + s + '" min="1000" step="500"><span class="hint">Left chest logo is typically 5,000 to 8,000</span></div></div>';
+    }).join('');
+    $('embAdd').hidden = it.embLocs.length >= 3;
+  }
+  function renderQ() {
+    var it = cur(), el = $('qtys'); if (!el) return;
+    el.innerHTML = it.qtys.map(function (q, i) {
+      return '<div class="qwrap"><input type="number" aria-label="Quantity ' + (i + 1) + '" data-q="' + i + '" value="' + (q || '') + '" min="1" placeholder="Qty">' +
+        (it.qtys.length > 1 ? '<button type="button" class="qx" data-rm-q="' + i + '" aria-label="Remove quantity ' + (i + 1) + '">&times;</button>' : '') + '</div>';
+    }).join('');
+    $('qAdd').hidden = it.qtys.length >= 8;
+  }
+  function adjKindValue(a) { return a.kind === 'pct' ? 'pct_' + (a.on === 'prod' ? 'prod' : 'imp') : (a.kind || 'pc'); }
+  function renderAdj() {
+    var it = cur(), el = $('adjList'); if (!el) return;
+    el.innerHTML = it.adjs.map(function (a, i) {
+      function sel(af, opts, val) { return '<select data-adj="' + i + '" data-af="' + af + '" aria-label="' + af + '">' + opts.map(function (o) { return '<option value="' + o[0] + '"' + (String(o[0]) === String(val) ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select>'; }
+      return '<div class="adj"><div class="loc-h"><span>Add-on ' + (i + 1) + '</span><button type="button" class="link" data-rm-adj="' + i + '">remove</button></div>' +
+        '<div class="field" style="margin-top:0"><label for="al' + i + '">Name</label><input type="text" id="al' + i + '" data-adj="' + i + '" data-af="label" value="' + esc(a.label) + '" placeholder="What is this charge?"></div>' +
+        '<div class="row r3" style="margin-top:8px">' +
+        '<div class="field" style="margin-top:0"><label>Effect</label>' + sel('sign', [[1, 'Add to price'], [-1, 'Remove from price']], a.sign) + '</div>' +
+        '<div class="field" style="margin-top:0"><label for="aa' + i + '">Amount</label><input type="number" id="aa' + i + '" data-adj="' + i + '" data-af="amt" value="' + (a.amt || '') + '" min="0" step="0.01"></div>' +
+        '<div class="field" style="margin-top:0"><label>Charged as</label>' + sel('kind', [['pc', '$ per piece'], ['tot', '$ total for the order'], ['pct_imp', '% of imprint price'], ['pct_prod', '% of product price']], adjKindValue(a)) + '</div>' +
+        '</div><div class="hint adj-sum" style="margin-top:6px">' + (+a.amt ? esc(adjText(a)) : 'Enter an amount.') + '</div></div>';
+    }).join('');
+  }
+  function renderTabs() {
+    $('tabs').innerHTML = state.items.map(function (it, i) {
+      var nm = itemTitle(it, i);
+      return '<button type="button" class="tab" data-tab="' + i + '" aria-current="' + (i === state.active) + '" title="' + esc(nm) + '">' + (i + 1) + '. ' + esc(nm.length > 20 ? nm.slice(0, 19) + '…' : nm) + '</button>';
+    }).join('') + '<button type="button" class="tab plus" id="addItem">+ Add item</button>';
+    $('rmItem').hidden = state.items.length < 2;
+  }
+  function fillQuoteFields() {
+    document.querySelectorAll('[data-qk]').forEach(function (el) { el.value = state.q[el.dataset.qk] || ''; });
+    document.querySelectorAll('[data-pg]').forEach(function (el) { el.checked = !!state.q[el.dataset.pg]; });
+    renderLogo();
+  }
+  function renderForms() { renderTabs(); renderPriceForm(); renderPresForm(); }
+
+  // ---- steps
+  function setStep(n) {
+    state.step = n;
+    $('step1Left').hidden = n !== 1; $('step2Left').hidden = n !== 2;
+    $('priceForm').hidden = n !== 1; $('presForm').hidden = n !== 2;
+    $('sumPane').hidden = n !== 1; $('pane').hidden = n !== 2;
+    document.querySelectorAll('.steps button').forEach(function (b) { b.setAttribute('aria-current', String(+b.dataset.step === n)); });
+    $('stageNote').textContent = n === 1 ? 'Prices come from the 2025 price sheet.' : (window.top === window ? 'In the print window, choose Save as PDF as the destination.' : 'Screen preview of the customer-facing pages.');
+    $('savePdf').hidden = !(n === 2 && window.top === window);
+    save();
+  }
+
+  // ---- pricing helpers
+  function optsFor(it) {
+    return { type: it.type, cost: it.cost, carhartt: it.carhartt, poly: it.poly, fold: it.fold, spLocs: it.spLocs, embLocs: it.embLocs, simpleText: it.simpleText,
+      art: it.art, ship: it.ship, sep: it.sep, disc: (it.discKind || 'pct') === 'pct' ? Math.min(it.disc || 0, 50) : (it.disc || 0), discKind: it.discKind || 'pct', waiveSetup: it.waiveSetup, waiveSmall: it.waiveSmall, adjs: it.adjs, marginAdj: +state.q.marginAdj || 0 };
+  }
+  // Details only (Josh's wording): "2 Colors + White Underbase", "6,000 Stitches". Location prefix only when there is more than one.
+  function locLines(it) {
+    var list = it.type === 'SP' ? it.spLocs : it.type === 'EMB' ? it.embLocs : [], multi = list.length > 1;
+    return list.map(function (l, i) {
+      var txt = it.type === 'SP' ? l.colors + (l.colors > 1 ? ' Colors' : ' Color') + (l.dark ? ' + White Underbase' : '') : Number(l).toLocaleString() + ' Stitches';
+      var nm = ((it.type === 'SP' ? l.loc : it.embNames[i]) || '').trim();
+      return { name: nm || (multi ? 'Location ' + (i + 1) : ''), txt: txt };
+    });
+  }
+  function imprintLabel(it) { return locLines(it).map(function (l) { return (l.name ? l.name + ': ' : '') + l.txt; }).join('  |  '); }
+  function methodName(it) { return it.type === 'SP' ? 'Screen Printing' : it.type === 'EMB' ? 'Embroidery' : it.type === 'PROMO' ? 'Promo Item' : ''; }
+  // Plain-text line, used in the summary and copied text
+  function methodLine(it) { var n = methodName(it); if (!n || it.type === 'PROMO') return ''; var dt = imprintLabel(it); return 'Imprint Method: ' + n + (dt ? ' | ' + dt : ''); }
+  function rowsFor(it) {
+    if (!it.type || it.type === 'PROMO' || !(it.cost > 0)) return null;
+    var qs = it.qtys.filter(function (q) { return q > 0; });
+    if (!qs.length) return null;
+    var o = optsFor(it);
+    return qs.map(function (q) { return price(q, o); });
+  }
+  function pct(x) { return (Math.round(x * 1000) / 10).toString().replace(/\.0$/, '') + '%'; }
+  function renderMarginView() {
+    var el = $('marginTables'); if (!el) return;
+    var adj = +state.q.marginAdj || 0;
+    function cell(u) { return adj ? pct(1 - adjUse(u, adj)) + '<span class="base">std ' + pct(1 - u) + '</span>' : pct(1 - u); }
+    function lab(b) { return b[1] >= 1e9 ? b[0] + '+' : b[0] + '-' + b[1]; }
+    var std = USE.under7.map(function (b, i) { return '<tr><td>' + lab(b) + '</td><td>' + cell(b[2]) + '</td><td>' + cell(USE.mid[i][2]) + '</td><td>' + cell(USE.high[i][2]) + '</td></tr>'; }).join('');
+    var car = USE.carhartt.map(function (b) { return '<tr><td>' + lab(b) + '</td><td>' + cell(b[2]) + '</td></tr>'; }).join('');
+    el.innerHTML = '<p class="mt-note">' + (adj ? 'Showing margins with your ' + (adj > 0 ? '+' : '') + adj + ' point adjustment. Standard values are in gray.' : 'Standard margins from the 2025 price sheet. ') + ' Margin is the share of the garment selling price that is profit, set by the garment cost and the quantity.</p>' +
+      '<div class="tw2"><table><thead><tr><th>Qty</th><th>Under $7</th><th>$7 to $19.99</th><th>$20 and up</th></tr></thead><tbody>' + std + '</tbody></table></div>' +
+      '<div class="tw2"><table><thead><tr><th>Carhartt qty</th><th>Margin</th></tr></thead><tbody>' + car + '</tbody></table></div>';
+  }
+  function discText(it) {
+    var v = it.disc || 0, k = it.discKind || 'pct';
+    return k === 'pc' ? money(v) + ' off each piece' : k === 'tot' ? money(v) + ' off the order total' : v + '% off';
+  }
+  // Customer-facing: names of add-on charges only, never amounts. Credits (removed charges) are not listed.
+  function addonNames(it) {
+    return (it.adjs || []).filter(function (a) { return a.sign > 0 && (a.label || '').trim() && +a.amt; }).map(function (a) { return a.label.trim(); }).join(', ');
+  }
+  function adjText(a) {
+    var amt = +a.amt || 0, s = a.sign < 0 ? '-' : '+';
+    var what = a.kind === 'pct' ? amt + '% of ' + (a.on === 'prod' ? 'product' : 'imprint') + ' price' : a.kind === 'tot' ? money(amt) + ' total' : money(amt) + ' per piece';
+    return s + ' ' + what;
+  }
+
+  // ---- step 1 summary
+  function sumCard(it, i) {
+    var rows = rowsFor(it), disc = (it.disc || 0) > 0, br = !!state.showBreak, body;
+    if (!it.type) body = '<p class="sum-msg">Choose an imprint method to see prices.</p>';
+    else if (it.type === 'PROMO') body = '<p class="sum-msg">Promo items are custom quoted. See Josh or Elliott.</p>';
+    else if (!rows) body = '<p class="sum-msg">Enter the item cost and at least one quantity to see prices.</p>';
+    else {
+      var head = '<th>Qty</th>' + (br ? '<th>Product</th><th>Margin</th><th>Imprint</th><th>Add-ons</th><th>Fees</th>' : '') + (disc ? '<th>List each</th>' : '') + '<th>' + (disc ? 'Your price' : 'Price each') + '</th><th>Total</th>';
+      var trs = rows.map(function (r) {
+        return '<tr><td>' + r.q.toLocaleString() + '</td>' +
+          (br ? '<td>' + money(r.garment) + '</td><td>' + pct(1 - r.use) + '</td><td>' + money(r.imprint) + '</td><td>' + (r.adj ? (r.adj > 0 ? '+' : '-') + money(Math.abs(r.adj)) : '-') + '</td><td>' + money(r.lumpPer) + '</td>' : '') +
+          (disc ? '<td class="was">' + money(r.each) + '</td>' : '') + '<td class="each">' + money(r.eachDisc) + '</td><td>' + money(r.total) + '</td></tr>';
+      }).join('');
+      var f = rows[0], notes = [];
+      if (it.sep && f.setup > 0) notes.push('<span><b>Setup charges (separate):</b> ' + money(f.setup) + '</span>');
+      if (it.sep && it.art > 0) notes.push('<span><b>Artwork (separate):</b> ' + money(it.art) + '</span>');
+      if (!it.sep && (f.setup > 0 || it.art > 0)) notes.push('<span>Setup and artwork are built into the price each.</span>');
+      if (it.ship > 0) notes.push('<span>Shipping of ' + money(it.ship) + ' is built into the price each.</span>');
+      if (rows.some(function (r) { return r.small; })) notes.push('<span>Small order charge of $10.00 applies under 12 pieces.</span>');
+      if (it.waiveSetup) notes.push('<span>Setup charges waived.</span>');
+      if (it.waiveSmall) notes.push('<span>Small order charge waived.</span>');
+      it.adjs.forEach(function (a) { if (+a.amt) notes.push('<span><b>' + esc(a.label || 'Adjustment') + ':</b> ' + esc(adjText(a)) + '</span>'); });
+      if ((it.disc || 0) > 0) notes.push('<span><b>Rep discount:</b> ' + esc(discText(it)) + '</span>');
+      notes.push('<span>Prices are rounded up to the next $0.05.</span>');
+      if (br) notes.push('<span>Fees column spreads setup, artwork, shipping and small order charges over the quantity.</span>');
+      body = '<div class="tw"><table><thead><tr>' + head + '</tr></thead><tbody>' + trs + '</tbody></table></div>' + (notes.length ? '<div class="notes">' + notes.join('') + '</div>' : '');
+    }
+    var sub = esc(methodLine(it) || (it.type === 'PROMO' ? 'Promo Item' : 'Imprint method not chosen'));
+    return '<section class="sum"><h3>' + esc(itemTitle(it, i)) + '</h3><div class="sub">' + sub + '</div>' + body + '</section>';
+  }
+
+  // ---- step 2 pages
+  var LOGO_DARK = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDYuMzcgMjc2LjY5IiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IkVhZ2xlIEdyYXBoaWNzIiB4bWxuczpjMnBhPSJodHRwOi8vYzJwYS5vcmcvbWFuaWZlc3QiPjx0aXRsZT5FYWdsZSBHcmFwaGljczwvdGl0bGU+PHBhdGggZmlsbD0iI0ZGRkZGRiIgZD0iTTI1LjUsMjM3LjMxdi05Ni43OGg1MS45OXYxNy4xNWgtMzQuMDV2MjIuNzloMzIuNjF2MTcuMTVoLTMyLjYxdjIyLjUzaDM0LjA1djE3LjE1SDI1LjVaIj48L3BhdGg+PHBhdGggZmlsbD0iI0ZGRkZGRiIgZD0iTTE2MC45MSwyMzcuMzFsLTEwLjM0LTI1LjAxaC0zNC40NGwtMTAuNzQsMjUuMDFoLTE5Ljc3bDQwLjMzLTk2Ljc4aDE0LjE1bDQwLjU5LDk2Ljc4aC0xOS43N1pNMTMzLjAyLDE2NS44bC0xMC4zNSwyOS4zM2gyMC42OWwtMTAuMzQtMjkuMzNaIj48L3BhdGg+PHBhdGggZmlsbD0iI0ZGRkZGRiIgZD0iTTIzMy42LDIzOS4wMWMtMjkuNzMsMC01Mi42NC0yMi01Mi42NC01MC4yOXMyMi42Ni00OS45LDUwLjk0LTQ5LjljMjEuMDgsMCw0MC45OSwxMi43LDQ3LjI3LDMwLjEyaC0yMS4wOWMtNi4wMi04LjM4LTE1LjMyLTEyLjgzLTI2LjU4LTEyLjgzLTE5LjEyLDAtMzIuNDgsMTQuNjctMzIuNDgsMzIuODdzMTQuNTQsMzIuNzQsMzMuNTMsMzIuNzRjMTIuNywwLDIzLjE4LTYuMjgsMjguNDItMTcuMDJoLTQwLjA3di0xNi43Nmg2My4yNXYyLjM2YzAsMjYuMzItMjIsNDguNzItNTAuNTUsNDguNzJaIj48L3BhdGg+PHBhdGggZmlsbD0iI0ZGRkZGRiIgZD0iTTM1My41NiwyMzcuMzF2LTk2Ljc4aDUxLjk5djE3LjE1aC0zNC4wNXYyMi43OWgzMi42MXYxNy4xNWgtMzIuNjF2MjIuNTNoMzQuMDV2MTcuMTVoLTUxLjk5WiI+PC9wYXRoPjxwYXRoIGZpbGw9IiM3NkJEMUQiIGQ9Ik0yNS42NywyNTEuNTJjMC0xLjA1LjI4LTEuOS44NS0yLjUzLjU3LS42MywxLjQyLS45NSwyLjU2LS45NWg4LjJsLjk5LDUuMzNoLTYuM2MtLjM0LDAtLjUyLjE4LS41Mi41NXYxNi45OWMwLC4zNy4xNy41NS41Mi41NWgyLjYxdi0xMS4zaDUuNTl2MTYuNTJoLTEwLjAyYy0xLjY2LDAtMi44My0uMzQtMy40OS0xLjAzLS42Ni0uNjktLjk5LTEuODItLjk5LTMuNHYtMjAuNzRaIj48L3BhdGg+PHBhdGggZmlsbD0iIzc2QkQxRCIgZD0iTTk0LjQ1LDI2NS4wM2MwLC42My0uMjIsMS4yMS0uNjUsMS43NC0uNDQuNTMtMS4wOC43OS0xLjkyLjc5bDMuMDEsOS4xM2gtNS45NGwtMi43Ny05LjEzaC0uNzV2OS4xM2gtNS43NXYtMjguNjVoMTAuOWMxLjM1LDAsMi4zMy4zNCwyLjk1LDEuMDEuNjIuNjcuOTMsMS41Ny45MywyLjcxdjEzLjI4Wk04NS40MiwyNTMuMDZ2OS44OGgyLjgxYy4zNywwLC41Ni0uMi41Ni0uNTl2LTguNjljMC0uMzktLjE5LS41OS0uNTYtLjU5aC0yLjgxWiI+PC9wYXRoPjxwYXRoIGZpbGw9IiM3NkJEMUQiIGQ9Ik0xMzkuMzksMjczLjEzbC0uNTIsMy41NmgtNS43OWw1LjE5LTI4LjY1aDYuMTRsNS4xOSwyOC42NWgtNS43OGwtLjUyLTMuNTZoLTMuOTJaTTE0MC4wMiwyNjguNTloMi42NWwtMS4zMS0xMC4xNS0xLjM1LDEwLjE1WiI+PC9wYXRoPjxwYXRoIGZpbGw9IiM3NkJEMUQiIGQ9Ik0xOTkuNzMsMjQ4LjA0YzEuMTQsMCwxLjk5LjMyLDIuNTYuOTUuNTcuNjMuODUsMS40OC44NSwyLjUzdjEzLjcxYzAsLjU1LS4wNiwxLjA2LS4xOCwxLjUyLS4xMi40Ni0uMzQuODYtLjY1LDEuMjEtLjMyLjM0LS43NC42MS0xLjI3LjgxLS41My4yLTEuMTkuMy0xLjk4LjNoLTQuOTF2Ny42M2gtNS43MXYtMjguNjVoMTEuMjlaTTE5NC4xNSwyNTMuMDZ2MTEuMjZoMi44NWMuMjQsMCwuMzktLjA0LjQ2LS4xNC4wNy0uMDkuMS0uMjQuMS0uNDV2LTEwLjExYzAtLjM3LS4xNy0uNTUtLjUyLS41NWgtMi44OVoiPjwvcGF0aD48cGF0aCBmaWxsPSIjNzZCRDFEIiBkPSJNMjU3LjUsMjc2LjY5aC01Ljg2di0xMS40NmgtMy4xM3YxMS40NmgtNS44NnYtMjguNjVoNS44NnYxMi4yNWgzLjEzdi0xMi4yNWg1Ljg2djI4LjY1WiI+PC9wYXRoPjxwYXRoIGZpbGw9IiM3NkJEMUQiIGQ9Ik0yOTcuMTMsMjQ4LjA0aDUuNzV2MjguNjVoLTUuNzV2LTI4LjY1WiI+PC9wYXRoPjxwYXRoIGZpbGw9IiM3NkJEMUQiIGQ9Ik0zNDYuOTcsMjc2LjY5Yy0xLjY2LDAtMi44My0uMzQtMy40OS0xLjAzLS42Ni0uNjktLjk5LTEuODItLjk5LTMuNHYtMjAuN2MwLTEuMTMuMzItMiwuOTctMi42MS42NS0uNiwxLjQ1LS45MSwyLjQtLjkxaDcuNTdsLjk5LDUuMzNoLTUuNTFjLS4zNCwwLS41Mi4xOC0uNTIuNTV2MTYuODdjMCwuMzcuMTcuNTUuNTIuNTVoNS41MWwtMS4wMyw1LjMzaC02LjQyWiI+PC9wYXRoPjxwYXRoIGZpbGw9IiM3NkJEMUQiIGQ9Ik0zOTQuODgsMjc2LjY5bC0xLjAzLTUuMzNoNi4xOGMuNDUsMCwuNjctLjIuNjctLjU5di01LjIyYzAtLjM5LS4wOC0uNjMtLjI0LS43MS0uMTYtLjA4LS40NC0uMTItLjgzLS4xMmgtMi45N2MtLjQyLDAtLjgyLS4wMy0xLjIxLS4xLS4zOC0uMDctLjczLS4yMi0xLjAzLS40NS0uMy0uMjQtLjU0LS41Ny0uNzEtLjk5LS4xNy0uNDItLjI2LS45OS0uMjYtMS43di05LjcyYzAtMS4xMy4zMS0yLjAzLjkzLTIuNzEuNjItLjY3LDEuNjEtMS4wMSwyLjk1LTEuMDFoNy45M2wuOTksNS4zM2gtNi41Yy0uNDcsMC0uNzEuMjEtLjcxLjYzdjUuMjFjMCwuMjkuMDcuNDkuMjIuNTkuMTQuMTEuMzYuMTYuNjUuMTZoMy42MWMuOTIsMCwxLjYzLjIyLDIuMTIuNjUuNDkuNDMuNzMsMS4xOS43MywyLjI3djkuNDRjMCwxLjU4LS4zMiwyLjctLjk3LDMuMzYtLjY1LjY2LTEuNzkuOTktMy40My45OWgtNy4wOVoiPjwvcGF0aD48cG9seWdvbiBmaWxsPSIjRkZGRkZGIiBwb2ludHM9IjMxMy44OCAyMjAuMTUgMzEzLjg4IDE1OC42NCAyOTUuOTQgMTQ4Ljc5IDI5NS45NCAyMzcuMzEgMzQzLjQ4IDIzNy4zMSAzNDMuNDggMjIwLjE1IDMxMy44OCAyMjAuMTUiPjwvcG9seWdvbj48cGF0aCBmaWxsPSIjRkZGRkZGIiBkPSJNMCwzNS44N3M0MC4zMSwzOS4wMiwxNjguNCwzNS4xN2MxMjguMDktMy44NSwxNzMuODQsODEuMzcsMTczLjg0LDgxLjM3LDAsMC03NC45My02NS40MS0xNTkuOTQtNjcuNTFDOTcuMjgsODIuODIsNDIuNjgsODAuMDksMCwzNS44N1oiPjwvcGF0aD48cGF0aCBmaWxsPSIjNzZCRDFEIiBkPSJNMTE3LjUzLDY2Ljg1czMyLjU4LDIuMjcsNTEuNzYsMS4wNGMwLDAtNTYuNTItNy4xOS05Ni4wOS0zMi43OCwwLDAsMTQuNTEsMjEuMTQsNDQuMzIsMzEuNzRaIj48L3BhdGg+PHBhdGggZmlsbD0iIzc2QkQxRCIgZD0iTTM1LjA0LDY3LjI0czI5Ljc5LDE0Ljg0LDY3LjM4LDE3LjA3YzAsMCwyMi41NywxMS41OSw2OS43MSwxMi42NCwwLDAtOTMuNDMsMTIuNS0xMzcuMDktMjkuNzFaIj48L3BhdGg+PHBhdGggZmlsbD0iI0ZGRkZGRiIgZD0iTTI4MC43NSwxMTguMjZjMTYuMzgsNi43MiwzMC42OCwxNi4zMSw0My44NCwyNiwwLDAtNjcuOTEtMzIuNDYtMTU1LjcyLTIxLjk3LDAsMCwxNC4wMiw2LjE1LDI5LjQsNS42MiwwLDAtNzcuOSwyNy4zOS0xNTUtMzEuNjcsMCwwLDY0LjEsMjMuOTEsMTI4LjA1LDEzLjg5LDYzLjk0LTEwLjAyLDkzLjA2LDEuNDEsMTA5LjQ0LDguMTNaIj48L3BhdGg+PHBhdGggZmlsbD0iIzc2QkQxRCIgZD0iTTEwNS4zNCwwczQ3LjM3LDMzLjkxLDEwNC4xNCw0NS45OGM0MC41Nyw4LjYzLDc5LjA5LDQxLjU0LDc5LjA5LDQxLjU0LDAsMC0xNi41LTMuNjItMjEuMjUtLjUyLDAsMC0xMy4yOC02LjU5LTI0LjMzLTkuNTIsMCwwLTE1LjU1LTE5Ljg1LTYwLjIxLTI4LjA5QzE0My40Myw0Mi4xMywxMDUuMzQsMCwxMDUuMzQsMFoiPjwvcGF0aD48cGF0aCBmaWxsPSIjRkZGRkZGIiBkPSJNMTE0LjQ4LDEyLjM0czIzLjQ0LDIxLjkzLDM5LjU0LDI5LjgzYzAsMCwyLjM0LDkuNDQsMjMuNTQsMTguNDYsMCwwLTQzLjQ0LTEyLjE1LTYzLjA3LTQ4LjI5WiI+PC9wYXRoPjxwYXRoIGZpbGw9IiM3NkJEMUQiIGQ9Ik0yMzMuNzUsMTIzLjM3czgxLjk5LDI3LjgyLDEwNS43OCwyOS40NmMwLDAsMTQuNDYsOS40Ni0uMTEsMzcuNSwwLDAtLjE3LTIzLjUyLTMwLjA3LTMyLjk3LTI5Ljg5LTkuNDUtNjcuNzgtMjguNDItNzUuNi0zMy45OVoiPjwvcGF0aD48L3N2Zz4=', HEAD_DARK = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzNDUuOTIgMTkwLjMzIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IkVhZ2xlIEdyYXBoaWNzIG1hcmsiIHhtbG5zOmMycGE9Imh0dHA6Ly9jMnBhLm9yZy9tYW5pZmVzdCI+PHRpdGxlPkVhZ2xlIEdyYXBoaWNzIG1hcms8L3RpdGxlPjxwYXRoIGZpbGw9IiNGRkZGRkYiIGQ9Ik0wLDM1Ljg3czQwLjMxLDM5LjAyLDE2OC40LDM1LjE3YzEyOC4wOS0zLjg1LDE3My44NCw4MS4zNywxNzMuODQsODEuMzcsMCwwLTc0LjkzLTY1LjQxLTE1OS45NC02Ny41MUM5Ny4yOCw4Mi44Miw0Mi42OCw4MC4wOSwwLDM1Ljg3WiI+PC9wYXRoPjxwYXRoIGZpbGw9IiM3NkJEMUQiIGQ9Ik0xMTcuNTMsNjYuODVzMzIuNTgsMi4yNyw1MS43NiwxLjA0YzAsMC01Ni41Mi03LjE5LTk2LjA5LTMyLjc4LDAsMCwxNC41MSwyMS4xNCw0NC4zMiwzMS43NFoiPjwvcGF0aD48cGF0aCBmaWxsPSIjNzZCRDFEIiBkPSJNMzUuMDQsNjcuMjRzMjkuNzksMTQuODQsNjcuMzgsMTcuMDdjMCwwLDIyLjU3LDExLjU5LDY5LjcxLDEyLjY0LDAsMC05My40MywxMi41LTEzNy4wOS0yOS43MVoiPjwvcGF0aD48cGF0aCBmaWxsPSIjRkZGRkZGIiBkPSJNMjgwLjc1LDExOC4yNmMxNi4zOCw2LjcyLDMwLjY4LDE2LjMxLDQzLjg0LDI2LDAsMC02Ny45MS0zMi40Ni0xNTUuNzItMjEuOTcsMCwwLDE0LjAyLDYuMTUsMjkuNCw1LjYyLDAsMC03Ny45LDI3LjM5LTE1NS0zMS42NywwLDAsNjQuMSwyMy45MSwxMjguMDUsMTMuODksNjMuOTQtMTAuMDIsOTMuMDYsMS40MSwxMDkuNDQsOC4xM1oiPjwvcGF0aD48cGF0aCBmaWxsPSIjNzZCRDFEIiBkPSJNMTA1LjM0LDBzNDcuMzcsMzMuOTEsMTA0LjE0LDQ1Ljk4YzQwLjU3LDguNjMsNzkuMDksNDEuNTQsNzkuMDksNDEuNTQsMCwwLTE2LjUtMy42Mi0yMS4yNS0uNTIsMCwwLTEzLjI4LTYuNTktMjQuMzMtOS41MiwwLDAtMTUuNTUtMTkuODUtNjAuMjEtMjguMDlDMTQzLjQzLDQyLjEzLDEwNS4zNCwwLDEwNS4zNCwwWiI+PC9wYXRoPjxwYXRoIGZpbGw9IiNGRkZGRkYiIGQ9Ik0xMTQuNDgsMTIuMzRzMjMuNDQsMjEuOTMsMzkuNTQsMjkuODNjMCwwLDIuMzQsOS40NCwyMy41NCwxOC40NiwwLDAtNDMuNDQtMTIuMTUtNjMuMDctNDguMjlaIj48L3BhdGg+PHBhdGggZmlsbD0iIzc2QkQxRCIgZD0iTTIzMy43NSwxMjMuMzdzODEuOTksMjcuODIsMTA1Ljc4LDI5LjQ2YzAsMCwxNC40Niw5LjQ2LS4xMSwzNy41LDAsMC0uMTctMjMuNTItMzAuMDctMzIuOTctMjkuODktOS40NS02Ny43OC0yOC40Mi03NS42LTMzLjk5WiI+PC9wYXRoPjwvc3ZnPg==', HEAD_LIGHT = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzNDUuOTIgMTkwLjMzIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IkVhZ2xlIEdyYXBoaWNzIG1hcmsiIHhtbG5zOmMycGE9Imh0dHA6Ly9jMnBhLm9yZy9tYW5pZmVzdCI+PHRpdGxlPkVhZ2xlIEdyYXBoaWNzIG1hcms8L3RpdGxlPjxwYXRoIGZpbGw9IiM1MzU4NUEiIGQ9Ik0wLDM1Ljg3czQwLjMxLDM5LjAyLDE2OC40LDM1LjE3YzEyOC4wOS0zLjg1LDE3My44NCw4MS4zNywxNzMuODQsODEuMzcsMCwwLTc0LjkzLTY1LjQxLTE1OS45NC02Ny41MUM5Ny4yOCw4Mi44Miw0Mi42OCw4MC4wOSwwLDM1Ljg3WiI+PC9wYXRoPjxwYXRoIGZpbGw9IiM3NkJEMUQiIGQ9Ik0xMTcuNTMsNjYuODVzMzIuNTgsMi4yNyw1MS43NiwxLjA0YzAsMC01Ni41Mi03LjE5LTk2LjA5LTMyLjc4LDAsMCwxNC41MSwyMS4xNCw0NC4zMiwzMS43NFoiPjwvcGF0aD48cGF0aCBmaWxsPSIjNzZCRDFEIiBkPSJNMzUuMDQsNjcuMjRzMjkuNzksMTQuODQsNjcuMzgsMTcuMDdjMCwwLDIyLjU3LDExLjU5LDY5LjcxLDEyLjY0LDAsMC05My40MywxMi41LTEzNy4wOS0yOS43MVoiPjwvcGF0aD48cGF0aCBmaWxsPSIjNTM1ODVBIiBkPSJNMjgwLjc1LDExOC4yNmMxNi4zOCw2LjcyLDMwLjY4LDE2LjMxLDQzLjg0LDI2LDAsMC02Ny45MS0zMi40Ni0xNTUuNzItMjEuOTcsMCwwLDE0LjAyLDYuMTUsMjkuNCw1LjYyLDAsMC03Ny45LDI3LjM5LTE1NS0zMS42NywwLDAsNjQuMSwyMy45MSwxMjguMDUsMTMuODksNjMuOTQtMTAuMDIsOTMuMDYsMS40MSwxMDkuNDQsOC4xM1oiPjwvcGF0aD48cGF0aCBmaWxsPSIjNzZCRDFEIiBkPSJNMTA1LjM0LDBzNDcuMzcsMzMuOTEsMTA0LjE0LDQ1Ljk4YzQwLjU3LDguNjMsNzkuMDksNDEuNTQsNzkuMDksNDEuNTQsMCwwLTE2LjUtMy42Mi0yMS4yNS0uNTIsMCwwLTEzLjI4LTYuNTktMjQuMzMtOS41MiwwLDAtMTUuNTUtMTkuODUtNjAuMjEtMjguMDlDMTQzLjQzLDQyLjEzLDEwNS4zNCwwLDEwNS4zNCwwWiI+PC9wYXRoPjxwYXRoIGZpbGw9IiM1MzU4NUEiIGQ9Ik0xMTQuNDgsMTIuMzRzMjMuNDQsMjEuOTMsMzkuNTQsMjkuODNjMCwwLDIuMzQsOS40NCwyMy41NCwxOC40NiwwLDAtNDMuNDQtMTIuMTUtNjMuMDctNDguMjlaIj48L3BhdGg+PHBhdGggZmlsbD0iIzc2QkQxRCIgZD0iTTIzMy43NSwxMjMuMzdzODEuOTksMjcuODIsMTA1Ljc4LDI5LjQ2YzAsMCwxNC40Niw5LjQ2LS4xMSwzNy41LDAsMC0uMTctMjMuNTItMzAuMDctMzIuOTctMjkuODktOS40NS02Ny43OC0yOC40Mi03NS42LTMzLjk5WiI+PC9wYXRoPjwvc3ZnPg==';
+  var WORD = '<span class="brand"><img src="' + HEAD_LIGHT + '" alt=""><span class="wordmark">Eagle <b>Graphics</b></span></span>';
+  var BIGLOGO = '<img class="biglogo" src="' + LOGO_DARK + '" alt="Eagle Graphics">';
+  var CAPS = ['Screen Printing', 'Embroidery', 'Promotional Products', 'Corporate Branding', 'Company Stores & Rewards', 'Swag Kits', 'School & Team Online Stores', 'Resort & Gift Merchandise', 'Print Collateral', 'Signs & Banners', 'Trade Show Displays', 'In-House Art & Design', 'Fulfillment & Warehousing'];
+  function repBlock(q) {
+    return '<div class="repblk"><div class="k">Your sales representative</div><div class="n">' + esc(q.rep || 'Your Name') + '</div>' +
+      '<div>' + esc(q.repPhone || '920-462-5200') + '</div>' + (q.repEmail ? '<div>' + esc(q.repEmail) + '</div>' : '') + '</div>';
+  }
+  function longDate() { return new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }); }
+  function headBand(q) {
+    var no = (q.quoteNo || '').trim(), note = (q.coverNote || '').trim();
+    return '<div class="qband qhead"><div class="qh-left">' + BIGLOGO + '<div class="for">Prepared for</div><div class="cust">' + (q.logo ? '<img src="' + q.logo + '" alt="">' : '') + '<span class="nm">' + esc(q.customer || 'Customer name') + '</span></div></div>' +
+      '<div class="qh-right"><h1>' + esc(q.title || 'Product Quote') + '</h1>' + (note ? '<p class="qnote">' + esc(note).replace(/\n/g, '<br>') + '</p>' : '') + repBlock(q) + '</div>' +
+      '<div class="qh-foot"><span>' + longDate() + (no ? ' &nbsp;|&nbsp; Quote ' + esc(no) : '') + '</span><span>Eagle Graphics &nbsp;|&nbsp; 1200 Prospect Lane, Kaukauna, WI &nbsp;|&nbsp; egpromo.com</span></div><div class="dark-bar"></div></div>';
+  }
+  function closeBand(q) {
+    var msg = (q.thanksMsg || '').trim(), terms = (q.terms == null ? TERMS_DEFAULT : q.terms).split(/\n/).map(function (s) { return s.trim(); }).filter(Boolean);
+    return '<div class="qband qclose"><p class="msg">' + (msg ? esc(msg).replace(/\n/g, '<br>') : '<b>' + THANKS_HEAD + '</b>' + esc(THANKS_BODY)) + '</p>' +
+      (terms.length ? '<ul class="terms">' + terms.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ul>' : '') +
+      (q.noCaps ? '' : '<div class="caps"><div class="for">Everything we do</div><ul>' + CAPS.map(function (c) { return '<li>' + esc(c) + '</li>'; }).join('') + '</ul></div>') + '</div>';
+  }
+  function itemPage(it, idx, total) {
+    var rows = rowsFor(it), disc = (it.disc || 0) > 0 && !!it.showDisc, first = rows && rows[0], bar, extras = '';
+    if (it.type === 'PROMO') bar = '<div class="pb-k">Pricing</div><div class="pb-v">Custom quote</div>';
+    else if (!rows) bar = '<div class="pb-msg">' + (it.type ? 'Add the item cost and a quantity in step 1 to price this item.' : 'Choose an imprint method in step 1 to price this item.') + '</div>';
+    else {
+      var low = rows.reduce(function (a, b) { return b.eachDisc < a.eachDisc ? b : a; });
+      bar = '<div class="pb-top"><div><div class="pb-k">Starting at / piece</div><div class="pb-v g">' + money(low.eachDisc) + '</div></div><div><div class="pb-k">At quantity</div><div class="pb-v">' + low.q.toLocaleString() + '</div></div></div>' +
+        '<div class="tbl-wrap"><table><thead><tr><th>Qty</th>' + (disc ? '<th>List each</th>' : '') + '<th>' + (disc ? 'Your price' : 'Price each') + '</th><th>Total</th></tr></thead><tbody>' +
+        rows.map(function (r) { return '<tr><td>' + r.q.toLocaleString() + '</td>' + (disc ? '<td class="was">' + money(r.each) + '</td>' : '') + '<td class="each">' + money(r.eachDisc) + '</td><td>' + money(r.total) + '</td></tr>'; }).join('') + '</tbody></table></div>';
+      var setupName = it.type === 'EMB' ? 'Embroidery Set Up Charge' : 'Setup charges';
+      if (it.sep && first.setup > 0) extras += '<div><span>' + setupName + '</span><span>' + money(first.setup) + '</span></div>';
+      if (it.sep && it.art > 0) extras += '<div><span>Artwork</span><span>' + money(it.art) + '</span></div>';
+      if (!it.sep && (first.setup > 0 || it.art > 0)) extras += '<div><span>' + (first.setup > 0 ? setupName + (it.art > 0 ? ' and artwork' : '') : 'Artwork') + '</span><span>Included in price each</span></div>';
+      if (it.ship > 0) extras += '<div><span>Shipping</span><span>Included in price each</span></div>';
+    }
+    var link = (it.link || '').trim(), safe = /^https?:\/\//i.test(link) ? link : '';
+    var n = it.imgs.length;
+    var gallery = '<div class="gal g' + Math.max(n, 1) + '">' + (n ? it.imgs.map(function (d, i) { var lb = (it.imgLabels && it.imgLabels[i] || '').trim(); return '<figure class="fig"><div class="tile"><img src="' + d + '" alt="' + esc(lb) + '"></div>' + (lb ? '<figcaption>' + esc(lb) + '</figcaption>' : '') + '</figure>'; }).join('') : '<figure class="fig"><div class="tile">Item image</div></figure>') + '</div>';
+    var catName = it.category || (it.type === 'EMB' ? 'Embroidery' : it.type === 'PROMO' ? 'Promo items' : it.type === 'SP' ? 'Screen print' : 'Quote');
+    var isFirst = idx === 0, isLast = idx === total - 1;
+    var tags = (isFirst ? '<span class="cat-tag">' + esc(catName) + '</span>' : '') + (it.vendor ? '<span class="hit">' + esc(it.vendor) + '</span>' : '') + (it.itemNo ? '<span>ITEM #' + esc(it.itemNo) + '</span>' : '') + (safe ? '<a href="' + esc(safe) + '" target="_blank" rel="noopener">View details</a>' : '');
+    return '<section class="page">' + (isFirst ? headBand(state.q) : '<div class="p-head">' + WORD + '<span class="cat">' + esc(catName) + '</span><span class="num">' + String(idx + 1).padStart(2, '0') + ' / ' + String(total).padStart(2, '0') + '</span></div>') +
+      '<div class="item ' + (it.layout || (n >= 3 ? 'colors' : 'side')) + ' ig' + n + ' plight">' + gallery + '<div class="info">' + (tags ? '<div class="tags">' + tags + '</div>' : '') + '<h3>' + esc(it.name || 'Item name') + '</h3>' +
+      '<div class="desc">' + it.desc + '</div>' + (methodLine(it) ? '<div class="imprint-line"><b>Imprint Method:</b> ' + esc(methodName(it)) + locLines(it).map(function (l) { return '<div class="loc-line">' + (l.name ? '<b>Imprint Location:</b> ' + esc(l.name) + ' | ' : '') + esc(l.txt) + '</div>'; }).join('') + '</div>' : '') + (addonNames(it) ? '<div class="imprint-line"><b>Add-ons included:</b> ' + esc(addonNames(it)) + '</div>' : '') + '</div>' +
+      '<div class="pricebar">' + bar + '</div></div>' + (extras ? '<div class="extras">' + extras + '</div>' : '') +
+      (isLast ? closeBand(state.q) : '') + '<div class="p-foot">For presentation purposes only. Pricing includes the imprint shown. Set-up and other charges may apply. Pricing is subject to change. Contact your sales representative for current information.</div></section>';
+  }
+
+  // ---- render + save
+  function render() {
+    var total = state.items.length;
+    renderMarginView();
+    $('sums').innerHTML = state.items.map(sumCard).join('');
+    $('pages').innerHTML = state.items.map(function (it, i) { return itemPage(it, i, total); }).join('');
+    save();
+  }
+  var timer;
+  function setStatus(t) { $('status').textContent = t; }
+  var flashT;
+  function flash(msg) { var el = $('toast'); el.textContent = msg; el.classList.add('show'); clearTimeout(flashT); flashT = setTimeout(function () { el.classList.remove('show'); }, 3200); }
+  function save() {
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+      try { localStorage.setItem(KEY, JSON.stringify(state)); setStatus('Draft saved in this browser'); }
+      catch (e) { setStatus('Draft not saved (browser storage full or off)'); }
+    }, 500);
+  }
+
+  // ---- copy text
+  function copyText() {
+    var q = state.q, t = 'EAGLE GRAPHICS QUOTE\n' + (q.customer ? 'Prepared for ' + q.customer + '\n' : '') + new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) + '\n';
+    state.items.forEach(function (it, i) {
+      t += '\n' + (i + 1) + '. ' + itemTitle(it, i) + (it.itemNo ? ' (' + it.itemNo + ')' : '') + (it.vendor ? ' [' + it.vendor + ']' : '') + '\n';
+      var rows = rowsFor(it);
+      if (it.type === 'PROMO') { t += '   Custom quote\n'; return; }
+      if (methodLine(it)) t += '   ' + methodLine(it) + '\n';
+      if (!rows) { t += '   (pricing incomplete)\n'; return; }
+      rows.forEach(function (r) { t += '   ' + r.q + ' pcs @ ' + money(r.eachDisc) + ' each = ' + money(r.total) + '\n'; });
+      if (it.sep && rows[0].setup > 0) t += '   Setup: ' + money(rows[0].setup) + '\n';
+      if (it.sep && it.art > 0) t += '   Artwork: ' + money(it.art) + '\n';
+    });
+    t += '\nPricing subject to change.' + (q.rep ? '\n' + q.rep + ', Eagle Graphics, ' + (q.repPhone || '920-462-5200') + (q.repEmail ? ', ' + q.repEmail : '') : '');
+    function done() { flash('Copied'); }
+    function fallback() { var ta = document.createElement('textarea'); ta.value = t; ta.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); done(); } catch (e) {} document.body.removeChild(ta); }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, fallback); else fallback();
+  }
+
+  // ---- armed (two-step) buttons, since confirm() is unavailable
+  function arm(btn, idleText, armedText, action) {
+    if (btn.classList.contains('armed')) { btn.classList.remove('armed'); btn.textContent = idleText; clearTimeout(btn._t); action(); return; }
+    btn.classList.add('armed'); btn.textContent = armedText;
+    btn._t = setTimeout(function () { btn.classList.remove('armed'); btn.textContent = idleText; }, 3000);
+  }
+
+  // ---- events
+  var left = $('left');
+  function syncDup(attr, key, t) { document.querySelectorAll('[' + attr + '="' + key + '"]').forEach(function (el) { if (el !== t) el.value = t.value; }); }
+  left.addEventListener('input', function (e) {
+    var t = e.target, it = cur();
+    if (t.dataset.qk) { state.q[t.dataset.qk] = t.dataset.qk === 'marginAdj' ? (parseFloat(t.value) || 0) : t.value; syncDup('data-qk', t.dataset.qk, t); }
+    else if (t.id === 'ed') it.desc = clean(t.innerHTML);
+    else if (t.dataset.sploct !== undefined) it.spLocs[+t.dataset.sploct].loc = t.value || ' ';
+    else if (t.dataset.embloct !== undefined) it.embNames[+t.dataset.embloct] = t.value || ' ';
+    else if (t.dataset.imglabel !== undefined) { syncLabels(it); it.imgLabels[+t.dataset.imglabel] = t.value; }
+    else if (t.dataset.adj !== undefined) {
+      var a = it.adjs[+t.dataset.adj], af = t.dataset.af;
+      if (af === 'label') a.label = t.value;
+      else if (af === 'amt') a.amt = parseFloat(t.value) || 0;
+      else if (af === 'sign') a.sign = +t.value;
+      else if (af === 'kind') { var v = t.value; if (v === 'pct_imp') { a.kind = 'pct'; a.on = 'imp'; } else if (v === 'pct_prod') { a.kind = 'pct'; a.on = 'prod'; } else { a.kind = v; } }
+      var sm = t.closest('.adj').querySelector('.adj-sum'); if (sm) sm.textContent = +a.amt ? adjText(a) : 'Enter an amount.';
+    }
+    else if (t.dataset.k && t.type !== 'checkbox') {
+      it[t.dataset.k] = t.type === 'number' ? (parseFloat(t.value) || 0) : t.value;
+      if (t.dataset.k === 'name') { renderTabs(); syncDup('data-k', 'name', t); }
+    }
+    else if (t.dataset.q !== undefined) it.qtys[+t.dataset.q] = parseInt(t.value, 10) || 0;
+    else if (t.dataset.st !== undefined) it.embLocs[+t.dataset.st] = parseInt(t.value, 10) || 0;
+    else return;
+    render();
+  });
+  left.addEventListener('change', function (e) {
+    var t = e.target, it = cur();
+    if (t.id === 'presetSel') {
+      if (t.value === '') return;
+      var isCustom = t.value === 'custom';
+      it.adjs.push(isCustom ? { label: '', sign: 1, amt: 0, kind: 'pc', on: 'imp' } : Object.assign({}, PRESETS[+t.value]));
+      t.value = ''; renderAdj(); render();
+      if (isCustom) { var last = $('adjList').querySelector('.adj:last-child input[data-af="label"]'); if (last) last.focus(); }
+      return;
+    }
+    if (t.dataset.file) { addFiles(t.dataset.file, t.files); t.value = ''; return; }
+    if (t.dataset.k && t.type === 'checkbox') it[t.dataset.k] = t.checked;
+    else if (t.dataset.sp !== undefined) it.spLocs[+t.dataset.sp].colors = +t.value;
+    else if (t.dataset.sploc !== undefined) { it.spLocs[+t.dataset.sploc].loc = t.value === '__other' ? ' ' : t.value; renderSp(); if (t.value === '__other') { var o1 = document.querySelector('[data-sploct="' + t.dataset.sploc + '"]'); if (o1) o1.focus(); } }
+    else if (t.dataset.embloc !== undefined) { it.embNames[+t.dataset.embloc] = t.value === '__other' ? ' ' : t.value; renderEmb(); if (t.value === '__other') { var o2 = document.querySelector('[data-embloct="' + t.dataset.embloc + '"]'); if (o2) o2.focus(); } }
+    else if (t.dataset.lay !== undefined) it.layout = t.value;
+    else if (t.dataset.pg !== undefined) state.q[t.dataset.pg] = t.checked;
+    else if (t.dataset.dark !== undefined) it.spLocs[+t.dataset.dark].dark = t.checked;
+    else return;
+    render();
+  });
+  left.addEventListener('mousedown', function (e) { if (e.target.dataset && e.target.dataset.cmd) e.preventDefault(); });
+  left.addEventListener('paste', function (e) {
+    if (e.target.id !== 'ed') return;
+    e.preventDefault();
+    var txt = (e.clipboardData || window.clipboardData).getData('text/plain');
+    document.execCommand('insertText', false, txt);
+  });
+  left.addEventListener('click', function (e) {
+    var t = e.target.closest('button'); if (!t) return;
+    var it = cur(), d = t.dataset;
+    if (d.goto) { setStep(+d.goto); window.scrollTo(0, 0); return; }
+    if (d.cmd) {
+      var ed = $('ed'); if (document.activeElement !== ed) ed.focus();
+      var sel = window.getSelection(), wasEnd = false;
+      if (sel.rangeCount && sel.isCollapsed && /List$/.test(d.cmd)) {
+        var an = sel.anchorNode; wasEnd = an.nodeType === 3 ? sel.anchorOffset === an.nodeValue.length : sel.anchorOffset >= an.childNodes.length;
+      }
+      document.execCommand(d.cmd);
+      if (wasEnd && sel.rangeCount) {
+        var n = sel.anchorNode, el = n && (n.nodeType === 3 ? n.parentNode : n), li = el && el.closest ? el.closest('li') : null;
+        if (li) { var r = document.createRange(); r.selectNodeContents(li); r.collapse(false); sel.removeAllRanges(); sel.addRange(r); }
+      }
+      it.desc = clean(ed.innerHTML); render(); return;
+    }
+    if (d.t) { it.type = d.t; renderPriceForm(); render(); return; }
+    if (d.rmSp !== undefined) { it.spLocs.splice(+d.rmSp, 1); renderSp(); render(); return; }
+    if (d.rmEmb !== undefined) { it.embLocs.splice(+d.rmEmb, 1); it.embNames.splice(+d.rmEmb, 1); renderEmb(); render(); return; }
+    if (d.rmQ !== undefined) { it.qtys.splice(+d.rmQ, 1); renderQ(); render(); return; }
+    if (d.rmImg !== undefined) { syncLabels(it); it.imgs.splice(+d.rmImg, 1); it.imgLabels.splice(+d.rmImg, 1); renderImgs(); render(); return; }
+    if (d.rmAdj !== undefined) { it.adjs.splice(+d.rmAdj, 1); renderAdj(); render(); return; }
+    if (t.id === 'spAdd') { if (it.spLocs.length < 3) { it.spLocs.push({ colors: 1, dark: false, loc: '' }); renderSp(); render(); } return; }
+    if (t.id === 'embAdd') { if (it.embLocs.length < 3) { it.embLocs.push(5000); it.embNames.push(''); renderEmb(); render(); } return; }
+    if (t.id === 'qAdd') { if (it.qtys.length < 8) { it.qtys.push(0); renderQ(); } return; }
+    if (t.id === 'logoRm') { state.q.logo = ''; renderLogo(); render(); return; }
+    if (d.tab !== undefined) { state.active = +d.tab; renderForms(); save(); return; }
+    if (t.id === 'addItem') { state.items.push(newItem()); state.active = state.items.length - 1; renderForms(); render(); return; }
+    if (t.id === 'dupItem') { var c = JSON.parse(JSON.stringify(it)); state.items.splice(state.active + 1, 0, c); state.active += 1; renderForms(); render(); return; }
+    if (t.id === 'rmItem') { arm(t, 'Remove this item', 'Click again to remove', function () { state.items.splice(state.active, 1); state.active = Math.max(0, state.active - 1); renderForms(); render(); }); return; }
+  });
+  ['dragenter', 'dragover'].forEach(function (ev) { left.addEventListener(ev, function (e) { var z = e.target.closest && e.target.closest('.drop'); if (z) { e.preventDefault(); z.classList.add('over'); } }); });
+  ['dragleave', 'drop'].forEach(function (ev) { left.addEventListener(ev, function (e) { var z = e.target.closest && e.target.closest('.drop'); if (z) { e.preventDefault(); z.classList.remove('over'); if (ev === 'drop') addFiles(z.dataset.drop, e.dataTransfer.files); } }); });
+
+  document.querySelector('.steps').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) setStep(+b.dataset.step); });
+  $('showBreak').addEventListener('change', function (e) { state.showBreak = e.target.checked; render(); });
+  $('copy').addEventListener('click', copyText);
+  // PDF: the browser print dialog with a print stylesheet that shows only the quote pages (works from either step, including Ctrl+P)
+  var prevTitle = '';
+  window.addEventListener('beforeprint', function () {
+    prevTitle = document.title;
+    document.title = 'Eagle Graphics Quote - ' + (state.q.customer || 'Customer');
+    $('pane').hidden = false; $('sumPane').hidden = true;
+  });
+  window.addEventListener('afterprint', function () { document.title = prevTitle || document.title; setStep(state.step || 1); });
+  $('savePdf').addEventListener('click', function () { window.print(); });
+  $('newQ').addEventListener('click', function () {
+    arm($('newQ'), 'New quote', dirty ? 'Unsaved work clears' : 'Click again to clear', function () {
+      dirty = false;
+      var rep = { rep: state.q.rep, repEmail: state.q.repEmail, repPhone: state.q.repPhone };
+      state = { q: { customer: '', title: 'Product Quote', rep: rep.rep, repEmail: rep.repEmail, repPhone: rep.repPhone, logo: '', marginAdj: 0, quoteNo: nextQuoteNo(state.q.quoteNo), terms: TERMS_DEFAULT }, items: [newItem()], active: 0, step: 1, showBreak: state.showBreak };
+      fillQuoteFields(); renderForms(); render(); setStep(1); setStatus('New quote started');
+    });
+  });
+
+  // ---- save to a file / open from a file
+  var dirty = false;
+  ['input', 'change'].forEach(function (ev) { left.addEventListener(ev, function () { dirty = true; }, true); });
+  function bumpCounter(no) {
+    try { var c = parseInt(localStorage.getItem(CKEY), 10) || 1200, n = parseInt(no, 10); if (n >= c) localStorage.setItem(CKEY, String(n + 1)); } catch (e) {}
+  }
+  $('saveQ').addEventListener('click', function () {
+    var q = state.q, name = ('Quote ' + (q.quoteNo || '').trim() + ' - ' + (q.customer || '').trim()).replace(/[\\\/:*?"<>|]+/g, '').replace(/\s+/g, ' ').trim().replace(/ -$/, '') + '.json';
+    var blob = new Blob([JSON.stringify({ app: 'eagle-quote-builder', version: 1, savedAt: new Date().toISOString(), q: state.q, items: state.items })], { type: 'application/json' });
+    var url = URL.createObjectURL(blob), el = document.createElement('a');
+    el.href = url; el.download = name; document.body.appendChild(el); el.click(); document.body.removeChild(el);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+    dirty = false; flash('Saved ' + name);
+  });
+  $('openQ').addEventListener('click', function () {
+    function pick() { $('openFile').click(); }
+    if (dirty) arm($('openQ'), 'Open', 'Replace current quote?', pick); else pick();
+  });
+  $('openFile').addEventListener('change', function (e) {
+    var f = e.target.files && e.target.files[0]; e.target.value = ''; if (!f) return;
+    f.text().then(function (txt) {
+      var d = null; try { d = JSON.parse(txt); } catch (x) {}
+      d = d && d.app === 'eagle-quote-builder' ? normalize(d, true) : null;
+      if (!d) { flash('That file is not a saved quote from this tool'); return; }
+      d.step = 1; d.showBreak = state.showBreak; state = d; dirty = false;
+      bumpCounter(d.q.quoteNo);
+      fillQuoteFields(); renderForms(); render(); setStep(1); flash('Opened ' + f.name);
+    }, function () { flash('Could not read that file'); });
+  });
+
+  fillQuoteFields(); renderForms(); render(); setStep(state.step || 1);
+  $('saveQ').hidden = $('openQ').hidden = window.top !== window;
+  $('showBreak').checked = !!state.showBreak;
+  setStatus(loaded ? 'Draft restored from this browser' : 'Sample data loaded');
+})();
+</script>
+
+</body></html>
