@@ -198,13 +198,19 @@ img{max-width:100%;display:block;}
 .step-hint{ color:var(--text-muted); font-size:13px; margin-top:2px; }
 
 .field label{ display:block; font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px; }
-.field input[type=text],.field input[type=url],.field select{
+.field input[type=text],.field input[type=url],.field input[type=number],.field select{
   width:100%; height:42px; border:1px solid var(--border-default); border-radius:var(--radius-control);
   padding:0 var(--space-3); background:#fff; color:var(--text-heading);
 }
 .field select{ font-weight:600; cursor:pointer; }
 .field select:disabled{ color:var(--text-muted); cursor:wait; }
 .field input:focus,.field select:focus{ border-color:var(--border-brand); }
+
+.collapse-toggle{ cursor:pointer; user-select:none; }
+.collapse-toggle .chevron{ transition:transform 140ms; margin-left:auto; flex:none; color:var(--text-muted); }
+.collapse-toggle.open .chevron{ transform:rotate(90deg); }
+.collapse-panel{ display:none; margin-top:var(--space-2); }
+.collapse-panel.open{ display:block; }
 
 .dropzone{
   border:2px dashed var(--border-default); border-radius:var(--radius-card);
@@ -319,6 +325,26 @@ img{max-width:100%;display:block;}
 .stat-card.tier-healthy .value{ color:var(--eg-success); }
 .stat-card .sub{ font-size:12px; color:var(--text-muted); margin-top:4px; }
 
+/* ---------- Key / legend ---------- */
+.report-key{
+  display:flex; flex-wrap:wrap; gap:var(--space-6);
+  padding:var(--space-4) var(--space-5); background:var(--surface-sunken);
+  border:1px solid var(--border-subtle); border-radius:var(--radius-card);
+  margin:0 0 var(--space-10);
+}
+.report-key .key-group{ display:flex; flex-direction:column; gap:5px; min-width:190px; flex:1; }
+.report-key .key-group-title{ font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-heading); margin-bottom:2px; }
+.report-key .key-row{ display:flex; align-items:flex-start; gap:7px; font-size:12px; color:var(--text-muted); line-height:1.4; }
+.report-key .key-row b{ color:var(--text-heading); }
+.report-key .key-dot{ width:9px; height:9px; border-radius:50%; flex:none; margin-top:4px; }
+.report-key .key-dot.critical{ background:var(--eg-danger); }
+.report-key .key-dot.watch{ background:var(--eg-warning); }
+.report-key .key-dot.healthy{ background:var(--eg-success); }
+.report-key .key-icon{ flex:none; width:14px; display:inline-block; text-align:center; }
+
+/* Elements with a native title tooltip get a help cursor as a visual hint */
+.badge[title],.stat-card[title],.pstat[title],.trend-up[title],.trend-down[title],.trend-flat[title],th[title]{ cursor:help; }
+
 /* ---------- Section heading device ---------- */
 .section{ margin-bottom:var(--space-12); }
 .section-head{ margin-bottom:var(--space-5); }
@@ -329,7 +355,7 @@ img{max-width:100%;display:block;}
 /* ---------- Priority list (reorder + slow movers) ---------- */
 .priority-list{ display:flex; flex-direction:column; gap:var(--space-3); }
 .priority-row{
-  display:grid; grid-template-columns:auto 1fr auto auto auto; align-items:center; gap:var(--space-4);
+  display:grid; grid-template-columns:auto 1fr auto auto auto auto; align-items:center; gap:var(--space-4);
   background:#fff; border:1px solid var(--border-subtle); border-left:4px solid var(--eg-grey-300);
   border-radius:var(--radius-card); padding:var(--space-4) var(--space-5);
 }
@@ -419,6 +445,7 @@ table.inv-table{ font-size:12px; width:100%; min-width:0; table-layout:auto; }
   .container{ padding:0; max-width:100%; }
   .report-header{ padding-top:0; }
   .stat-grid{ grid-template-columns:repeat(5,1fr); break-inside:avoid; }
+  .report-key{ break-inside:avoid; }
   .section{ margin-bottom:var(--space-8); }
   .section-head{ break-after:avoid; break-inside:avoid; }
   .priority-row{ break-inside:avoid; }
@@ -522,6 +549,48 @@ table.inv-table{ font-size:12px; width:100%; min-width:0; table-layout:auto; }
       </div>
     </div>
 
+    <!-- STEP 1c — advanced thresholds (optional) -->
+    <div class="step-card" id="step-advanced">
+      <div class="step-head collapse-toggle" id="adv-toggle" role="button" tabindex="0" aria-expanded="false">
+        <div class="step-num">&#9881;</div>
+        <div style="flex:1">
+          <div class="step-title">Advanced settings (optional)</div>
+          <div class="step-hint">Reorder-urgency thresholds &mdash; defaults match Eagle's standard policy. Only change these if this customer needs different timing.</div>
+        </div>
+        <svg class="icon icon-sm chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </div>
+      <div class="collapse-panel" id="adv-panel">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-5)">
+          <div class="field">
+            <label for="thWindow">Velocity window (days)</label>
+            <input type="number" id="thWindow" min="7" step="1" value="30">
+            <div class="step-hint" style="margin-top:4px">How many days of sales history to average for velocity and trend.</div>
+          </div>
+          <div class="field">
+            <label for="thLead">Critical lead time (days)</label>
+            <input type="number" id="thLead" min="0" step="1" value="14">
+            <div class="step-hint" style="margin-top:4px">Flag Critical if projected to hit the trigger within this many days.</div>
+          </div>
+          <div class="field">
+            <label for="thWatch">Watch band (% above trigger)</label>
+            <input type="number" id="thWatch" min="0" step="1" value="20">
+            <div class="step-hint" style="margin-top:4px">Flag Watch if on-hand is within this percent above the trigger.</div>
+          </div>
+          <div class="field">
+            <label for="thSlowVel">Slow-mover cutoff (units/day)</label>
+            <input type="number" id="thSlowVel" min="0" step="0.01" value="0.15">
+            <div class="step-hint" style="margin-top:4px">Items selling at or below this rate are candidates for the slow-mover list.</div>
+          </div>
+          <div class="field" style="grid-column:1 / -1; max-width:calc(50% - 10px)">
+            <label for="thDeadVal">Dead-stock minimum value ($)</label>
+            <input type="number" id="thDeadVal" min="0" step="1" value="100">
+            <div class="step-hint" style="margin-top:4px">Only flag slow movers with at least this much inventory value tied up.</div>
+          </div>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="btn-reset-thresholds" type="button" style="margin-top:var(--space-4)">Reset to defaults</button>
+      </div>
+    </div>
+
     <!-- STEP 2 — snapshot -->
     <div class="step-card" id="step-snapshot">
       <div class="step-head">
@@ -558,6 +627,7 @@ table.inv-table{ font-size:12px; width:100%; min-width:0; table-layout:auto; }
       <div id="logs-result"></div>
     </div>
 
+    <div id="preview-summary"></div>
     <div class="generate-row">
       <button class="btn btn-primary" id="btn-generate" disabled>Generate Report</button>
     </div>
@@ -601,6 +671,10 @@ table.inv-table{ font-size:12px; width:100%; min-width:0; table-layout:auto; }
           Show cost
           <div class="switch"></div>
         </div>
+        <button class="btn btn-outline btn-sm" id="btn-export-reorder">
+          <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+          Reorder List (.xlsx)
+        </button>
         <button class="btn btn-outline btn-sm" id="btn-export-xlsx">
           <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="19"></line><line x1="16" y1="13" x2="8" y2="19"></line></svg>
           Export to Excel
@@ -661,6 +735,9 @@ table.inv-table{ font-size:12px; width:100%; min-width:0; table-layout:auto; }
     <!-- STATS -->
     <div class="stat-grid" id="stat-grid"></div>
 
+    <!-- KEY -->
+    <div class="report-key" id="report-key"></div>
+
     <!-- REORDER PRIORITY -->
     <div class="section">
       <div class="section-head">
@@ -707,11 +784,12 @@ table.inv-table{ font-size:12px; width:100%; min-width:0; table-layout:auto; }
               <th data-key="itemNo">Item #</th>
               <th class="num" data-key="onHand">On Hand <span class="arrow">&#9650;</span></th>
               <th class="num" data-key="trigger">Trigger <span class="arrow">&#9650;</span></th>
-              <th data-key="tier">Status <span class="arrow">&#9650;</span></th>
-              <th class="num" data-key="sellThrough">Sell-Thru <span class="arrow">&#9650;</span></th>
-              <th class="num" data-key="velocity">Vel/Day <span class="arrow">&#9650;</span></th>
-              <th class="num" data-key="daysOfSupply">Days Left <span class="arrow">&#9650;</span></th>
-              <th data-key="trend">Trend <span class="arrow">&#9650;</span></th>
+              <th data-key="tier" title="Hover any Critical/Watch badge below for the specific reason it's flagged.">Status <span class="arrow">&#9650;</span></th>
+              <th class="num" data-key="sellThrough" title="% of starting stock sold to date. Can exceed 100% if the item was restocked.">Sell-Thru <span class="arrow">&#9650;</span></th>
+              <th class="num" data-key="velocity" title="Average units sold per day, trailing 30 days.">Vel/Day <span class="arrow">&#9650;</span></th>
+              <th class="num" data-key="sold30d" title="Units sold in the trailing 30 days.">Sold 30d <span class="arrow">&#9650;</span></th>
+              <th class="num" data-key="daysOfSupply" title="On hand ÷ daily sales rate — days until this item sells out, not days until it hits its trigger.">Days Left <span class="arrow">&#9650;</span></th>
+              <th data-key="trend" title="Hover the icon below for what it compares.">Trend <span class="arrow">&#9650;</span></th>
               <th class="num" data-key="basePrice">Price <span class="arrow">&#9650;</span></th>
               <th class="num col-cost" data-key="unitCost">Cost <span class="arrow">&#9650;</span></th>
               <th class="num" data-key="invValueBase">Val (Price) <span class="arrow">&#9650;</span></th>
@@ -764,11 +842,15 @@ table.inv-table{ font-size:12px; width:100%; min-width:0; table-layout:auto; }
    sheet, no fetch, no network dependency at all for this part.
    ============================================================ */
 
-var WINDOW_DAYS = 30;              // velocity / trend window
-var CRITICAL_LEAD_DAYS = 14;       // projected-to-hit-trigger horizon
-var WATCH_BAND = 1.2;              // within 20% above trigger = watch
-var SLOW_VELOCITY_MAX = 0.15;      // units/day or less = "slow"
-var DEAD_STOCK_MIN_VALUE = 100;    // $ sitting in inventory to flag as dead stock
+// These are defaults only — reps can override them per report in the
+// "Advanced settings" panel. buildReport() always receives the actual
+// values to use (see state.thresholds), these constants just seed the
+// input fields and act as a fallback if a field is left blank/invalid.
+var DEFAULT_WINDOW_DAYS = 30;              // velocity / trend window
+var DEFAULT_CRITICAL_LEAD_DAYS = 14;       // projected-to-hit-trigger horizon
+var DEFAULT_WATCH_BAND_PCT = 20;           // within this % above trigger = watch
+var DEFAULT_SLOW_VELOCITY_MAX = 0.15;      // units/day or less = "slow"
+var DEFAULT_DEAD_STOCK_MIN_VALUE = 100;    // $ sitting in inventory to flag as dead stock
 
 /* ============================================================
    HELPERS
@@ -1029,7 +1111,13 @@ function parseLogs(text){
 /* ============================================================
    REPORT COMPUTATION
    ============================================================ */
-function buildReport(items, logs){
+function buildReport(items, logs, opts){
+  opts = opts || {};
+  var WINDOW_DAYS = (opts.windowDays>0) ? opts.windowDays : DEFAULT_WINDOW_DAYS;
+  var CRITICAL_LEAD_DAYS = (opts.criticalLeadDays>=0) ? opts.criticalLeadDays : DEFAULT_CRITICAL_LEAD_DAYS;
+  var WATCH_BAND = (opts.watchBandPct>=0) ? (1 + opts.watchBandPct/100) : (1 + DEFAULT_WATCH_BAND_PCT/100);
+  var SLOW_VELOCITY_MAX = (opts.slowVelocityMax>=0) ? opts.slowVelocityMax : DEFAULT_SLOW_VELOCITY_MAX;
+  var DEAD_STOCK_MIN_VALUE = (opts.deadStockMinValue>=0) ? opts.deadStockMinValue : DEFAULT_DEAD_STOCK_MIN_VALUE;
   var logsByItem = {};
   var maxDate = null;
   logs.forEach(function(l){
@@ -1044,7 +1132,21 @@ function buildReport(items, logs){
   var windowStart = new Date(asOf); windowStart.setDate(windowStart.getDate() - WINDOW_DAYS);
   var priorStart = new Date(asOf); priorStart.setDate(priorStart.getDate() - WINDOW_DAYS*2);
 
+  // How many rows share each Item #. Apparel-style items commonly export one
+  // row per size under the SAME item number (each with its own on-hand/
+  // trigger), but Brightsites' logs export only records sales against that
+  // shared item number — there's no per-size sales data to split apart. So
+  // when an item number covers more than one row here, every one of those
+  // rows necessarily gets the SAME velocity/trend/sold figures, pooled across
+  // all of them, because that's the only sales data that exists for that
+  // item number. We flag this below rather than silently showing a
+  // size-specific-looking number that isn't.
+  var itemNoCounts = {};
+  items.forEach(function(item){ itemNoCounts[item.itemNo] = (itemNoCounts[item.itemNo]||0) + 1; });
+
   var computed = items.map(function(item){
+    var sizeGroupCount = itemNoCounts[item.itemNo] || 1;
+    var pooledAcrossSizes = sizeGroupCount > 1;
     var logsForItem = logsByItem[item.itemNo] || [];
     var soldLogs = logsForItem.filter(function(l){ return l.type === "sold"; });
 
@@ -1088,19 +1190,28 @@ function buildReport(items, logs){
     // 4. days of supply
     var daysOfSupply = velocity > 0 ? (item.onHand / velocity) : (item.onHand > 0 ? Infinity : 0);
 
-    // 5. reorder tier
-    var tier;
+    // 5. reorder tier (+ a plain-language reason, shown as a tooltip on the badge)
+    var tier, tierReason;
     var trig = item.trigger;
+    var daysToTrig = (trig != null && velocity > 0) ? (item.onHand - trig) / velocity : null;
     if (trig == null){
       tier = "healthy";
+      tierReason = "No reorder trigger is set for this item in Brightsites.";
     } else if (item.onHand <= trig){
       tier = "critical";
-    } else if (velocity > 0 && ((item.onHand - trig) / velocity) <= CRITICAL_LEAD_DAYS){
+      tierReason = "On hand (" + item.onHand + ") is already at or below the trigger (" + trig + ").";
+    } else if (trig > 0 && velocity > 0 && daysToTrig <= CRITICAL_LEAD_DAYS){
       tier = "critical";
+      tierReason = "On hand (" + item.onHand + ") is above the trigger (" + trig + "), but at the current sales pace it's projected to reach the trigger in about " + Math.max(0,Math.round(daysToTrig)) + " day" + (Math.round(daysToTrig)===1?"":"s") + ".";
     } else if (trig > 0 && item.onHand <= trig * WATCH_BAND){
       tier = "watch";
+      tierReason = "On hand (" + item.onHand + ") is within " + Math.round((WATCH_BAND-1)*100) + "% of the trigger (" + trig + ").";
     } else {
       tier = "healthy";
+      tierReason = "On hand (" + item.onHand + ") is comfortably above the trigger (" + trig + ").";
+    }
+    if (pooledAcrossSizes){
+      tierReason += " Note: Item # " + item.itemNo + " covers " + sizeGroupCount + " size/variant rows, and Brightsites' sales log only tracks this item number as a whole — so the sales pace, trend, and days-left figures below are the SAME combined number applied to every size of this item, not calculated per size.";
     }
 
     // 6. slow mover / dead stock
@@ -1115,15 +1226,18 @@ function buildReport(items, logs){
     return Object.assign({}, item, {
       correctedStarting: correctedStarting,
       velocity: velocity, trend: trend, sellThrough: sellThrough, daysOfSupply: daysOfSupply,
-      tier: tier, isSlowMover: isSlowMover, integrityOk: integrityOk, expectedOnHand: expected,
+      tier: tier, tierReason: tierReason, isSlowMover: isSlowMover, integrityOk: integrityOk, expectedOnHand: expected,
       invValueBase: invValueBase, invValueCost: invValueCost,
-      logCount: logsForItem.length
+      logCount: logsForItem.length,
+      sold30d: recentSold, sizeGroupCount: sizeGroupCount, pooledAcrossSizes: pooledAcrossSizes
     });
   });
 
   var summary = {
     asOf: asOf,
+    thresholds: { windowDays: WINDOW_DAYS, criticalLeadDays: CRITICAL_LEAD_DAYS, watchBandPct: Math.round((WATCH_BAND-1)*100), slowVelocityMax: SLOW_VELOCITY_MAX, deadStockMinValue: DEAD_STOCK_MIN_VALUE },
     itemCount: computed.length,
+    pooledCount: computed.filter(function(i){ return i.pooledAcrossSizes; }).length,
     totalValueBase: computed.reduce(function(s,i){ return s + (i.invValueBase||0); }, 0),
     totalValueCost: computed.reduce(function(s,i){ return s + (i.invValueCost||0); }, 0),
     critical: computed.filter(function(i){ return i.tier==="critical"; }).length,
@@ -1203,6 +1317,7 @@ var el = {
 
 function updateGenerateEnabled(){
   el.btnGenerate.disabled = !(state.customerName.trim() && state.snapshotItems && state.logEntries);
+  renderPreviewSummary();
 }
 
 el.customerNameText.addEventListener("input", function(){
@@ -1333,6 +1448,61 @@ wireDropzone(el.dzLogo, el.fileLogo, function(file){
   }).catch(function(err){ showInlineError(el.logoResult, err.message); });
 });
 
+/* ---------- advanced thresholds: collapse + reset ---------- */
+var advToggle = $("#adv-toggle"), advPanel = $("#adv-panel");
+function toggleAdvPanel(){
+  var open = !advToggle.classList.contains("open");
+  advToggle.classList.toggle("open", open);
+  advPanel.classList.toggle("open", open);
+  advToggle.setAttribute("aria-expanded", open ? "true" : "false");
+}
+advToggle.addEventListener("click", toggleAdvPanel);
+advToggle.addEventListener("keydown", function(e){ if (e.key==="Enter" || e.key===" "){ e.preventDefault(); toggleAdvPanel(); } });
+var THRESHOLD_DEFAULTS = { thWindow: DEFAULT_WINDOW_DAYS, thLead: DEFAULT_CRITICAL_LEAD_DAYS, thWatch: DEFAULT_WATCH_BAND_PCT, thSlowVel: DEFAULT_SLOW_VELOCITY_MAX, thDeadVal: DEFAULT_DEAD_STOCK_MIN_VALUE };
+$("#btn-reset-thresholds").addEventListener("click", function(){
+  Object.keys(THRESHOLD_DEFAULTS).forEach(function(id){ $("#"+id).value = THRESHOLD_DEFAULTS[id]; });
+});
+function readThresholds(){
+  function num(id, fallback, min){
+    var v = parseFloat($("#"+id).value);
+    if (isNaN(v) || v < (min==null?-Infinity:min)) return fallback;
+    return v;
+  }
+  return {
+    windowDays: num("thWindow", DEFAULT_WINDOW_DAYS, 1),
+    criticalLeadDays: num("thLead", DEFAULT_CRITICAL_LEAD_DAYS, 0),
+    watchBandPct: num("thWatch", DEFAULT_WATCH_BAND_PCT, 0),
+    slowVelocityMax: num("thSlowVel", DEFAULT_SLOW_VELOCITY_MAX, 0),
+    deadStockMinValue: num("thDeadVal", DEFAULT_DEAD_STOCK_MIN_VALUE, 0)
+  };
+}
+
+/* ---------- pre-generate sanity preview ---------- */
+function renderPreviewSummary(){
+  var box = $("#preview-summary");
+  if (!state.snapshotItems || !state.logEntries){ box.innerHTML = ""; return; }
+  var items = state.snapshotItems, logs = state.logEntries;
+  var dates = logs.map(function(l){ return l.date; }).filter(Boolean);
+  var minD = dates.length ? new Date(Math.min.apply(null, dates)) : null;
+  var maxD = dates.length ? new Date(Math.max.apply(null, dates)) : null;
+  var snapshotNos = {};
+  items.forEach(function(i){ snapshotNos[i.itemNo] = true; });
+  var logNos = {}, matched = 0;
+  logs.forEach(function(l){
+    if (!logNos[l.itemNo]){ logNos[l.itemNo] = true; if (snapshotNos[l.itemNo]) matched++; }
+  });
+  var logItemCount = Object.keys(logNos).length;
+  var overlapPct = logItemCount ? Math.round((matched/logItemCount)*100) : 0;
+  var html = '<div class="inline-note"><svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg><div>' +
+    '<b>' + items.length + '</b> items &middot; <b>' + logs.length + '</b> log entries' +
+    (minD && maxD ? ' &middot; activity from <b>' + fmtDate(minD) + '</b> to <b>' + fmtDate(maxD) + '</b>' : '') +
+    '</div></div>';
+  if (overlapPct < 50){
+    html += '<div class="inline-error"><svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><div>Only ' + overlapPct + '% of the item numbers in the logs file also appear in the snapshot file &mdash; double-check these two exports are for the same customer.</div></div>';
+  }
+  box.innerHTML = html;
+}
+
 /* ---------- generate ---------- */
 el.btnGenerate.addEventListener("click", function(){
   el.generateError.innerHTML = "";
@@ -1343,7 +1513,8 @@ el.btnGenerate.addEventListener("click", function(){
     state.brand = state.brand || {};
     var pickedHex = extractHex(el.brandColorHex.value) || el.brandColorPicker.value;
     state.brand.color1 = (pickedHex && pickedHex.toLowerCase() !== "#76bd1d") ? pickedHex : null;
-    state.report = buildReport(state.snapshotItems, state.logEntries);
+    state.thresholds = readThresholds();
+    state.report = buildReport(state.snapshotItems, state.logEntries, state.thresholds);
     applyBrandTheme(state.brand);
     renderReport();
     $("#setup-screen").hidden = true;
@@ -1407,22 +1578,46 @@ function renderReport(){
 
   // stat grid
   $("#stat-grid").innerHTML = [
-    statCard("Total On-Hand Value", fmtMoney0(s.totalValueBase), fmtMoney0(s.totalValueCost), "base-only/cost-only"),
+    statCard("Total On-Hand Value", fmtMoney0(s.totalValueBase), fmtMoney0(s.totalValueCost)),
     statCard("Items Tracked", String(s.itemCount)),
-    statCard("Critical", String(s.critical), null, null, "tier-critical"),
-    statCard("Watch", String(s.watch), null, null, "tier-watch"),
-    statCard("Healthy", String(s.healthy), null, null, "tier-healthy")
+    statCard("Critical", String(s.critical), null, "tier-critical", "At or below the reorder trigger, or projected to hit it within " + s.thresholds.criticalLeadDays + " days."),
+    statCard("Watch", String(s.watch), null, "tier-watch", "Within " + s.thresholds.watchBandPct + "% above the trigger."),
+    statCard("Healthy", String(s.healthy), null, "tier-healthy", "Comfortably above the trigger.")
   ].join("");
 
-  function statCard(label, baseVal, costVal, mode, tierClass){
+  function statCard(label, baseVal, costVal, tierClass, tip){
     var valueHtml;
     if (costVal != null){
       valueHtml = '<div class="value base-only">' + baseVal + '</div><div class="value cost-only">' + costVal + ' <span style="font-size:13px;font-weight:600;color:var(--text-muted)">at cost</span></div>';
     } else {
       valueHtml = '<div class="value">' + baseVal + '</div>';
     }
-    return '<div class="stat-card ' + (tierClass||"") + '"><div class="label">' + escapeHtml(label) + '</div>' + valueHtml + '</div>';
+    return '<div class="stat-card ' + (tierClass||"") + '"' + tipAttr(tip) + '><div class="label">' + escapeHtml(label) + '</div>' + valueHtml + '</div>';
   }
+
+  // key / legend — wording reflects the actual thresholds used for this report
+  var th = s.thresholds;
+  $("#report-key").innerHTML =
+    '<div class="key-group"><div class="key-group-title">Status</div>' +
+      '<div class="key-row"><span class="key-dot critical"></span><div><b>Critical</b> &mdash; at or below the reorder trigger, or projected to hit it within ' + th.criticalLeadDays + ' days.</div></div>' +
+      '<div class="key-row"><span class="key-dot watch"></span><div><b>Watch</b> &mdash; within ' + th.watchBandPct + '% above the trigger.</div></div>' +
+      '<div class="key-row"><span class="key-dot healthy"></span><div><b>Healthy</b> &mdash; comfortably above the trigger.</div></div>' +
+    '</div>' +
+    '<div class="key-group"><div class="key-group-title">Trend</div>' +
+      '<div class="key-row"><span class="key-icon" style="color:var(--eg-success)">&#9650;</span><div><b>Accelerating</b> &mdash; selling faster than the prior ' + th.windowDays + ' days.</div></div>' +
+      '<div class="key-row"><span class="key-icon" style="color:var(--text-muted)">&#9644;</span><div><b>Steady</b> &mdash; about the same pace.</div></div>' +
+      '<div class="key-row"><span class="key-icon" style="color:var(--eg-danger)">&#9660;</span><div><b>Slowing</b> &mdash; selling slower than the prior ' + th.windowDays + ' days.</div></div>' +
+    '</div>' +
+    '<div class="key-group"><div class="key-group-title">Columns</div>' +
+      '<div class="key-row"><div><b>Sell-Thru</b> &mdash; % of starting stock sold to date (can exceed 100% if restocked).</div></div>' +
+      '<div class="key-row"><div><b>Vel/Day</b> &mdash; average units sold per day, trailing ' + th.windowDays + ' days.</div></div>' +
+      '<div class="key-row"><div><b>Sold 30d</b> &mdash; units sold in the trailing ' + th.windowDays + ' days.</div></div>' +
+      '<div class="key-row"><div><b>Days Left</b> &mdash; on-hand &divide; daily sell rate.</div></div>' +
+    '</div>' +
+    (s.pooledCount > 0 ?
+    '<div class="key-group"><div class="key-group-title">Sized items</div>' +
+      '<div class="key-row"><div>' + s.pooledCount + ' row' + (s.pooledCount===1?"":"s") + ' here share an item number with other sizes/colors of the same style. Brightsites only logs sales against the shared item number, not each size &mdash; so Sold 30d, Vel/Day, Trend and Days Left are the <b>same combined number</b> on every size of that item, not a per-size figure. Rows like this are marked <span style="color:var(--eg-warning)">(pooled)</span>.</div></div>' +
+    '</div>' : '');
 
   // reorder priority list
   var reorderList = $("#reorder-list");
@@ -1445,38 +1640,54 @@ function renderReport(){
   renderTable();
 }
 
-function tierBadge(tier){
+function tipAttr(text){ return text ? ' title="' + escapeHtml(text) + '"' : ""; }
+function tierBadge(tier, reason){
   var map = {
     critical: ['badge-critical','Critical'],
     watch: ['badge-watch','Watch'],
     healthy: ['badge-healthy','Healthy']
   };
   var m = map[tier] || ['badge-neutral', tier];
-  return '<span class="badge ' + m[0] + '">' + m[1] + '</span>';
+  return '<span class="badge ' + m[0] + '"' + tipAttr(reason) + '>' + m[1] + '</span>';
 }
+var TREND_TIP = {
+  accelerating: "Sold more in the last 30 days than the 30 days before that.",
+  slowing: "Sold less in the last 30 days than the 30 days before that.",
+  steady: "About the same sales pace as the prior 30 days."
+};
 function trendIcon(trend){
-  if (trend === "accelerating") return '<span class="trend-up">&#9650; Accelerating</span>';
-  if (trend === "slowing") return '<span class="trend-down">&#9660; Slowing</span>';
-  return '<span class="trend-flat">&#9644; Steady</span>';
+  var tip = tipAttr(TREND_TIP[trend] || TREND_TIP.steady);
+  if (trend === "accelerating") return '<span class="trend-up"' + tip + '>&#9650; Accelerating</span>';
+  if (trend === "slowing") return '<span class="trend-down"' + tip + '>&#9660; Slowing</span>';
+  return '<span class="trend-flat"' + tip + '>&#9644; Steady</span>';
 }
 
+function pooledFlag(item){
+  if (!item.pooledAcrossSizes) return "";
+  var tip = "Brightsites only logs sales against the item number as a whole, so this item number's " + item.sizeGroupCount + " size rows share one pooled sales number &mdash; not a per-size figure.";
+  return ' &middot; <span style="color:var(--eg-warning)"' + tipAttr(tip) + '>pooled across ' + item.sizeGroupCount + ' sizes</span>';
+}
 function priorityRow(item){
+  var variant = [item.color, item.size].filter(Boolean).join(" · ");
   return '<div class="priority-row ' + item.tier + '">' +
-    '<div>' + tierBadge(item.tier) + '</div>' +
-    '<div><div class="pname">' + escapeHtml(item.name) + (item.color ? " &mdash; " + escapeHtml(item.color) : "") + '</div>' +
-    '<div class="pmeta"><code>' + escapeHtml(item.itemNo) + '</code> &middot; ' + (item.integrityOk ? "" : '<span style="color:var(--eg-warning)">data check flagged &middot; </span>') + trendIcon(item.trend) + '</div></div>' +
+    '<div>' + tierBadge(item.tier, item.tierReason) + '</div>' +
+    '<div><div class="pname">' + escapeHtml(item.name) + (variant ? " &mdash; " + escapeHtml(variant) : "") + '</div>' +
+    '<div class="pmeta"><code>' + escapeHtml(item.itemNo) + '</code> &middot; ' + (item.integrityOk ? "" : '<span style="color:var(--eg-warning)">data check flagged &middot; </span>') + trendIcon(item.trend) + pooledFlag(item) + '</div></div>' +
     '<div class="pstat"><div class="n">' + item.onHand + '</div><div class="l">On Hand</div></div>' +
     '<div class="pstat"><div class="n">' + (item.trigger==null?"—":item.trigger) + '</div><div class="l">Trigger</div></div>' +
-    '<div class="pstat"><div class="n">' + fmtDays(item.daysOfSupply) + '</div><div class="l">Days Left</div></div>' +
+    '<div class="pstat"' + tipAttr("Units sold in the last " + (state.thresholds ? state.thresholds.windowDays : 30) + " days." + (item.pooledAcrossSizes ? " Pooled across this item number's sizes — see note above." : "")) + '><div class="n">' + item.sold30d + '</div><div class="l">Sold 30d</div></div>' +
+    '<div class="pstat"' + tipAttr("On hand ÷ daily sales rate — not the same as days until the trigger above.") + '><div class="n">' + fmtDays(item.daysOfSupply) + '</div><div class="l">Days Left</div></div>' +
     '</div>';
 }
 function slowRow(item){
+  var variant = [item.color, item.size].filter(Boolean).join(" · ");
   return '<div class="priority-row slow">' +
     '<div><span class="badge badge-neutral">Slow</span></div>' +
-    '<div><div class="pname">' + escapeHtml(item.name) + (item.color ? " &mdash; " + escapeHtml(item.color) : "") + '</div>' +
-    '<div class="pmeta"><code>' + escapeHtml(item.itemNo) + '</code> &middot; ' + item.velocity.toFixed(2) + ' units/day</div></div>' +
+    '<div><div class="pname">' + escapeHtml(item.name) + (variant ? " &mdash; " + escapeHtml(variant) : "") + '</div>' +
+    '<div class="pmeta"><code>' + escapeHtml(item.itemNo) + '</code> &middot; ' + item.velocity.toFixed(2) + ' units/day' + pooledFlag(item) + '</div></div>' +
     '<div class="pstat"><div class="n">' + item.onHand + '</div><div class="l">On Hand</div></div>' +
     '<div class="pstat"><div class="n">' + fmtMoney0(item.invValueBase) + '</div><div class="l">Tied Up</div></div>' +
+    '<div class="pstat"' + tipAttr("Units sold in the last " + (state.thresholds ? state.thresholds.windowDays : 30) + " days.") + '><div class="n">' + item.sold30d + '</div><div class="l">Sold 30d</div></div>' +
     '<div class="pstat"><div class="n">' + fmtDays(item.daysOfSupply) + '</div><div class="l">Days Left</div></div>' +
     '</div>';
 }
@@ -1519,13 +1730,14 @@ function renderTable(){
   var rows = items.map(function(i){
     return "<tr>" +
       '<td class="name-cell"><div class="pname">' + escapeHtml(i.name) + (!i.integrityOk ? ' <svg class="icon icon-sm integrity-flag" viewBox="0 0 24 24" title="Starting + Adj. − Sold ≠ On Hand"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>' : "") + '</div>' +
-      '<div class="pvariant">' + [i.color,i.size].filter(Boolean).map(escapeHtml).join(" &middot; ") + '</div></td>' +
+      '<div class="pvariant">' + [i.color,i.size].filter(Boolean).map(escapeHtml).join(" &middot; ") + (i.pooledAcrossSizes ? ' <span style="color:var(--eg-warning)"' + tipAttr("Brightsites only logs sales against item # " + i.itemNo + " as a whole, shared across " + i.sizeGroupCount + " size rows — Sold 30d/Vel/Day/Trend below are pooled, not per-size.") + '>(pooled)</span>' : '') + '</div></td>' +
       '<td class="mono">' + escapeHtml(i.itemNo) + "</td>" +
       '<td class="num">' + i.onHand + "</td>" +
       '<td class="num">' + (i.trigger==null?"—":i.trigger) + "</td>" +
-      "<td>" + tierBadge(i.tier) + "</td>" +
+      "<td>" + tierBadge(i.tier, i.tierReason) + "</td>" +
       '<td class="num">' + fmtPct(i.sellThrough) + "</td>" +
       '<td class="num">' + i.velocity.toFixed(2) + "</td>" +
+      '<td class="num">' + i.sold30d + "</td>" +
       '<td class="num">' + fmtDays(i.daysOfSupply) + "</td>" +
       "<td>" + trendIcon(i.trend) + "</td>" +
       '<td class="num">' + fmtMoney(i.basePrice) + "</td>" +
@@ -1534,7 +1746,7 @@ function renderTable(){
       '<td class="num col-cost">' + fmtMoney0(i.invValueCost) + "</td>" +
       "</tr>";
   }).join("");
-  $("#inv-tbody").innerHTML = rows || '<tr><td colspan="13" style="text-align:center;padding:32px;color:var(--text-muted)">No items match these filters.</td></tr>';
+  $("#inv-tbody").innerHTML = rows || '<tr><td colspan="14" style="text-align:center;padding:32px;color:var(--text-muted)">No items match these filters.</td></tr>';
 
   $all("#inv-table thead th").forEach(function(th){
     th.classList.toggle("sorted", th.dataset.key === state.sort.key);
@@ -1640,7 +1852,7 @@ function xlCellNum(ref, style, value){
 function xlCellStr(ref, style, text){
   return '<c r="'+ref+'" t="inlineStr" s="'+style+'"><is><t xml:space="preserve">'+xlXmlEscape(text)+'</t></is></c>';
 }
-var XLSX_HEADERS = ["Item","Variant","Item #","On Hand","Trigger","Status","Sell-Through","Velocity/Day","Days Left","Trend","Price","Unit Cost","Value (Price)","Value (Cost)","Data OK"];
+var XLSX_HEADERS = ["Item","Variant","Item #","On Hand","Trigger","Status","Sell-Through","Velocity/Day","Sold (30d)","Days Left","Trend","Price","Unit Cost","Value (Price)","Value (Cost)","Pooled Sales?","Data OK"];
 var TIER_LABEL = { critical:"Critical", watch:"Watch", healthy:"Healthy" };
 var TREND_LABEL = { accelerating:"Accelerating", slowing:"Slowing", steady:"Steady" };
 function buildXlsxSheetRows(items){
@@ -1656,14 +1868,16 @@ function buildXlsxSheetRows(items){
       xlCellStr(L(5)+r, 0, TIER_LABEL[it.tier]||it.tier),
       it.sellThrough==null ? '<c r="'+L(6)+r+'" s="3"/>' : xlCellNum(L(6)+r,3,it.sellThrough),
       xlCellNum(L(7)+r,4,it.velocity),
-      (it.daysOfSupply==null||isNaN(it.daysOfSupply)) ? '<c r="'+L(8)+r+'" s="5"/>'
-        : (!isFinite(it.daysOfSupply) ? xlCellStr(L(8)+r,0,"∞") : xlCellNum(L(8)+r,5,Math.round(it.daysOfSupply))),
-      xlCellStr(L(9)+r, 0, TREND_LABEL[it.trend]||it.trend),
-      it.basePrice==null ? '<c r="'+L(10)+r+'" s="2"/>' : xlCellNum(L(10)+r,2,it.basePrice),
-      it.unitCost==null ? '<c r="'+L(11)+r+'" s="2"/>' : xlCellNum(L(11)+r,2,it.unitCost),
-      it.invValueBase==null ? '<c r="'+L(12)+r+'" s="2"/>' : xlCellNum(L(12)+r,2,it.invValueBase),
-      it.invValueCost==null ? '<c r="'+L(13)+r+'" s="2"/>' : xlCellNum(L(13)+r,2,it.invValueCost),
-      xlCellStr(L(14)+r, 0, it.integrityOk ? "Yes" : "No")
+      xlCellNum(L(8)+r,5,it.sold30d),
+      (it.daysOfSupply==null||isNaN(it.daysOfSupply)) ? '<c r="'+L(9)+r+'" s="5"/>'
+        : (!isFinite(it.daysOfSupply) ? xlCellStr(L(9)+r,0,"∞") : xlCellNum(L(9)+r,5,Math.round(it.daysOfSupply))),
+      xlCellStr(L(10)+r, 0, TREND_LABEL[it.trend]||it.trend),
+      it.basePrice==null ? '<c r="'+L(11)+r+'" s="2"/>' : xlCellNum(L(11)+r,2,it.basePrice),
+      it.unitCost==null ? '<c r="'+L(12)+r+'" s="2"/>' : xlCellNum(L(12)+r,2,it.unitCost),
+      it.invValueBase==null ? '<c r="'+L(13)+r+'" s="2"/>' : xlCellNum(L(13)+r,2,it.invValueBase),
+      it.invValueCost==null ? '<c r="'+L(14)+r+'" s="2"/>' : xlCellNum(L(14)+r,2,it.invValueCost),
+      xlCellStr(L(15)+r, 0, it.pooledAcrossSizes ? "Yes (" + it.sizeGroupCount + " sizes)" : "No"),
+      xlCellStr(L(16)+r, 0, it.integrityOk ? "Yes" : "No")
     ];
     rows.push('<row r="'+r+'">'+cells.join("")+'</row>');
   });
@@ -1678,10 +1892,12 @@ function buildXlsxWorksheet(items){
     '<col min="6" max="6" width="11" customWidth="1"/>' +
     '<col min="7" max="7" width="12" customWidth="1"/>' +
     '<col min="8" max="8" width="11" customWidth="1"/>' +
-    '<col min="9" max="9" width="10" customWidth="1"/>' +
-    '<col min="10" max="10" width="13" customWidth="1"/>' +
-    '<col min="11" max="14" width="12" customWidth="1"/>' +
-    '<col min="15" max="15" width="9" customWidth="1"/>' +
+    '<col min="9" max="9" width="11" customWidth="1"/>' +
+    '<col min="10" max="10" width="10" customWidth="1"/>' +
+    '<col min="11" max="11" width="13" customWidth="1"/>' +
+    '<col min="12" max="15" width="12" customWidth="1"/>' +
+    '<col min="16" max="16" width="16" customWidth="1"/>' +
+    '<col min="17" max="17" width="9" customWidth="1"/>' +
     '</cols>';
   return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
@@ -1736,6 +1952,77 @@ function exportToXlsx(){
   setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
 }
 $("#btn-export-xlsx").addEventListener("click", exportToXlsx);
+
+/* ---------- reorder-list export (Critical + Watch only) ---------- */
+var REORDER_HEADERS = ["Item","Item #","Status","On Hand","Trigger","Qty to Reach Trigger","Sold (30d)","Days Left","Vel/Day","Trend","Pooled Sales?"];
+function buildReorderSheetRows(items){
+  var rows = ['<row r="1">' + REORDER_HEADERS.map(function(h,ci){ return xlCellStr(colLetter(ci)+"1", 1, h); }).join("") + '</row>'];
+  items.forEach(function(it, idx){
+    var r = idx+2, L = colLetter;
+    var qty = (it.trigger!=null) ? Math.max(Math.round(it.trigger - it.onHand), 0) : null;
+    var cells = [
+      xlCellStr(L(0)+r, 0, it.name||""),
+      xlCellStr(L(1)+r, 0, it.itemNo||""),
+      xlCellStr(L(2)+r, 0, TIER_LABEL[it.tier]||it.tier),
+      xlCellNum(L(3)+r, 5, it.onHand),
+      it.trigger==null ? '<c r="'+L(4)+r+'" s="5"/>' : xlCellNum(L(4)+r,5,it.trigger),
+      qty==null ? '<c r="'+L(5)+r+'" s="5"/>' : xlCellNum(L(5)+r,5,qty),
+      xlCellNum(L(6)+r,5,it.sold30d),
+      (it.daysOfSupply==null||isNaN(it.daysOfSupply)) ? '<c r="'+L(7)+r+'" s="5"/>'
+        : (!isFinite(it.daysOfSupply) ? xlCellStr(L(7)+r,0,"∞") : xlCellNum(L(7)+r,5,Math.round(it.daysOfSupply))),
+      xlCellNum(L(8)+r,4,it.velocity),
+      xlCellStr(L(9)+r, 0, TREND_LABEL[it.trend]||it.trend),
+      xlCellStr(L(10)+r, 0, it.pooledAcrossSizes ? "Yes (" + it.sizeGroupCount + " sizes)" : "No")
+    ];
+    rows.push('<row r="'+r+'">'+cells.join("")+'</row>');
+  });
+  return rows.join("");
+}
+function buildReorderWorksheet(items){
+  var lastCol = colLetter(REORDER_HEADERS.length-1), lastRow = items.length+1;
+  var colsXml = '<cols>' +
+    '<col min="1" max="1" width="32" customWidth="1"/>' +
+    '<col min="2" max="2" width="16" customWidth="1"/>' +
+    '<col min="3" max="3" width="11" customWidth="1"/>' +
+    '<col min="4" max="7" width="14" customWidth="1"/>' +
+    '<col min="8" max="9" width="11" customWidth="1"/>' +
+    '<col min="10" max="10" width="14" customWidth="1"/>' +
+    '<col min="11" max="11" width="16" customWidth="1"/>' +
+    '</cols>';
+  return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
+    '<dimension ref="A1:'+lastCol+lastRow+'"/>' +
+    '<sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>' +
+    colsXml + '<sheetData>' + buildReorderSheetRows(items) + '</sheetData>' +
+    '<autoFilter ref="A1:'+lastCol+lastRow+'"/>' +
+    '</worksheet>';
+}
+function exportReorderList(){
+  if (!state.report) return;
+  var items = state.report.summary.reorderList; // already Critical-then-Watch, most urgent first
+  if (!items.length){
+    alert("Nothing is in the reorder list for this report — there's nothing to export.");
+    return;
+  }
+  var files = {
+    "[Content_Types].xml": XLSX_CONTENT_TYPES,
+    "_rels/.rels": XLSX_RELS,
+    "xl/workbook.xml": XLSX_WORKBOOK,
+    "xl/_rels/workbook.xml.rels": XLSX_WORKBOOK_RELS,
+    "xl/styles.xml": XLSX_STYLES,
+    "xl/worksheets/sheet1.xml": buildReorderWorksheet(items)
+  };
+  var blob = buildXlsxBlob(files);
+  var name = (state.customerName||"Inventory Report").trim().replace(/[\\/:*?"<>|]+/g,"_") || "Inventory Report";
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = name + " - Reorder List.xlsx";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+}
+$("#btn-export-reorder").addEventListener("click", exportReorderList);
 
 /* ---------- print / new report ---------- */
 $("#btn-print").addEventListener("click", function(){ window.print(); });
