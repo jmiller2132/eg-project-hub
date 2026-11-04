@@ -6,10 +6,9 @@ Internal hub for every tool we build. Hosted on Vercel; every push to `main` dep
 - `site/` – what gets deployed
   - `index.html` – the hub page. Add or edit a project in the `GROUPS` list near the bottom.
   - `tools/` – the hosted HTML tools
-  - `ai-toolkit.html` – the AI Toolkit showcase (opens hub tools in a frame)
   - `brand/` – logo files (SVG + PNG) used by the Brand Guide
   - `downloads/` – files people download (CSV templates, etc.)
-- `src/` – source for pages assembled by `build.py`: order import, code generator, brand guide, AI Toolkit
+- `src/` – source for pages assembled by `build.py`: order import, code generator, brand guide
 - `build.py` – run after editing anything in `src/`
 
 ## Add a tool
