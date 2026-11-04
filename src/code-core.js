@@ -32,15 +32,19 @@ const CodeCore = (() => {
     return n;
   }
 
-  function fill(n, capacity, make) {
-    const warnings = [];
+  function fill(n, capacity, make, avoid) {
+    const warnings = []; let replaced = 0;
     if (n > MAX) { warnings.push(`Capped at ${MAX.toLocaleString()} codes per batch.`); n = MAX; }
     if (n > capacity) { warnings.push(`Requested ${n.toLocaleString()} codes, but only ${capacity.toLocaleString()} unique codes are possible with these settings. Generating the maximum.`); n = capacity; }
     const set = new Set(), limit = Math.max(n * 5, n + 1000);
     let tries = 0;
-    while (set.size < n && tries < limit) { set.add(make()); tries++; }
+    while (set.size < n && tries < limit) {
+      const c = make(); tries++;
+      if (avoid && avoid.has(c)) { replaced++; continue; }
+      set.add(c);
+    }
     if (set.size < n) warnings.push(`Only ${set.size.toLocaleString()} unique codes could be made in a reasonable number of attempts. Try a longer code or more character types.`);
-    return { codes: [...set].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0)), warnings };
+    return { codes: [...set].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0)), warnings, replaced };
   }
 
   /* opts: {count, length, upper, lower, digits, special, punctuation, brackets, space, exclude} */
@@ -52,8 +56,10 @@ const CodeCore = (() => {
     if (opts.brackets) cs += BRACKETS; if (opts.space) cs += " ";
     cs = without(uniq(cs), opts.exclude || "");
     if (!cs) throw new Error("The selected character types minus the excluded characters leave nothing to build codes from. Adjust your selections.");
-    const cap = Math.pow(cs.length, len);
-    return fill(n, cap, () => { let s = ""; for (let i = 0; i < len; i++) s += pick(cs); return s; });
+    const avoid = opts.avoid && opts.avoid.size ? opts.avoid : null;
+    let cap = Math.pow(cs.length, len);
+    if (avoid) for (const c of avoid) if (c.length === len && [...c].every(ch => cs.includes(ch))) cap--;
+    return fill(n, cap, () => { let s = ""; for (let i = 0; i < len; i++) s += pick(cs); return s; }, avoid);
   }
 
   /* opts: {count, pattern, exclude} */
@@ -70,8 +76,36 @@ const CodeCore = (() => {
       if (!set) throw new Error(`Pattern character "${p[i]}" has nothing left after exclusions.`);
       parts.push({ set });
     }
-    const cap = parts.reduce((a, x) => a * (x.set ? x.set.length : 1), 1);
-    return fill(n, cap, () => parts.map(x => x.lit ?? pick(x.set)).join(""));
+    const avoid = opts.avoid && opts.avoid.size ? opts.avoid : null;
+    let cap = parts.reduce((a, x) => a * (x.set ? x.set.length : 1), 1);
+    if (avoid) for (const c of avoid)
+      if (c.length === parts.length && parts.every((x, i) => x.lit !== undefined ? c[i] === x.lit : x.set.includes(c[i]))) cap--;
+    return fill(n, cap, () => parts.map(x => x.lit ?? pick(x.set)).join(""), avoid);
+  }
+
+  /* Reads codes from an earlier export or list. TXT: one code per line. CSV: if a column
+     is headed "Code", only that column is read; otherwise every cell. Our ="CODE" wrapper is removed. */
+  function parsePrevious(text, filename) {
+    if (text.charCodeAt(0) === 0xfeff) text = text.slice(1);
+    let rows = [];
+    if (/\.txt$/i.test(filename || "")) rows = text.split(/\r?\n/).map(l => [l]);
+    else {
+      let row = [], f = "", q = false;
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        if (q) { if (ch === '"') { if (text[i + 1] === '"') { f += '"'; i++; } else q = false; } else f += ch; continue; }
+        if (ch === '"') q = true;
+        else if (ch === ",") { row.push(f); f = ""; }
+        else if (ch === "\n" || ch === "\r") { row.push(f); f = ""; rows.push(row); row = []; if (ch === "\r" && text[i + 1] === "\n") i++; }
+        else f += ch;
+      }
+      if (f !== "" || row.length) { row.push(f); rows.push(row); }
+    }
+    const clean = c => { c = (c || "").trim(); const m = c.match(/^="(.*)"$/); return m ? m[1] : c; };
+    const head = (rows[0] || []).map(c => clean(c).toLowerCase());
+    const col = head.indexOf("code");
+    const cells = col >= 0 ? rows.slice(1).map(r => r[col]) : rows.flat();
+    return cells.map(clean).filter(c => c && c.toLowerCase() !== "code");
   }
 
   /* Matches the desktop export: header "Code", each code wrapped as ="CODE" so Excel keeps it as text. */
@@ -79,6 +113,6 @@ const CodeCore = (() => {
     const q = v => /[",\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
     return ["Code", ...codes.map(c => q(`="${c}"`))].join("\r\n") + "\r\n";
   }
-  return { random, pattern, toCSV, GUIDE, MAX };
+  return { random, pattern, toCSV, parsePrevious, GUIDE, MAX };
 })();
 if (typeof module !== "undefined") module.exports = CodeCore;
