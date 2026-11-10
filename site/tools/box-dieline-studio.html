@@ -1,0 +1,1526 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Box Dieline Studio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700;800&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Archivo+Black&family=Bebas+Neue&family=Caveat:wght@600&family=DM+Serif+Display&family=IBM+Plex+Sans:wght@600&display=swap">
+<style>
+/* Eagle Graphics design system (light, single theme). Layout: tool sidebar left, workbench right with 3D fold preview + flat dieline */
+:root{
+  --eg-green-100:#e9f6d6; --eg-green-500:#76bd1d; --eg-green-600:#5f9a17; --eg-green-700:#4a7812; --eg-green-800:#365711; --eg-green-900:#20340a;
+  --eg-grey-50:#f7f8f8; --eg-grey-100:#f0f1f2; --eg-grey-200:#e1e3e4; --eg-grey-300:#c5c8c9; --eg-grey-400:#9ca0a2; --eg-grey-500:#7d8183;
+  --eg-grey-600:#63676a; --eg-grey-700:#53585a; --eg-grey-800:#3a3e40; --eg-grey-900:#2a2d2e; --eg-white:#ffffff;
+  --bg:var(--eg-grey-100); --surface:var(--eg-grey-50); --raised:var(--eg-white); --fg:var(--eg-grey-900); --body:var(--eg-grey-700); --muted:var(--eg-grey-600);
+  --line:var(--eg-grey-200); --line-strong:var(--eg-grey-300);
+  --brand:var(--eg-green-500); --brand-fill:var(--eg-green-700); --brand-fill-hover:var(--eg-green-800); --brand-fill-press:var(--eg-green-900);
+  --brand-indicator:var(--eg-green-600); --brand-tint:var(--eg-green-100); --text-brand:var(--eg-green-700);
+  --focus-ring:rgba(118,189,29,.40);
+  --stage:var(--eg-grey-200);
+  --cut:#e11d48; --crease:#2a6fa8; --bleed:#1f8a4c;
+  --paper:var(--eg-white); --label:var(--eg-grey-900); --halo:rgba(255,255,255,.9); --shadow:rgba(20,21,22,.42);
+  --shadow-sm:0 1px 3px rgba(20,21,22,.10); --shadow-md:0 3px 10px rgba(20,21,22,.10);
+  --r-xs:2px; --r-sm:3px; --r-md:4px; --r-lg:6px;
+  --ease:cubic-bezier(.4,0,.2,1);
+  --f-display:"Jost","Century Gothic","Futura",system-ui,sans-serif;
+  --f-ui:"Open Sans","Helvetica Neue",Arial,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  color-scheme:light;
+}
+html{height:100%;box-sizing:border-box}
+[hidden]{display:none!important}
+*,*::before,*::after{box-sizing:inherit}
+body{height:100%;background:var(--bg);color:var(--body);font-family:var(--f-ui);font-size:14px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--focus-ring);outline-offset:2px}
+
+.app{height:100%;display:grid;grid-template-columns:340px minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);gap:12px}
+.top{grid-column:1/-1;display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:var(--eg-grey-900);color:var(--eg-white);border-radius:var(--r-md);
+  padding:12px 18px}
+.brand{display:flex;flex-direction:column;gap:2px}
+.brand .eyebrow{font-family:var(--f-display);font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--brand)}
+.brand b{font-family:var(--f-display);font-weight:800;font-size:22px;letter-spacing:-.01em;line-height:1.1;text-transform:uppercase;color:var(--eg-white)}
+.brand b::after{content:"";display:block;width:48px;height:3px;background:var(--brand);margin-top:6px}
+.brand span.sub{color:var(--eg-grey-300);font-size:12.5px;margin-top:4px}
+.top-spec{margin-left:auto;font-family:var(--f-mono);font-size:12px;color:var(--eg-grey-200);border:1px solid var(--eg-grey-700);border-radius:var(--r-sm);padding:5px 10px;font-variant-numeric:tabular-nums}
+
+/* Sidebar */
+.side{background:var(--raised);border:1px solid var(--line);border-radius:var(--r-md);display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--line);flex:none}
+.tabs button{background:none;border:0;padding:13px 6px 11px;font-family:var(--f-display);font-weight:600;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px;transition:color 140ms var(--ease)}
+.tabs button:hover{color:var(--fg)}
+.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--brand-indicator)}
+.pane-scroll{overflow:auto;padding:18px 16px;display:flex;flex-direction:column;gap:24px;min-height:0;flex:1}
+.group{display:flex;flex-direction:column;gap:10px}
+.group h3{margin:0;font-family:var(--f-display);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--fg);font-weight:600;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.row.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field>span{font-size:12px;font-weight:600;color:var(--body)}
+.field>span em{font-style:normal;font-family:var(--f-mono);font-weight:400;font-size:11px;color:var(--muted)}
+input[type=number],input[type=text],select{width:100%;height:38px;background:var(--raised);border:1px solid var(--line-strong);border-radius:var(--r-sm);padding:6px 9px;min-width:0;color:var(--fg);transition:border-color 140ms var(--ease)}
+input[type=number]:focus,input[type=text]:focus,select:focus{border-color:var(--brand-indicator)}
+input[type=number]{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+input:disabled,select:disabled{background:var(--eg-grey-200);color:var(--eg-grey-400);cursor:not-allowed}
+input[type=color]{width:100%;height:38px;border:1px solid var(--line-strong);border-radius:var(--r-sm);background:var(--raised);padding:3px;cursor:pointer}
+input[type=range]{width:100%;accent-color:var(--brand-indicator)}
+.seg{display:inline-flex;background:var(--eg-grey-100);border:1px solid var(--line);border-radius:var(--r-sm);padding:2px;gap:2px}
+.seg button{border:0;background:none;padding:5px 10px;border-radius:var(--r-xs);font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;letter-spacing:0;text-transform:none;font-family:var(--f-ui)}
+.seg button:hover{color:var(--fg)}
+.seg button[aria-pressed="true"]{background:var(--raised);color:var(--fg);box-shadow:var(--shadow-sm)}
+.seg.full{display:flex}.seg.full button{flex:1}
+.check{display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;color:var(--body)}
+.check input{accent-color:var(--brand-indicator);width:16px;height:16px}
+
+.types{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.type{border:1px solid var(--line);background:var(--raised);border-radius:var(--r-md);padding:8px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:6px;transition:box-shadow 200ms var(--ease),transform 200ms var(--ease),border-color 140ms var(--ease)}
+.type:hover{box-shadow:var(--shadow-md);transform:translateY(-2px)}
+.type svg{width:100%;height:58px}
+.type .tc{fill:none;stroke:var(--eg-grey-800);stroke-width:.9;vector-effect:non-scaling-stroke}
+.type .tf{fill:none;stroke:var(--crease);stroke-width:.9;stroke-dasharray:2 2;vector-effect:non-scaling-stroke}
+.type b{font-size:12.5px;font-weight:700;color:var(--fg)}
+.type[aria-pressed="true"]{border-color:var(--brand-indicator);background:var(--brand-tint);box-shadow:inset 0 -3px 0 var(--brand-indicator)}
+.type-note{font-size:13px;color:var(--body);margin:0;line-height:1.6}
+
+.spec{border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface);padding:4px 12px;margin:0}
+.spec div{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--line);font-size:12.5px}
+.spec div:last-child{border-bottom:0}
+.spec dt{color:var(--muted)} .spec dd{margin:0;font-family:var(--f-mono);text-align:right;color:var(--fg);font-variant-numeric:tabular-nums}
+
+.chips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.chips button{border:1px solid var(--line-strong);background:var(--raised);border-radius:var(--r-sm);padding:6px 4px;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--body);transition:border-color 140ms var(--ease)}
+.chips button:hover:not(:disabled){border-color:var(--fg)}
+.chips button[aria-pressed="true"]{border-color:var(--brand-indicator);background:var(--brand-tint);color:var(--fg);box-shadow:inset 0 -3px 0 var(--brand-indicator)}
+.chips button:disabled{background:var(--eg-grey-200);color:var(--eg-grey-400);border-color:var(--eg-grey-200);cursor:not-allowed}
+.file{display:flex;gap:6px}
+.btn{border:1px solid var(--brand-fill);background:var(--raised);color:var(--brand-fill);border-radius:var(--r-sm);padding:7px 13px;font-weight:700;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:background 140ms var(--ease),color 140ms var(--ease)}
+.btn:hover{background:var(--brand-fill);color:var(--eg-white)}
+.btn:active{background:var(--brand-fill-press);color:var(--eg-white);transform:translateY(1px);box-shadow:inset 0 1px 0 rgba(255,255,255,.14)}
+.btn.primary{background:var(--brand-fill);color:var(--eg-white)}
+.btn.primary:hover{background:var(--brand-fill-hover)}
+.btn.primary:active{background:var(--brand-fill-press)}
+.btn.small{padding:5px 10px;font-size:12px}
+.btn.grow{flex:1}
+.hint{font-size:12px;color:var(--muted);margin:0;line-height:1.6}
+.exports{display:flex;flex-direction:column;gap:8px}
+.exp{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--line);border-radius:var(--r-md);padding:10px 12px;background:var(--raised)}
+.exp b{display:block;font-size:13px;color:var(--fg)}.exp span{font-size:12px;color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:18px;height:0;border-top:2px solid;vertical-align:middle;margin-right:5px}
+.legend .lc{border-color:var(--cut)} .legend .lf{border-color:var(--crease);border-top-style:dashed} .legend .lb{border-color:var(--bleed);border-top-width:5px;opacity:.5}
+
+/* Workbench */
+.work{display:flex;flex-direction:column;gap:10px;min-height:0;min-width:0}
+.worktools{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.panes{flex:1;min-height:0;display:grid;gap:12px;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.panes[data-view="3d"]{grid-template-columns:1fr}.panes[data-view="3d"] .pane2d{display:none}
+.panes[data-view="2d"]{grid-template-columns:1fr}.panes[data-view="2d"] .pane3d{display:none}
+.pane{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;background:var(--raised);min-height:0;min-width:0}
+.pane-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 12px;border-bottom:1px solid var(--line)}
+.pane-head h2{margin:0;font-family:var(--f-display);font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--fg);margin-right:auto}
+.foldctl{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--body)}
+.foldctl input{width:130px}
+.foldctl output{font-family:var(--f-mono);font-weight:400;width:3.2em;text-align:right;font-variant-numeric:tabular-nums}
+
+.stage{position:relative;flex:1;min-height:320px;overflow:hidden;perspective:1700px;perspective-origin:50% 42%;background:var(--stage);cursor:grab;touch-action:none}
+.stage:active{cursor:grabbing}
+.pivot{position:absolute;left:50%;top:47%;width:0;height:0;transform-style:preserve-3d}
+.node{position:absolute;transform-style:preserve-3d}
+.face,.inside{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.face{background-image:var(--art);background-repeat:no-repeat;background-color:#888}
+.inside{transform:rotateY(180deg)}
+.floor{position:absolute;left:50%;bottom:9%;width:46%;height:36px;transform:translateX(-50%);border-radius:50%;
+  background:radial-gradient(closest-side,var(--shadow),transparent);filter:blur(6px);pointer-events:none}
+.stage-hint{position:absolute;left:12px;bottom:10px;font-size:11.5px;color:var(--eg-grey-600);pointer-events:none}
+.zoomctl{position:absolute;right:10px;bottom:10px;display:flex;gap:4px}
+
+.sheet{position:relative;flex:1;min-height:320px;overflow:auto;background:var(--eg-grey-100)}
+.sheet svg{display:block;width:100%;height:100%;min-height:320px}
+.paper{fill:var(--paper)}
+.bleedzone{fill:var(--bleed);opacity:.25}
+.cut{fill:none;stroke:var(--cut);stroke-width:1.4;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+.fold{fill:none;stroke:var(--crease);stroke-width:1.3;vector-effect:non-scaling-stroke}
+.hit{fill:transparent;cursor:pointer}
+.hit.nf{cursor:default}
+.hit:not(.nf):hover{fill:var(--brand);fill-opacity:.14}
+.hit.sel{fill:var(--brand);fill-opacity:.18;stroke:var(--brand-indicator);stroke-width:2.5;vector-effect:non-scaling-stroke}
+.lbl{font-family:var(--f-mono);fill:var(--label);stroke:var(--halo);paint-order:stroke;stroke-linejoin:round;pointer-events:none}
+.dim{stroke:var(--eg-grey-500);stroke-width:1;vector-effect:non-scaling-stroke;fill:none}
+.dimt{font-family:var(--f-mono);fill:var(--eg-grey-700)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--eg-grey-900);color:var(--eg-white);padding:9px 16px;border-radius:var(--r-sm);box-shadow:0 10px 28px rgba(20,21,22,.14);font-size:13px;z-index:20;max-width:calc(100% - 32px);border-left:3px solid var(--brand)}
+
+/* Sidebar: stacked collapsible section cards on a dark rail */
+.side{--raised:var(--eg-grey-800);--surface:var(--eg-grey-900);--fg:var(--eg-white);--body:var(--eg-grey-200);--muted:var(--eg-grey-400);
+  --line:var(--eg-grey-700);--line-strong:var(--eg-grey-600);--crease:#6fa9dc;--brand-tint:rgba(118,189,29,.14);--brand-indicator:var(--eg-green-500);
+  background:var(--eg-grey-900);border-color:var(--eg-grey-900);overflow:auto;color-scheme:dark;padding:10px}
+.side .pane-scroll{overflow:visible;flex:none;padding:0;gap:10px}
+.side .pane-scroll+.pane-scroll{margin-top:10px}
+.side .group{background:var(--eg-grey-800);border:1px solid var(--eg-grey-700);border-radius:var(--r-md);gap:0}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;cursor:pointer;user-select:none}
+.side .group h3{font-size:15px;font-weight:700;letter-spacing:.06em;color:var(--eg-white)}
+.collapse{background:none;border:0;color:var(--eg-grey-300);font-family:var(--f-mono);font-size:18px;line-height:1;width:28px;height:28px;border-radius:var(--r-sm);cursor:pointer;display:grid;place-items:center;flex:none}
+.collapse:hover{color:var(--eg-white);background:var(--eg-grey-700)}
+.group.closed .collapse{color:var(--brand)}
+.card-body{display:flex;flex-direction:column;gap:10px;padding:14px;border-top:1px solid var(--eg-grey-700)}
+.group.closed .card-body{display:none}
+.sublabel{font-family:var(--f-display);font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--eg-grey-300);margin-top:4px}
+.side input[type=number],.side input[type=text],.side select{background:var(--eg-grey-900);border-color:var(--eg-grey-600);color:var(--eg-white)}
+.side input[type=color]{background:var(--eg-grey-900);border-color:var(--eg-grey-600)}
+.side input:disabled,.side select:disabled{background:var(--eg-grey-700);color:var(--eg-grey-500)}
+.side .btn{border-color:var(--eg-grey-500);color:var(--eg-white);background:transparent}
+.side .btn:hover{background:var(--brand-fill);border-color:var(--brand-fill)}
+.side .btn.primary{background:var(--brand-fill);border-color:var(--brand-fill)}
+.side .btn.primary:hover{background:var(--brand-fill-hover)}
+.side .seg{background:var(--eg-grey-900);border-color:var(--eg-grey-600)}
+.side .seg button{color:var(--eg-grey-300)}
+.side .seg button[aria-pressed="true"]{background:var(--brand-tint);color:var(--eg-white);box-shadow:inset 0 0 0 1px var(--brand)}
+.side .type,.side .chips button,.side .exp{background:var(--eg-grey-900);border-color:var(--eg-grey-600)}
+.side .type[aria-pressed="true"],.side .chips button[aria-pressed="true"]{border:2px solid var(--brand);background:var(--brand-tint);box-shadow:none}
+.side .type:hover{box-shadow:none;transform:none;border-color:var(--eg-grey-400)}
+.side .type .tc{stroke:var(--eg-grey-200)}
+.side .chips button:disabled{background:var(--eg-grey-800);color:var(--eg-grey-500);border-color:var(--eg-grey-700)}
+.side .spec{background:var(--eg-grey-900)}
+.side .hint,.side .type-note{color:var(--eg-grey-300)}
+.side input[type=file]{color:var(--eg-grey-300);font-size:12px}
+
+.newbtn{border-color:var(--eg-grey-500);color:var(--eg-white);background:transparent}
+.newbtn:hover{background:var(--brand-fill);border-color:var(--brand-fill)}
+.overlay{position:fixed;inset:0;background:rgba(20,21,22,.62);display:grid;place-items:center;z-index:30;
+  padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.dlg{background:var(--eg-white);color:var(--eg-grey-700);border-radius:var(--r-lg);box-shadow:0 24px 60px rgba(20,21,22,.28);width:min(460px,100%);padding:22px;display:flex;flex-direction:column;gap:14px}
+.dlg h2{margin:0;font-family:var(--f-display);font-size:20px;font-weight:800;text-transform:uppercase;color:var(--eg-grey-900)}
+.dlg h2::after{content:"";display:block;width:48px;height:3px;background:var(--brand);margin-top:8px}
+.dlg p{margin:0;line-height:1.6}
+.dlg-opts{display:flex;flex-direction:column;gap:8px}
+.opt{text-align:left;border:1px solid var(--eg-grey-300);background:var(--eg-white);border-radius:var(--r-md);padding:12px 14px;cursor:pointer;display:flex;flex-direction:column;gap:3px;transition:border-color 140ms var(--ease),box-shadow 200ms var(--ease)}
+.opt:hover{border-color:var(--brand-fill);box-shadow:0 3px 10px rgba(20,21,22,.10)}
+.opt b{color:var(--eg-grey-900);font-size:14px}.opt span{font-size:13px;color:var(--eg-grey-600)}
+.dlg-foot{display:flex;justify-content:flex-end}
+.catbar{display:flex;flex-wrap:wrap;gap:6px}
+.catbar button{border:1px solid var(--line-strong);background:var(--surface);color:var(--body);border-radius:var(--r-sm);padding:4px 9px;font-size:12px;font-weight:600;cursor:pointer}
+.catbar button:hover{border-color:var(--eg-grey-400)}
+.catbar button[aria-pressed="true"]{border-color:var(--brand);background:var(--brand-tint);color:var(--fg)}
+.type .cat{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.side .check:has(input:disabled){color:var(--eg-grey-500);cursor:not-allowed}
+
+.type .tag{align-self:flex-start;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--eg-grey-900);background:var(--brand);border-radius:var(--r-xs);padding:2px 6px}
+.type .tag.opt{background:transparent;color:var(--brand);border:1px solid var(--brand);padding:1px 5px}
+
+.panesheet{display:none}
+.panes[data-view="sheet"]{grid-template-columns:1fr}
+.panes[data-view="sheet"] .pane3d,.panes[data-view="sheet"] .pane2d{display:none}
+.panes[data-view="sheet"] .panesheet{display:flex}
+.pane-head .nsum{font-size:12.5px;color:var(--body);font-variant-numeric:tabular-nums;margin-right:auto}
+.pane-head h2+.nsum{margin-left:-2px}
+.nstats{display:flex;flex-direction:column;gap:8px}
+.nbig{display:flex;align-items:baseline;gap:8px}
+.nbig b{font-family:var(--f-display);font-size:38px;font-weight:800;line-height:1;color:var(--brand);font-variant-numeric:tabular-nums}
+.nbig span{font-family:var(--f-display);font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--eg-grey-200)}
+.nstats .spec dd{max-width:62%}
+.nstats .spec dd.txt{font-family:var(--f-ui);font-size:12.5px}
+.nerr{color:#f3b3a9!important}
+.nsheet{fill:var(--paper);stroke:var(--eg-grey-400);stroke-width:1;vector-effect:non-scaling-stroke}
+.ngrip{fill:var(--eg-grey-300);opacity:.5}
+.ngript{font-family:var(--f-display);font-weight:600;letter-spacing:.2em;fill:var(--eg-grey-600)}
+.nusable{fill:none;stroke:var(--eg-grey-500);stroke-width:1;stroke-dasharray:6 4;vector-effect:non-scaling-stroke}
+
+@media (max-width:1180px){
+  .panes[data-view="split"]{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) minmax(0,1fr)}
+}
+@media (max-width:860px){
+  html,body{height:auto}
+  .app{display:flex;flex-direction:column;height:auto}
+  .pane-scroll{overflow:visible}
+  .panes,.panes[data-view="split"]{display:flex;flex-direction:column}
+  .stage,.sheet{flex:none;height:420px}
+  .top-spec{margin-left:0}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}.type:hover{transform:none}}
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="brand"><span class="eyebrow">Eagle Graphics · Art Department</span><b>Box Dieline Studio</b><span class="sub">Build a dieline, add your artwork, fold it in 3D and export for print.</span></div>
+    <div class="top-spec" id="topSpec">—</div>
+    <button class="btn newbtn" id="btnNew" type="button">New Design</button>
+  </header>
+
+  <aside class="side">
+    
+
+    <div class="pane-scroll" data-pane="structure">
+      <div class="group">
+        <h3>Box Style</h3>
+        <p class="hint">Every style locks together with tabs and slots. No glue needed.</p>
+        <div class="catbar" id="catBar"></div>
+        <div class="types" id="types"></div>
+        <p class="type-note" id="typeNote"></p>
+        <div class="sublabel">Options</div>
+        <label class="check" id="optSeamRow"><input type="checkbox" id="optSeam"> Lock-tab seam instead of a glue flap</label>
+        <label class="check" id="optHangRow"><input type="checkbox" id="optHang"> Hang tab with hang hole</label>
+        <label class="check" id="optWinRow"><input type="checkbox" id="optWin"> Window on front panel</label>
+        <div class="row" id="winRow">
+          <label class="field"><span>Window width</span><input type="range" id="winW" min="15" max="85" step="1"></label>
+          <label class="field"><span>Window height</span><input type="range" id="winH" min="10" max="85" step="1"></label>
+          <label class="field"><span>Move up / down</span><input type="range" id="winY" min="-35" max="35" step="1"></label>
+        </div>
+        <p class="hint" id="optNote"></p>
+      </div>
+      <div class="group">
+        <h3>Size <span class="seg" id="unitSeg"><button data-v="in" aria-pressed="true">inches</button><button data-v="cm" aria-pressed="false">cm</button></span></h3>
+        <label class="field"><span>Start from a common size</span>
+          <select id="preset"></select></label>
+        <p class="hint" id="dimNote" hidden></p>
+        <div class="row">
+          <label class="field"><span>Length <em>L</em></span><input type="number" id="dimL" step="0.5" min="10"></label>
+          <label class="field"><span>Width <em>W</em></span><input type="number" id="dimW" step="0.5" min="10"></label>
+          <label class="field"><span>Height <em>H</em></span><input type="number" id="dimH" step="0.5" min="10"></label>
+        </div>
+        <div class="seg full" id="modeSeg"><button data-v="inner" aria-pressed="true">Inner dimensions</button><button data-v="outer" aria-pressed="false">Outer dimensions</button></div>
+      </div>
+      <div class="group">
+        <h3>Board <span class="seg" id="bunitSeg"><button data-v="mm" aria-pressed="true">mm</button><button data-v="cm" aria-pressed="false">cm</button><button data-v="in" aria-pressed="false">inches</button></span></h3>
+        <div class="row two">
+          <label class="field"><span>Material</span><select id="material"></select></label>
+          <label class="field"><span>Caliper <em class="bu">mm</em></span><input type="number" id="thick" min="0"></label>
+        </div>
+        <div class="row">
+          <label class="field"><span>Tuck depth <em class="bu">mm</em></span><input type="number" id="tuck" min="0"></label>
+          <label class="field"><span>Glue flap <em class="bu">mm</em></span><input type="number" id="glue" min="0"></label>
+          <label class="field"><span>Bleed <em class="bu">mm</em></span><input type="number" id="bleed" min="0"></label>
+        </div>
+        <p class="hint" id="tuckHint"></p>
+      </div>
+      <div class="group">
+        <h3>Specification</h3>
+        <dl class="spec" id="spec"></dl>
+        <p class="hint">Panel sizes add the board caliper to inner dimensions (or subtract it from outer). Confirm final allowances with your converter.</p>
+      </div>
+    </div>
+
+    <div class="pane-scroll" data-pane="artwork">
+      <div class="group">
+        <h3>Whole Box</h3>
+        <div class="row two">
+          <label class="field"><span>Base color</span><input type="color" id="gBase"></label>
+          <label class="field"><span>Pattern</span><select id="gPattern">
+            <option value="none">None</option><option value="stripes">Diagonal stripes</option><option value="dots">Dots</option><option value="grid">Grid</option><option value="waves">Waves</option></select></label>
+          <label class="field"><span>Pattern color</span><input type="color" id="gAccent"></label>
+          <label class="field"><span>Pattern strength</span><input type="range" id="gPatOp" min="0" max="0.6" step="0.02"></label>
+        </div>
+        <div class="sublabel">Other</div>
+        <label class="field"><span>Full-dieline artwork (covers every panel, under the text)</span>
+          <span class="file"><input type="file" id="gArt" accept="image/*" style="flex:1;min-width:0"><button class="btn small" id="gArtClear" type="button">Clear</button></span></label>
+        <label class="check"><input type="checkbox" id="gBarcode"> Barcode placeholder on back panel</label>
+      </div>
+      <div class="group">
+        <h3 id="secPanel">Panel <span class="hint">Pick a panel below, or click one in the dieline.</span></h3>
+        <div class="chips" id="faceChips"></div>
+        <label class="field"><span>Headline</span><input type="text" id="fTitle" maxlength="80"></label>
+        <label class="field"><span>Supporting line</span><input type="text" id="fSub" maxlength="120"></label>
+        <div class="row two">
+          <label class="field"><span>Typeface</span><select id="fFont"></select></label>
+          <label class="field"><span>Text color</span><input type="color" id="fText"></label>
+          <label class="field"><span>Text size</span><input type="range" id="fSize" min="40" max="200" step="5"></label>
+          <label class="field"><span>Text position</span><select id="fPos"><option value="top">Top</option><option value="middle">Middle</option><option value="bottom">Bottom</option></select></label>
+        </div>
+        <div class="row two" style="align-items:end">
+          <label class="check"><input type="checkbox" id="fColorOn"> Own panel color</label>
+          <label class="field"><span>Panel color</span><input type="color" id="fColor"></label>
+        </div>
+        <label class="field"><span>Panel image or logo</span>
+          <span class="file"><input type="file" id="fImg" accept="image/*" style="flex:1;min-width:0"><button class="btn small" id="fImgClear" type="button">Clear</button></span></label>
+        <div class="row two">
+          <label class="field"><span>Image size</span><input type="range" id="fImgScale" min="10" max="100" step="1"></label>
+          <label class="field"><span>Image vertical offset</span><input type="range" id="fImgY" min="-45" max="45" step="1"></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="pane-scroll" data-pane="export">
+      <div class="group">
+        <h3>Sheet Layout</h3>
+        <label class="field"><span>Press sheet</span><select id="nPreset"></select></label>
+        <div class="row two">
+          <label class="field"><span>Sheet width <em class="su">in</em></span><input type="number" id="nSW" min="1"></label>
+          <label class="field"><span>Sheet height <em class="su">in</em></span><input type="number" id="nSH" min="1"></label>
+          <label class="field"><span>Gripper margin <em class="su">in</em></span><input type="number" id="nGrip" min="0"></label>
+          <label class="field"><span>Other margins <em class="su">in</em></span><input type="number" id="nMar" min="0"></label>
+        </div>
+        <button class="btn small" id="nSwap" type="button">Swap Width &amp; Height</button>
+        <label class="field"><span>Layout</span><select id="nMode">
+          <option value="auto">Best fit (tries every layout)</option>
+          <option value="same">All boxes facing the same way</option>
+          <option value="altRows">Every other row turned 180°</option>
+          <option value="altCols">Every other column turned 180°</option></select></label>
+        <label class="check"><input type="checkbox" id="nRot"> Allow turning boxes 90° (ignores grain direction)</label>
+        <div id="nStats" class="nstats"></div>
+        <label class="field"><span>Boxes needed</span><input type="number" id="nQty" min="1" step="1"></label>
+        <button class="btn primary" id="nShow" type="button">Show Sheet Layout</button>
+        <div class="sublabel">Sheet files</div>
+        <div class="exports">
+          <div class="exp"><div><b>Sheet layout SVG</b><span>Every box on the sheet. Shared edges are a single cut line.</span></div><button class="btn primary small" id="btnNSvg" type="button">Download</button></div>
+          <div class="exp"><div><b>Sheet layout DXF</b><span>SHEET, CUT and CREASE layers for the die maker.</span></div><button class="btn small" id="btnNDxf" type="button">Download</button></div>
+          <div class="exp"><div><b>Sheet print PNG</b><span>Artwork for every box, at the resolution set under Print Artwork.</span></div><button class="btn small" id="btnNPng" type="button">Download</button></div>
+        </div>
+        <p class="hint">Butted boxes share one cut line, so artwork can't bleed across those edges. Keep key art and solid edge colors away from shared edges.</p>
+      </div>
+      <div class="group">
+        <h3>Dieline Files</h3>
+        <div class="exports">
+          <div class="exp"><div><b>Dieline SVG</b><span>Vector cut, crease and bleed layers in mm. Opens in Illustrator.</span></div><button class="btn primary small" id="btnSvg" type="button">Download</button></div>
+          <div class="exp"><div><b>Dieline + artwork SVG</b><span>Same layers with your artwork embedded under them.</span></div><button class="btn small" id="btnSvgArt" type="button">Download</button></div>
+          <div class="exp"><div><b>DXF</b><span>CUT and CREASE layers for die makers and cutting tables.</span></div><button class="btn small" id="btnDxf" type="button">Download</button></div>
+        </div>
+        <div class="legend"><span><i class="lc"></i>Cut</span><span><i class="lf"></i>Crease / fold</span><span><i class="lb"></i>Bleed</span></div>
+      </div>
+      <div class="group">
+        <h3>Print Artwork</h3>
+        <div class="row two">
+          <label class="field"><span>Resolution</span><select id="dpi"><option value="150">150 dpi (proof)</option><option value="300" selected>300 dpi (press)</option></select></label>
+          <label class="check" style="align-self:end;padding-bottom:8px"><input type="checkbox" id="pngLines" checked> Show dieline lines</label>
+        </div>
+        <button class="btn primary" id="btnPng" type="button">Download Print PNG</button>
+        <p class="hint">Flat artwork trimmed to the bleed line, transparent outside it.</p>
+      </div>
+      <div class="group">
+        <h3>Project</h3>
+        <div class="file">
+          <button class="btn grow" id="btnSave" type="button">Save Project</button>
+          <label class="btn grow" for="fileLoad">Open Project</label>
+          <input type="file" id="fileLoad" accept=".json,application/json" hidden>
+        </div>
+        <button class="btn" id="btnNew2" type="button">Start New Design</button>
+        <button class="btn" id="btnReset" type="button">Reset to Sample Design</button>
+        <p class="hint">Project files keep the structure, colors, text and images in one .json.</p>
+      </div>
+    </div>
+  </aside>
+
+  <main class="work">
+    <div class="worktools">
+      <div class="seg" id="viewSeg"><button data-v="split" aria-pressed="true">Split</button><button data-v="3d" aria-pressed="false">3D only</button><button data-v="2d" aria-pressed="false">Dieline only</button><button data-v="sheet" aria-pressed="false">Sheet Layout</button></div>
+      <span class="hint" id="sampleNote">Sample design loaded. Replace the text and colors with your own.</span>
+    </div>
+    <div class="panes" id="panes" data-view="split">
+      <section class="pane pane3d">
+        <div class="pane-head">
+          <h2>3D Preview</h2>
+          <label class="foldctl">Fold <input type="range" id="fold" min="0" max="1" step="0.005" value="1"><output id="foldOut">100%</output></label>
+          <button class="btn small" id="btnPlay" type="button">Unfold</button>
+          <label class="check" style="font-size:12px"><input type="checkbox" id="spin"> Spin</label>
+          <button class="btn small" id="btnView" type="button">Reset View</button>
+        </div>
+        <div class="stage" id="stage">
+          <div class="floor" id="floor"></div>
+          <div class="pivot" id="pivot"></div>
+          <div class="stage-hint">Drag to rotate · scroll or pinch to zoom</div>
+          <div class="zoomctl"><button class="btn small" id="zOut" type="button" aria-label="Zoom out">−</button><button class="btn small" id="zIn" type="button" aria-label="Zoom in">+</button></div>
+        </div>
+      </section>
+      <section class="pane pane2d">
+        <div class="pane-head">
+          <h2>Dieline</h2>
+          <label class="check" style="font-size:12px"><input type="checkbox" id="tArt" checked> Artwork</label>
+          <label class="check" style="font-size:12px"><input type="checkbox" id="tLabels" checked> Labels</label>
+          <label class="check" style="font-size:12px"><input type="checkbox" id="tDims" checked> Dimensions</label>
+        </div>
+        <div class="sheet"><svg id="svg2d" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet"></svg></div>
+      </section>
+      <section class="pane panesheet">
+        <div class="pane-head">
+          <h2>Sheet Layout</h2>
+          <span class="nsum" id="nSum"></span>
+          <label class="check" style="font-size:12px"><input type="checkbox" id="nArt" checked> Artwork</label>
+          <label class="check" style="font-size:12px"><input type="checkbox" id="nDims" checked> Dimensions</label>
+        </div>
+        <div class="sheet"><svg id="svgNest" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet"></svg></div>
+      </section>
+    </div>
+  </main>
+</div>
+<div class="toast" id="toast" hidden></div>
+<div class="overlay" id="newDlg" hidden>
+  <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="newTitle">
+    <h2 id="newTitle">Start a New Design?</h2>
+    <p>This clears the current design. Save it first from the Project section if you want to keep it.</p>
+    <div class="dlg-opts">
+      <button class="opt" id="newArt" type="button"><b>Clear Artwork Only</b><span>Keep the box style and size. Remove colors, patterns, text and images.</span></button>
+      <button class="opt" id="newAll" type="button"><b>Start Completely New</b><span>Blank white reverse tuck end box at 3 × 3 × 4 in, with no artwork.</span></button>
+    </div>
+    <div class="dlg-foot"><button class="btn" id="newCancel" type="button">Cancel</button></div>
+  </div>
+</div>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const FACES=['front','back','left','right','top','bottom'];
+const FACE_LABEL={front:'Front',back:'Back',left:'Left side',right:'Right side',top:'Top',bottom:'Bottom'};
+const CATS={cartons:'Cartons',mailers:'Mailers & Trays',twopc:'Two-Piece',specialty:'Specialty'};
+const TYPES={
+  shallowtuck:{gf:1,cat:'mailers',winFace:'top',name:'Shallow tuck box',note:'Low box with roll-over double side walls that lock into slots in the base, ears on the front and back walls, and a lid with rounded side flaps. The front tuck has curved wings that fold in. Apparel, stationery and flat gifts.'},
+  rte:{seam:1,cat:'cartons',name:'Reverse tuck end',note:'Tucks close on opposite panels: top tucks from the back, bottom from the front. The everyday retail carton.'},
+  ste:{seam:1,cat:'cartons',name:'Straight tuck end',note:'Both tucks hinge from the back panel, so the front stays clean. Common for windowed and premium cartons.'},
+  snaplock:{seam:1,cat:'cartons',name:'Snap-lock bottom',note:'Tuck top with a 1-2-3 bottom that folds and locks by hand. Holds more weight than a tuck bottom.'},
+  hex:{seam:1,cat:'cartons',name:'Hexagon tuck',note:'Six-sided carton with hexagon tuck closures.',noW:1,dimNote:'Length is the width across the flats. Width is not used for this style.'},
+  oct:{seam:1,cat:'cartons',name:'Octagon tuck',note:'Eight-sided carton with octagon tuck closures. Candles, tins and gift sets.',noW:1,dimNote:'Length is the width across the flats. Width is not used for this style.'},
+  tri:{seam:1,cat:'cartons',name:'Triangle tube',note:'Three-sided tube with triangle tuck ends. Snack bars, pens and long items.',noW:1,dimNote:'Length is the width of each side. Height is the tube length. Width is not used for this style.'},
+  mailer:{gf:1,cat:'mailers',name:'Mailer box',note:'Roll end tuck front (FEFCO 0427). Double side walls roll in and lock with tabs, and the lid tucks into the front. The standard swag kit and subscription box.'},
+  bakery:{gf:1,cat:'mailers',winFace:'top',name:'Bakery box',note:'Mailer-style box with side flaps on the lid so it closes cleaner over food. The window option goes on the lid.'},
+  locktray:{gf:1,cat:'mailers',name:'Lock-corner tray',note:'Corner flaps fold inside, then the doubled side walls fold over them and lock into slots in the base.'},
+  hingedtray:{gf:1,cat:'mailers',winFace:'top',name:'Hinged-lid tray',note:'Lock-corner tray with a lid hinged to the back wall. The lid tucks into the front and its side flaps tuck inside. Cigar-box style. The window option goes on the lid.'},
+  lockdisplay:{gf:1,cat:'mailers',name:'Self-locking display',note:'Counter display whose double front wall and double header lock into slots in the base, holding the corner flaps in place.',dimNote:'Height is the side wall at the back. The front is about half as tall and the header adds its own height above.'},
+  locktwopiece:{gf:1,cat:'twopc',name:'Lid & base',note:'Telescoping lid over a base. Both pieces are lock-corner trays. Apparel, caps, business cards and gift sets.',dimNote:'Sizes are for the base. The lid is cut slightly larger and about a third as deep.'},
+  slidebox:{gf:1,cat:'twopc',name:'Slide box',note:'Matchbox-style drawer: a lock-corner tray slides inside a tab-locked sleeve. Jewelry, cards and premium gifts.',dimNote:'Sizes are for the drawer. The sleeve is cut slightly larger so the drawer slides freely.'},
+  sleeve:{seam:1,cat:'twopc',name:'Sleeve',note:'Open-ended wrap that slides over a tray, bottle or bundle. No closures.'},
+  pillow:{seam:1,cat:'specialty',name:'Pillow box',note:'Curved ends press closed. The 3D preview approximates the curves.',dimNote:'Width sets how deep the curved end flaps are.'},
+  gable:{seam:1,cat:'specialty',name:'Gable box',note:'Pitched roof with a carry handle and a tuck bottom. A tab on the front handle folds over and locks into the back handle.'},
+  seal:{hide:1,cat:'cartons',name:'Seal end',note:''},autolock:{hide:1,cat:'cartons',name:'Auto-lock bottom',note:''},rsc:{hide:1,cat:'mailers',name:'Shipping box',note:''},hsc:{hide:1,cat:'mailers',name:'Half slotted box',note:''},
+  twopiece:{hide:1,cat:'twopc',name:'Two-piece lid & base',note:''},tray:{hide:1,cat:'mailers',name:'Tray',note:''},display:{hide:1,cat:'mailers',name:'Counter display',note:''},pyramid:{hide:1,cat:'specialty',name:'Pyramid',note:'',noW:1}
+};
+const GLUED_TO={seal:'snaplock',autolock:'snaplock',rsc:'mailer',hsc:'locktray',twopiece:'locktwopiece',tray:'locktray',display:'lockdisplay',pyramid:'hex'};
+const SEAM_OK=['rte','ste','snaplock','sleeve','pillow','hex','oct','tri','gable'];
+const HANG_OK=['rte','ste','snaplock'], TUCK_OK=['rte','ste','snaplock','hex','oct','tri','gable'];
+const MATERIALS={kraft:{name:'Kraft',inside:'#c29a6b'},white:{name:'White SBS',inside:'#f2f0ec'},black:{name:'Black board',inside:'#2b2b2d'},corr:{name:'Corrugated E-flute',inside:'#b8895a'}};
+const FONTS=[['Jost','800'],['Open Sans','700'],['Archivo Black','400'],['Bebas Neue','400'],['DM Serif Display','400'],['IBM Plex Sans','600'],['IBM Plex Mono','500'],['Caveat','600']];
+const IN_=25.4;
+const PRESETS=[
+  ['Lip balm',22,22,75,'rte'],['Mug box',95,95,110,'rte'],['Perfume 50 ml',50,50,110,'rte'],['Coffee 12 oz',80,80,120,'rte'],
+  ['Tea',70,50,110,'ste'],['Soap bar',95,30,65,'ste'],['Snack carton',190,50,280,'snaplock'],['Candle',85,85,100,'snaplock'],['Bottle carton',75,75,200,'snaplock'],
+  ['Hexagon gift',100,100,140,'hex'],['Octagon candle',90,90,110,'oct'],['Triangle snack bar',50,50,200,'tri'],['Pen tube',30,30,160,'tri'],
+  ['Swag kit mailer 9×6×3 in',9*IN_,6*IN_,3*IN_,'mailer'],['Shirt mailer 12×9×2 in',12*IN_,9*IN_,2*IN_,'mailer'],['Subscription box 10×8×4 in',10*IN_,8*IN_,4*IN_,'mailer'],
+  ['Bakery box 8×8×4 in',8*IN_,8*IN_,4*IN_,'bakery'],['Cupcake box 4×4×4 in',4*IN_,4*IN_,4*IN_,'bakery'],['Pie box 10×10×2.5 in',10*IN_,10*IN_,2.5*IN_,'bakery'],
+  ['Shallow tuck 9×6×1.5 in',9*IN_,6*IN_,1.5*IN_,'shallowtuck'],['Apparel shallow box 12×10×2 in',12*IN_,10*IN_,2*IN_,'shallowtuck'],['Stationery box',230,165,30,'shallowtuck'],
+  ['Product tray',200,150,40,'locktray'],['Cigar-style box',220,140,50,'hingedtray'],['Gift box with hinged lid 8×6×2 in',8*IN_,6*IN_,2*IN_,'hingedtray'],
+  ['Counter display 8×6×3 in',8*IN_,6*IN_,3*IN_,'lockdisplay'],
+  ['Cap box 9×9×6 in',9*IN_,9*IN_,6*IN_,'locktwopiece'],['Business card box',92,56,45,'locktwopiece'],['Apparel gift box 14×10×2 in',14*IN_,10*IN_,2*IN_,'locktwopiece'],
+  ['Jewelry slide box',80,80,30,'slidebox'],['Card slide box',100,70,25,'slidebox'],
+  ['Bottle sleeve',75,75,140,'sleeve'],['Pillow gift',120,30,80,'pillow'],['Treat box',100,60,110,'gable']];
+
+/* ---------- geometry ---------- */
+const D2R=Math.PI/180;
+function build(o){
+  const sg=o.dimMode==='outer'?-1:1, t0=o.thick||0, st=o.type;
+  const L=o.L+sg*t0, W=o.W+sg*t0, H=o.H+sg*t0;
+  const g=clamp(o.glue,5,40), M=(o.bleed||0)+4;
+  const P=[], meta={faceNames:{},tilt:{},place:{},tkMax:0};
+  const add=p=>{p.dz=p.dz||0;P.push(p);return p};
+  const R=(x,y,w,h)=>[[x,y],[x+w,y],[x+w,y+h],[x,y+h]];
+  const RS=(x,y,w,h,s)=>s?[[x,y],[x+s,y],[x+w-s,y],[x+w,y],[x+w,y+h],[x+w-s,y+h],[x+s,y+h],[x,y+h]]:R(x,y,w,h);
+  const BODY=[0,.42],FL=[.42,.62],LID=[.6,.88],TK=[.7,.97],IN=-1.6;
+  const lockSeam=SEAM_OK.includes(st);
+  const seamFlap=(xG,H,pid,a,backId)=>{const gs=Math.min(g*0.6,H*0.2);
+    if(!lockSeam){add({id:'glue',name:'Glue flap',pts:[[xG,0],[xG+g,gs],[xG+g,H-gs],[xG,H]],parent:pid,a,dz:IN,t:BODY});return}
+    const tw=Math.min(H*0.3,25),ya=H/2-tw/2,yb=H/2+tw/2,te=Math.max(5,g*0.6);
+    add({id:'glue',name:'Lock tab',pts:[[xG,0],[xG+g,gs],[xG+g,ya],[xG+g+te,ya-2],[xG+g+te,yb+2],[xG+g,yb],[xG+g,H-gs],[xG,H]],parent:pid,a,dz:IN,t:BODY});
+    const bp=P.find(p=>p.id===backId),bx=Math.min(...bp.pts.map(q=>q[0]));
+    (bp.holes=bp.holes||[]).push([[bx+g-0.5,ya-0.3],[bx+g+0.5,ya-0.3],[bx+g+0.5,yb+0.3],[bx+g-0.5,yb+0.3]]);
+  };
+  const tabEdge=(x0,x1,y,dir,n=2)=>{const len=x1-x0,tw=Math.min(len*0.18,25),pts=[];
+    for(let i=0;i<n;i++){const c=x0+len*(i+0.5)/n;pts.push([c-tw/2,y],[c-tw/2+1,y+dir*4],[c+tw/2-1,y+dir*4],[c+tw/2,y])}return {pts,tw,centers:[...Array(n)].map((_,i)=>x0+len*(i+0.5)/n)}};
+  const tongue=(x,y0,w,t,dir)=>{
+    const r=Math.min(t*0.8,w*0.25),yE=y0+dir*t,pts=[[x,y0]];
+    for(let i=0;i<=8;i++){const a=Math.PI/2*i/8;pts.push([x+r-r*Math.cos(a),yE-dir*r+dir*r*Math.sin(a)])}
+    for(let i=0;i<=8;i++){const a=Math.PI/2*i/8;pts.push([x+w-r+r*Math.sin(a),yE-dir*r+dir*r*Math.cos(a)])}
+    pts.push([x+w,y0]);return pts;
+  };
+  const capsule=(cx,cy,w,h)=>{const r=h/2,pts=[];for(let i=0;i<=10;i++){const a=-Math.PI/2+Math.PI*i/10;pts.push([cx+w/2-r+r*Math.cos(a),cy+r*Math.sin(a)])}
+    for(let i=0;i<=10;i++){const a=Math.PI/2+Math.PI*i/10;pts.push([cx-w/2+r+r*Math.cos(a),cy+r*Math.sin(a)])}return pts};
+  const rrect=(x,y,w,h,r)=>{const pts=[],c=[[x+w-r,y+r,-90],[x+w-r,y+h-r,0],[x+r,y+h-r,90],[x+r,y+r,180]];
+    c.forEach(([cx,cy,a0])=>{for(let i=0;i<=5;i++){const a=(a0+18*i)*D2R;pts.push([cx+r*Math.cos(a),cy+r*Math.sin(a)])}});return pts};
+  const parab=(x,y0,w,b,dir,n=18)=>{const pts=[];for(let i=0;i<=n;i++){const u=i/n;pts.push([x+w*u,y0+dir*b*(1-(2*u-1)**2)])}return pts};
+  let tk=o.tuck;
+  const setTk=max=>{meta.tkMax=Math.max(5,max);tk=clamp(o.tuck,5,meta.tkMax)};
+
+  // four-panel body: Back | Left | Front | Right | Glue
+  const body=(slot=0)=>{
+    const xB=0,xSL=L,xF=L+W,xSR=2*L+W,xG=2*L+2*W,yT=0,yB=H;
+    add({id:'front',face:'front',name:'Front',pts:RS(xF,0,L,H,slot)});
+    add({id:'sideL',face:'left',name:'Left side',pts:RS(xSL,0,W,H,slot),parent:'front',a:90,t:BODY});
+    add({id:'back',face:'back',name:'Back',pts:RS(xB,0,L,H,slot),parent:'sideL',a:90,t:BODY});
+    add({id:'sideR',face:'right',name:'Right side',pts:RS(xSR,0,W,H,slot),parent:'front',a:90,t:BODY});
+    seamFlap(xG,H,'sideR',90,'back');
+    return {xB,xSL,xF,xSR,yT,yB};
+  };
+  const dust=(top,sid,x0,mir,d,y0)=>{
+    let raw=[[0,0],[1.5,d],[W-d*0.45,d],[W-0.5,d*0.3],[W,0]];
+    if(mir)raw=raw.map(([u,v])=>[W-u,v]).reverse();
+    const dir=top?-1:1;
+    add({id:(top?'dT':'dB')+sid,name:'Dust flap',pts:raw.map(([u,v])=>[x0+u,y0+dir*v]),parent:sid,a:90,dz:IN,t:FL});
+  };
+  const tuck=(top,pid,x,y0)=>{
+    const dir=top?-1:1;
+    const lid=add({id:top?'lidT':'lidB',face:top?'top':'bottom',name:top?'Top closure':'Bottom closure',pts:R(x,top?y0-W:y0,L,W),parent:pid,a:90,t:LID,rot:pid==='back'});
+    add({id:top?'tkT':'tkB',name:'Tuck flap',pts:tongue(x,y0+dir*W,L,tk,dir),parent:lid.id,a:90,dz:1.6,t:TK});
+  };
+  const trayPiece=(pre,x0,y0,L,W,H,F,cf,lock)=>{
+    add({id:pre+'front',face:F.front,name:'Front wall',pts:R(x0,y0,L,H),rot:F.rot});
+    const base=add({id:pre+'base',face:F.bottom,name:pre?'Lid top':'Base',pts:R(x0,y0+H,L,W),parent:pre+'front',a:90,t:BODY,rot:F.rotTop});
+    add({id:pre+'back',face:F.back,name:'Back wall',pts:R(x0,y0+H+W,L,H),parent:pre+'base',a:90,t:BODY});
+    add({id:pre+'sideL',face:F.left,name:'Left wall',pts:R(x0-H,y0+H,H,W),parent:pre+'base',a:90,t:BODY});
+    add({id:pre+'sideR',face:F.right,name:'Right wall',pts:R(x0+L,y0+H,H,W),parent:pre+'base',a:90,t:BODY});
+    const c=Math.min(1.5,H*0.1);
+    [[pre+'front',y0],[pre+'back',y0+H+W]].forEach(([pid,y])=>{
+      add({id:'cfL'+pid,name:'Corner flap',pts:[[x0,y],[x0,y+H],[x0-cf,y+H-c],[x0-cf,y+c]],parent:pid,a:90,dz:IN,t:[.15,.42]});
+      add({id:'cfR'+pid,name:'Corner flap',pts:[[x0+L,y],[x0+L+cf,y+c],[x0+L+cf,y+H-c],[x0+L,y+H]],parent:pid,a:90,dz:IN,t:[.15,.42]});
+    });
+    if(lock){
+      const Hi=H-1.5,yA=y0+H,yZ=y0+H+W;
+      const tl=tabEdge(yA,yZ,0,1),swap=a=>a.map(([u,v])=>[v,u]);
+      const xl=x0-H-Hi,xr=x0+L+H+Hi;
+      add({id:pre+'sideLi',name:'Inner wall (lock)',pts:[[x0-H,yA],[xl,yA],...swap(tl.pts).map(([u,v])=>[xl-u,v]),[xl,yZ],[x0-H,yZ]],parent:pre+'sideL',a:180,dz:2.4,t:[.45,.7]});
+      add({id:pre+'sideRi',name:'Inner wall (lock)',pts:[[x0+L+H,yA],[x0+L+H,yZ],[xr,yZ],...swap(tl.pts).reverse().map(([u,v])=>[xr+u,v]),[xr,yA]],parent:pre+'sideR',a:180,dz:2.4,t:[.45,.7]});
+      base.holes=[];tl.centers.forEach(cy=>{[x0+0.8,x0+L-2.4].forEach(sx=>base.holes.push([[sx,cy-tl.tw/2],[sx+1.6,cy-tl.tw/2],[sx+1.6,cy+tl.tw/2],[sx,cy+tl.tw/2]]))});
+    }
+  };
+
+  if(['rte','ste','seal','autolock','snaplock','sleeve','rsc','hsc','gable'].includes(st)){
+    const slot=(st==='rsc'||st==='hsc')?Math.min(3,W*0.06):0;
+    const {xB,xSL,xF,xSR,yT,yB}=body(slot);
+    const hang=o.hangTab&&HANG_OK.includes(st);
+    if(TUCK_OK.includes(st))setTk(Math.min(H*0.45,W));
+    const d=W*0.8;
+    if(HANG_OK.includes(st)){
+      const topOn=hang?'front':'back';
+      tuck(true,topOn,topOn==='front'?xF:xB,yT);
+      dust(true,'sideL',xSL,false,d,yT);dust(true,'sideR',xSR,true,d,yT);
+      if(hang){
+        const hh=clamp(L*0.4,22,40),r=Math.min(6,hh*0.3),pts=[[xB,yT],[xB+L,yT]];
+        for(let i=0;i<=6;i++){const a=-i/6*Math.PI/2;pts.push([xB+L-r+r*Math.cos(a),yT-hh+r+r*Math.sin(a)])}
+        for(let i=0;i<=6;i++){const a=-Math.PI/2-i/6*Math.PI/2;pts.push([xB+r+r*Math.cos(a),yT-hh+r+r*Math.sin(a)])}
+        add({id:'hang',name:'Hang tab',pts,parent:'back',a:0,t:BODY,hideHinge:1,holes:[capsule(xB+L/2,yT-hh*0.55,Math.min(L*0.45,32),6)]});
+      }
+      if(st==='rte'||st==='ste'){
+        const botOn=st==='rte'?(hang?'back':'front'):(hang?'front':'back');
+        tuck(false,botOn,botOn==='front'?xF:xB,yB);
+        dust(false,'sideL',xSL,false,d,yB);dust(false,'sideR',xSR,true,d,yB);
+      }
+      if(st==='autolock'){
+        const dB=W*0.55,cr=Math.min(dB,L*0.5);
+        [['back',xB,-0.8],['front',xF,0]].forEach(([pid,x,dz])=>add({id:'cl'+pid,name:'Lock flap',parent:pid,a:90,dz,t:[.45,.7],
+          pts:[[x,yB],[x+L,yB],[x+L,yB+dB*0.65],[x+L-dB*0.35,yB+dB],[x,yB+dB]],creases:[[[x,yB],[x+cr,yB+cr]]]}));
+        [['sideL',xSL],['sideR',xSR]].forEach(([pid,x])=>add({id:'cl'+pid,name:'Hook flap',parent:pid,a:90,dz:IN,t:FL,
+          pts:[[x,yB],[x+W,yB],[x+W,yB+W*0.22],[x+W*0.62,yB+W*0.48],[x+W*0.18,yB+W*0.48],[x,yB+W*0.25]]}));
+      }
+      if(st==='snaplock'){
+        add({id:'snback',name:'Lock flap',parent:'back',a:90,dz:-0.8,t:[.45,.7],pts:R(xB,yB,L,W*0.5)});
+        const x=xF;add({id:'snfront',name:'Tab flap',parent:'front',a:90,t:[.5,.75],
+          pts:[[x,yB],[x+L,yB],[x+L,yB+W*0.35],[x+L*0.68,yB+W*0.35],[x+L*0.62,yB+W*0.55],[x+L*0.38,yB+W*0.55],[x+L*0.32,yB+W*0.35],[x,yB+W*0.35]]});
+        [['sideL',xSL],['sideR',xSR]].forEach(([pid,x])=>add({id:'sn'+pid,name:'Side flap',parent:pid,a:90,dz:IN,t:FL,
+          pts:[[x,yB],[x+W,yB],[x+W*0.85,yB+W*0.45],[x+W*0.15,yB+W*0.45]]}));
+      }
+    }
+    if(st==='seal'){
+      const h=W*0.55;
+      [[true,yT-h],[false,yB]].forEach(([top,y])=>{
+        add({id:(top?'fT':'fB')+'back',name:'Inner flap',pts:R(xB,y,L,h),parent:'back',a:90,dz:-0.8,t:[.55,.76]});
+        add({id:(top?'fT':'fB')+'front',face:top?'top':'bottom',name:'Outer flap',pts:R(xF,y,L,h),parent:'front',a:90,t:[.72,.96]});
+        dust(top,'sideL',xSL,false,W*0.45,top?yT:yB);dust(top,'sideR',xSR,true,W*0.45,top?yT:yB);
+      });
+    }
+    if(st==='rsc'||st==='hsc'){
+      const fd=W/2;
+      (st==='rsc'?[true,false]:[false]).forEach(top=>{
+        const y=top?yT-fd:yB;
+        [['back',xB,L,1,null],['front',xF,L,1,top?'top':'bottom'],['sideL',xSL,W,0,null],['sideR',xSR,W,0,null]].forEach(([pid,x,w,maj,fc])=>
+          add({id:(top?'rT':'rB')+pid,face:fc,name:maj?'Major flap':'Minor flap',pts:R(x+slot,y,w-2*slot,fd),parent:pid,a:90,dz:maj?0:IN,t:maj?LID:FL}));
+      });
+    }
+    if(st==='gable'){
+      const al=60,Rr=(W/2)/Math.sin(al*D2R),rise=Rr*Math.cos(al*D2R),hh=clamp(H*0.28,25,45);
+      [['back',xB],['front',xF]].forEach(([pid,x])=>{
+        add({id:'roof'+pid,face:pid==='front'?'top':null,name:'Roof',pts:R(x,yT-Rr,L,Rr),parent:pid,a:al,t:[.45,.75]});
+        const tw=Math.min(L*0.25,30),th=Math.min(hh*0.3,10),y0=yT-Rr-hh;
+        const hl=add({id:'hdl'+pid,name:'Handle',pts:pid==='front'?[[x,y0],[x+L/2-tw/2,y0],[x+L/2+tw/2,y0],[x+L,y0],[x+L,y0+hh],[x,y0+hh]]:R(x,y0,L,hh),parent:'roof'+pid,a:-al,dz:0.8,t:[.45,.75],
+          holes:[capsule(x+L/2,yT-Rr-hh*0.5,Math.min(L*0.45,90),Math.min(hh*0.32,22))]});
+        if(pid==='front')add({id:'hdltab',name:'Handle lock tab',pts:[[x+L/2-tw/2,y0],[x+L/2-tw/2+1.5,y0-th],[x+L/2+tw/2-1.5,y0-th],[x+L/2+tw/2,y0]],parent:'hdlfront',a:180,dz:1.6,t:[.8,.97]});
+        else hl.holes.push([[x+L/2-tw/2-0.5,y0+th*0.7],[x+L/2+tw/2+0.5,y0+th*0.7],[x+L/2+tw/2+0.5,y0+th*0.7+1.6],[x+L/2-tw/2-0.5,y0+th*0.7+1.6]]);
+      });
+      [['sideL',xSL],['sideR',xSR]].forEach(([pid,x])=>add({id:'gus'+pid,name:'Gusset',pts:[[x,yT],[x+W,yT],[x+W/2,yT-rise]],parent:pid,a:0,t:BODY,hideHinge:1}));
+      tuck(false,'front',xF,yB);dust(false,'sideL',xSL,false,W*0.8,yB);dust(false,'sideR',xSR,true,W*0.8,yB);
+    }
+  }
+  if(st==='hex'||st==='oct'||st==='tri'){
+    const N=st==='tri'?3:st==='hex'?6:8,ext=360/N,a=st==='tri'?L:st==='hex'?L/Math.sqrt(3):L/(1+Math.SQRT2);
+    const ngon=(x,y0,dir)=>{const pts=[[x,y0],[x+a,y0]];let th=0;for(let i=2;i<N;i++){th+=dir*ext;const q=pts[i-1];pts.push([q[0]+a*Math.cos(th*D2R),q[1]+a*Math.sin(th*D2R)])}return pts};
+    const tongueAB=(A,B,t,cen)=>{const w=Math.hypot(B[0]-A[0],B[1]-A[1]),e=[(B[0]-A[0])/w,(B[1]-A[1])/w];let n=[-e[1],e[0]];
+      const m=[(A[0]+B[0])/2,(A[1]+B[1])/2];if((m[0]-cen[0])*n[0]+(m[1]-cen[1])*n[1]<0)n=[-n[0],-n[1]];
+      return tongue(0,0,w,t,1).map(([u,v])=>[A[0]+u*e[0]+v*n[0],A[1]+u*e[1]+v*n[1]])};
+    const probe=ngon(0,0,-1),depth=Math.max(...probe.map(q=>-q[1]));
+    setTk(Math.min(H*0.45,N===3?a*0.45:depth));
+    const r=Math.floor((N-1)/2),ids=[...Array(N).keys()].map(i=>'hx'+i);
+    const fcOf=i=>i===r?'front':i===r-1?'left':i===r+1?'right':(i===N-1&&N>=4)?'back':null;
+    const nmOf=i=>({front:'Front',left:'Left side',right:'Right side',back:'Back'})[fcOf(i)]||'Side';
+    add({id:ids[r],face:'front',name:'Front',pts:R(r*a,0,a,H)});
+    for(let i=r-1;i>=0;i--)add({id:ids[i],face:fcOf(i),name:nmOf(i),pts:R(i*a,0,a,H),parent:ids[i+1],a:ext,t:BODY});
+    for(let i=r+1;i<N;i++)add({id:ids[i],face:fcOf(i),name:nmOf(i),pts:R(i*a,0,a,H),parent:ids[i-1],a:ext,t:BODY});
+    seamFlap(N*a,H,ids[N-1],ext,ids[0]);
+    const lidAt=(top,i)=>{const x=i*a,y0=top?0:H,dir=top?-1:1,pts=ngon(x,y0,dir),cen=pts.reduce((s,q)=>[s[0]+q[0]/N,s[1]+q[1]/N],[0,0]);
+      const lid=add({id:top?'hxLT':'hxLB',face:top?'top':'bottom',name:top?'Top closure':'Bottom closure',parent:ids[i],a:90,t:LID,rot:top,pts});
+      const A=N%2?pts[2]:pts[N/2],B=N%2?pts[0]:pts[N/2+1];
+      add({id:lid.id+'tk',name:'Tuck flap',pts:tongueAB(A,B,tk,cen),parent:lid.id,a:90,dz:1.6,t:TK});};
+    const dustAt=(top,i)=>{const x=i*a,y0=top?0:H,dir=top?-1:1,dd=a*(N===3?0.22:0.4),k=dd/Math.tan((180-ext)/2*D2R);
+      add({id:(top?'hdT':'hdB')+i,name:'Dust flap',pts:[[x,y0],[x+a,y0],[x+a-k,y0+dir*dd],[x+k,y0+dir*dd]],parent:ids[i],a:90,dz:IN,t:FL});};
+    const bi=N===3?0:Math.floor(N/2),skip=(i,l)=>i===l||(N>3&&Math.abs(i-l)===1);
+    lidAt(true,0);for(let i=0;i<N;i++)if(!skip(i,0))dustAt(true,i);
+    lidAt(false,bi);for(let i=0;i<N;i++)if(!skip(i,bi))dustAt(false,i);
+  }
+  if(st==='mailer'||st==='bakery'){
+    const Hi=Math.max(H-1.5,H*0.9),tw=Math.min(20,L*0.15);
+    add({id:'front',face:'front',name:'Front wall',pts:R(0,0,L,H)});
+    const it=[];[0.25,0.75].forEach(f=>{const x=L*f-tw/2;it.push([x,-Hi],[x,-Hi-4],[x+tw,-Hi-4],[x+tw,-Hi])});
+    add({id:'frontIn',name:'Inner front wall',pts:[[0,0],[0,-Hi],...it,[L,-Hi],[L,0]],parent:'front',a:180,dz:2,t:[.3,.55]});
+    add({id:'base',face:'bottom',name:'Base',pts:R(0,H,L,W),parent:'front',a:90,t:BODY});
+    add({id:'back',face:'back',name:'Back wall',pts:R(0,H+W,L,H),parent:'base',a:90,t:BODY});
+    add({id:'lid',face:'top',name:'Lid',pts:R(0,2*H+W,L,W),parent:'back',a:90,t:LID});
+    add({id:'lidTk',name:'Front tuck',pts:tongue(0,2*H+2*W,L,Math.min(H*0.85,W*0.9),1),parent:'lid',a:90,dz:3.5,t:TK});
+    const e=Math.min(W*0.45,H*1.5);
+    add({id:'sideL',face:'left',name:'Left wall',pts:R(-H,H,H,W),parent:'base',a:90,t:BODY});
+    add({id:'sideLi',name:'Inner left wall',pts:R(-H-(H-1.5),H,H-1.5,W),parent:'sideL',a:180,dz:2.4,t:[.3,.55]});
+    add({id:'sideR',face:'right',name:'Right wall',pts:R(L,H,H,W),parent:'base',a:90,t:BODY});
+    add({id:'sideRi',name:'Inner right wall',pts:R(L+H,H,H-1.5,W),parent:'sideR',a:180,dz:2.4,t:[.3,.55]});
+    add({id:'earL',name:'Ear',pts:[[0,H+W],[0,2*H+W],[-e,2*H+W-3],[-e,H+W+3]],parent:'back',a:90,dz:IN,t:[.2,.42]});
+    add({id:'earR',name:'Ear',pts:[[L,H+W],[L+e,H+W+3],[L+e,2*H+W-3],[L,2*H+W]],parent:'back',a:90,dz:IN,t:[.2,.42]});
+    if(st==='bakery'){const le=Math.min(H*0.8,W*0.45),c=Math.min(4,W*0.08);
+      add({id:'lidEL',name:'Lid side flap',pts:[[0,2*H+W],[0,2*H+2*W],[-le,2*H+2*W-c-le*0.3],[-le,2*H+W+c+le*0.3]],parent:'lid',a:90,dz:-2.8,t:[.62,.8]});
+      add({id:'lidER',name:'Lid side flap',pts:[[L,2*H+W],[L+le,2*H+W+c+le*0.3],[L+le,2*H+2*W-c-le*0.3],[L,2*H+2*W]],parent:'lid',a:90,dz:-2.8,t:[.62,.8]});}
+  }
+  if(st==='tray'||st==='locktray'){
+    trayPiece('',0,0,L,W,H,{front:'front',back:'back',left:'left',right:'right',bottom:'bottom'},Math.min(W*0.4,25),st==='locktray');
+  }
+  if(st==='twopiece'||st==='locktwopiece'){const lk=st==='locktwopiece';
+    const cf=Math.min(W*0.4,25),cl=1.5+t0,Lc=L+2*cl,Wc=W+2*cl,Hl=clamp(H*0.35,12,H),cfl=Math.min(Wc*0.4,25);
+    trayPiece('',0,0,L,W,H,{front:'front',back:'back',left:'left',right:'right',bottom:'bottom'},cf,lk);
+    const x0=L+(lk?2*H:Math.max(H,cf))+12+(lk?2*Hl:Math.max(Hl,cfl));
+    trayPiece('lid_',x0,0,Lc,Wc,Hl,{bottom:'top',rot:true,rotTop:true},cfl,lk);
+    meta.place['lid_front']={rz:180,pos:[0,-H/2-0.6+Hl/2,W/2+cl]};
+    meta.faceNames.top='Lid top';
+  }
+  if(st==='shallowtuck'){
+    // rows: front wall + ears | base + double side walls | back wall + ears | lid + side flaps | tuck lip + wings
+    const gap=Math.max(1.5,2*t0+0.5),Hi=Math.max(H-1,H*0.9),e=W/2-0.5,chy=Math.min(H*0.16,e*0.3);let chx=e*0.09;if(Math.abs(e-chx-H)<0.05)chx+=0.3;
+    add({id:'front',face:'front',name:'Front wall',pts:R(0,0,L,H)});
+    const base=add({id:'base',face:'bottom',name:'Base',pts:R(0,H,L,W),parent:'front',a:90,t:BODY});
+    add({id:'back',face:'back',name:'Back wall',pts:R(0,H+W,L,H),parent:'base',a:90,t:BODY});
+    const ear=(pid,y0,top,sgn)=>{const x0=sgn<0?0:L,X=u=>x0+sgn*u,yc=top?y0+H:y0;
+      const pts=top?[[X(0),y0],[X(e),y0],[X(e),y0+H-chy],[X(e-chx),y0+H],[X(0),y0+H]]:[[X(0),y0],[X(e-chx),y0],[X(e),y0+chy],[X(e),y0+H],[X(0),y0+H]];
+      add({id:'ear'+pid+(sgn<0?'L':'R'),name:'Ear',pts,parent:pid,a:90,dz:IN,t:[.15,.42]})};
+    ear('front',0,true,-1);ear('front',0,true,1);ear('back',H+W,false,-1);ear('back',H+W,false,1);
+    const td=Math.min(4,H*0.08),tw=W*0.19,cys=[H+W*0.3,H+W*0.7],sw=Math.max(1.6,2*t0+0.6);
+    [-1,1].forEach(sgn=>{const x0=sgn<0?0:L,X=u=>x0+sgn*u,sd=sgn<0?'L':'R';
+      add({id:'side'+sd,face:sgn<0?'left':'right',name:sgn<0?'Left wall':'Right wall',pts:[[X(0),H],[X(H),H],[X(H),H+W],[X(0),H+W]],parent:'base',a:90,t:BODY});
+      add({id:'strip'+sd,name:'Roll-over strip',pts:[[X(H),H],[X(H+gap),H],[X(H+gap),H+W],[X(H),H+W]],parent:'side'+sd,a:90,t:[.45,.62]});
+      const xe=H+gap+Hi,edge=[];cys.forEach(cy=>edge.push([X(xe),cy-tw/2],[X(xe+td),cy-tw/2+1],[X(xe+td),cy+tw/2-1],[X(xe),cy+tw/2]));
+      add({id:'inner'+sd,name:'Inner wall (lock)',pts:[[X(H+gap),H],[X(xe),H],...edge,[X(xe),H+W],[X(H+gap),H+W]],parent:'strip'+sd,a:90,t:[.5,.7]});
+      cys.forEach(cy=>(base.holes=base.holes||[]).push(rrect(sgn<0?0.5:L-0.5-sw,cy-tw/2,sw,tw,sw/2)));
+    });
+    const yl=2*H+W,fw=Math.min(Hi,W*0.45),rr=fw*0.36,c=W*0.03;
+    add({id:'lid',face:'top',name:'Lid',pts:R(0,yl,L,W),parent:'back',a:90,t:LID});
+    const arc=(cx,cy,r,a0,a1,n=8)=>[...Array(n+1)].map((_,i)=>{const a=(a0+(a1-a0)*i/n)*D2R;return[cx+r*Math.cos(a),cy+r*Math.sin(a)]});
+    [-1,1].forEach(sgn=>{const x0=sgn<0?0:L,M=pts=>pts.map(([u,v])=>[x0+sgn*u,yl+v]);
+      add({id:'lidF'+(sgn<0?'L':'R'),name:'Lid side flap',parent:'lid',a:90,dz:-2.8,t:[.62,.8],
+        pts:M([[0,0],[fw-rr,c],...arc(fw-rr,c+rr,rr,-90,0).slice(1),...arc(fw-rr,W-c-rr,rr,0,90),[0,W]])});
+    });
+    const yt=yl+W,tkH=Math.max(H-1,H*0.9),ww=fw*0.95,c2=W*0.02;
+    add({id:'lidTk',name:'Front tuck',pts:R(0,yt,L,tkH),parent:'lid',a:90,dz:3.5,t:TK});
+    [-1,1].forEach(sgn=>{const x0=sgn<0?0:L,M=pts=>pts.map(([u,v])=>[x0+sgn*u,yt+v]);
+      add({id:'tkW'+(sgn<0?'L':'R'),name:'Tuck wing',parent:'lidTk',a:90,dz:IN,t:[.75,.95],
+        pts:M([[0,0],...[...Array(13)].map((_,i)=>{const a=i/12*Math.PI/2;return[ww*Math.cos(a),c2+(tkH-c2)*Math.sin(a)]}).filter((q,i)=>i<12),[0,tkH]])});
+    });
+  }
+  if(st==='hingedtray'){
+    trayPiece('',0,0,L,W,H,{front:'front',back:'back',left:'left',right:'right',bottom:'bottom'},Math.min(W*0.4,25),true);
+    const yl=2*H+W,le=Math.min(H*0.8,W*0.45),c=Math.min(4,W*0.08);
+    add({id:'lid',face:'top',name:'Lid',pts:R(0,yl,L,W),parent:'back',a:90,t:LID});
+    add({id:'lidTk',name:'Front tuck',pts:tongue(0,yl+W,L,Math.min(H*0.8,W*0.6),1),parent:'lid',a:90,dz:3.5,t:TK});
+    add({id:'lidEL',name:'Lid side flap',pts:[[0,yl],[0,yl+W],[-le,yl+W-c-le*0.3],[-le,yl+c+le*0.3]],parent:'lid',a:90,dz:-2.8,t:[.62,.8]});
+    add({id:'lidER',name:'Lid side flap',pts:[[L,yl],[L+le,yl+c+le*0.3],[L+le,yl+W-c-le*0.3],[L,yl+W]],parent:'lid',a:90,dz:-2.8,t:[.62,.8]});
+  }
+  if(st==='slidebox'){
+    trayPiece('',0,0,L,W,H,{front:null,back:null,left:'left',right:'right',bottom:null},Math.min(W*0.4,25),true);
+    const c=1+t0,Ws=W+2*c,Hs=H+2*c,xs=L+2*H+12,gs=Math.min(g,Ws*0.4),tw=Math.min(L*0.3,25),te=Math.max(5,gs*0.6),ye=2*Ws+2*Hs;
+    const top=add({id:'sl_top',face:'top',name:'Sleeve top',pts:R(xs,0,L,Ws),parent:'sl_front',a:90,t:BODY});
+    add({id:'sl_front',face:'front',name:'Sleeve front',pts:R(xs,Ws,L,Hs)});
+    add({id:'sl_bot',face:'bottom',name:'Sleeve bottom',pts:R(xs,Ws+Hs,L,Ws),parent:'sl_front',a:90,t:BODY});
+    add({id:'sl_back',face:'back',name:'Sleeve back',pts:R(xs,2*Ws+Hs,L,Hs),parent:'sl_bot',a:90,t:BODY,rot:true});
+    const xa=xs+L/2-tw/2,xb=xs+L/2+tw/2,ss=Math.min(gs*0.6,L*0.2);
+    add({id:'sl_tab',name:'Lock tab',parent:'sl_back',a:90,dz:IN,t:BODY,pts:[[xs,ye],[xb+((xs+L)-xb),ye],[xs+L-ss,ye+gs],[xb,ye+gs],[xb+2,ye+gs+te],[xa-2,ye+gs+te],[xa,ye+gs],[xs+ss,ye+gs]]});
+    top.holes=[[[xa-0.3,gs-0.5],[xb+0.3,gs-0.5],[xb+0.3,gs+0.5],[xa-0.3,gs+0.5]]];
+    meta.place.sl_front={rz:0,pos:[-L*0.3,0,W/2+c]};
+  }
+  if(st==='display'||st==='lockdisplay'){const lk=st==='lockdisplay';
+    const Hf=H*0.45,hh=clamp(H*1.1,40,200),HB=H+hh,yb=Hf+W,cf=Math.min(W*0.4,25),c=1.5;
+    add({id:'front',face:'front',name:'Front wall',pts:R(0,0,L,Hf)});
+    const dbase=add({id:'base',face:'bottom',name:'Base',pts:R(0,Hf,L,W),parent:'front',a:90,t:BODY});
+    add({id:'backO',name:'Back wall',pts:[[0,yb],[L,yb],[L,yb+H],[L,yb+HB],[0,yb+HB],[0,yb+H]],parent:'base',a:90,t:BODY});
+    if(!lk)add({id:'header',face:'back',name:'Header card',pts:R(0,yb+HB,L,HB-1.5),parent:'backO',a:180,dz:1.2,t:[.45,.75]});
+    else{
+      const ye=yb+HB+HB-1.5,th=tabEdge(0,L,ye,1);
+      add({id:'header',face:'back',name:'Header card (lock)',pts:[[0,yb+HB],[L,yb+HB],[L,ye],...th.pts.slice().reverse(),[0,ye]],parent:'backO',a:180,dz:1.2,t:[.45,.75]});
+      const yf=-(Hf-1.5),tf=tabEdge(0,L,yf,-1);
+      add({id:'frontIn',name:'Inner front (lock)',pts:[[0,0],[0,yf],...tf.pts,[L,yf],[L,0]],parent:'front',a:180,dz:2,t:[.45,.7]});
+      dbase.holes=[];[[Hf+0.8,tf],[Hf+W-2.4,th]].forEach(([sy,tt])=>tt.centers.forEach(cx=>dbase.holes.push([[cx-tt.tw/2,sy],[cx+tt.tw/2,sy],[cx+tt.tw/2,sy+1.6],[cx-tt.tw/2,sy+1.6]])));
+    }
+    add({id:'sideL',face:'left',name:'Left wall',pts:[[0,Hf],[0,Hf+W],[-H,Hf+W],[-Hf,Hf]],parent:'base',a:90,t:BODY});
+    add({id:'sideR',face:'right',name:'Right wall',pts:[[L,Hf],[L+Hf,Hf],[L+H,Hf+W],[L,Hf+W]],parent:'base',a:90,t:BODY});
+    add({id:'cfLf',name:'Corner flap',pts:[[0,0],[0,Hf],[-cf,Hf-c],[-cf,c]],parent:'front',a:90,dz:IN,t:[.15,.42]});
+    add({id:'cfRf',name:'Corner flap',pts:[[L,0],[L+cf,c],[L+cf,Hf-c],[L,Hf]],parent:'front',a:90,dz:IN,t:[.15,.42]});
+    add({id:'cfLb',name:'Corner flap',pts:[[0,yb],[0,yb+H],[-cf,yb+H-c],[-cf,yb+c]],parent:'backO',a:90,dz:IN,t:[.15,.42]});
+    add({id:'cfRb',name:'Corner flap',pts:[[L,yb],[L+cf,yb+c],[L+cf,yb+H-c],[L,yb+H]],parent:'backO',a:90,dz:IN,t:[.15,.42]});
+    meta.faceNames.back='Header card';
+  }
+  if(st==='pillow'){
+    const b2=clamp(W,8,L*0.45),b1=b2*0.35,gs=Math.min(g*0.6,H*0.2);
+    add({id:'front',face:'front',name:'Front',pts:R(L,0,L,H)});
+    add({id:'back',face:'back',name:'Back',pts:R(0,0,L,H),parent:'front',a:165,t:BODY});
+    seamFlap(2*L,H,'front',165,'back');
+    [['back',0],['front',L]].forEach(([pid,x])=>[true,false].forEach(top=>{const y0=top?0:H,dir=top?-1:1;
+      add({id:'pt'+pid+(top?'T':'B'),name:'End flap',pts:[...parab(x,y0,L,b2,dir)],parent:pid,a:80,dz:IN,t:LID,hideHinge:1,creases:[parab(x,y0,L,b1,dir)]})}));
+  }
+  if(st==='pyramid'){
+    const half=L/2,s=Math.hypot(H,half),phi=Math.atan2(H,half)/D2R,F=180-phi;
+    const nf=[0,-H,half],nr=[H,0,half],nn=v=>Math.hypot(...v);
+    const fa=Math.acos((nf[0]*nr[0]+nf[1]*nr[1]+nf[2]*nr[2])/nn(nf)/nn(nr))/D2R;
+    add({id:'front',face:'front',name:'Front',pts:[[0,s],[L/2,0],[L,s]]});
+    add({id:'base',face:'bottom',name:'Base',pts:R(0,s,L,L),parent:'front',a:F,t:BODY});
+    add({id:'tL',face:'left',name:'Left side',pts:[[0,s],[0,s+L],[-s,s+L/2]],parent:'base',a:F,t:BODY});
+    add({id:'tR',face:'right',name:'Right side',pts:[[L,s],[L+s,s+L/2],[L,s+L]],parent:'base',a:F,t:BODY});
+    add({id:'tB',face:'back',name:'Back',pts:[[0,s+L],[L,s+L],[L/2,s+L+s]],parent:'base',a:F,t:BODY,rot:true});
+    const gw=Math.min(g,s*0.15);
+    const gl=(pid,A,B,c,i)=>{const dx=B[0]-A[0],dy=B[1]-A[1],l=Math.hypot(dx,dy),t=[dx/l,dy/l];let n=[-t[1],t[0]];
+      const m=[(A[0]+B[0])/2,(A[1]+B[1])/2];if((c[0]-m[0])*n[0]+(c[1]-m[1])*n[1]>0)n=[-n[0],-n[1]];
+      add({id:'pg'+pid+i,name:'Glue flap',parent:pid,a:fa,dz:IN,t:[.5,.8],pts:[A,B,[B[0]+n[0]*gw-t[0]*gw*0.7,B[1]+n[1]*gw-t[1]*gw*0.7],[A[0]+n[0]*gw+t[0]*gw*0.7,A[1]+n[1]*gw+t[1]*gw*0.7]]})};
+    gl('tL',[0,s],[-s,s+L/2],[-s/3,s+L/2],0);gl('tL',[-s,s+L/2],[0,s+L],[-s/3,s+L/2],1);
+    gl('tR',[L,s],[L+s,s+L/2],[L+s/3,s+L/2],0);gl('tR',[L+s,s+L/2],[L,s+L],[L+s/3,s+L/2],1);
+    meta.tilt.front=90-phi;
+  }
+  // window on the front panel
+  if(o.win&&o.win.on){
+    const wf=TYPES[st].winFace||'front',f=P.find(p=>p.face===wf&&!p.id.startsWith('lid_'));
+    if(f&&f.pts.length===4){
+      const xs=f.pts.map(q=>q[0]),ys=f.pts.map(q=>q[1]),x=Math.min(...xs),y=Math.min(...ys),w=Math.max(...xs)-x,h=Math.max(...ys)-y;
+      const ww=w*o.win.w/100,wh=h*o.win.h/100,cy=clamp(y+h/2+o.win.y/100*h,y+wh/2+3,y+h-wh/2-3);
+      (f.holes=f.holes||[]).push(rrect(x+(w-ww)/2,cy-wh/2,ww,wh,Math.min(5,ww*0.1,wh*0.1)));
+    }
+  }
+  // normalize to a margin and measure
+  let mx=Infinity,my=Infinity;P.forEach(p=>p.pts.forEach(([x,y])=>{mx=Math.min(mx,x);my=Math.min(my,y)}));
+  const sh=a=>a.map(([x,y])=>[x-mx+M,y-my+M]);
+  let netW=0,netH=0;
+  P.forEach(p=>{p.pts=sh(p.pts);if(p.holes)p.holes=p.holes.map(sh);if(p.creases)p.creases=p.creases.map(sh);
+    const xs=p.pts.map(q=>q[0]),ys=p.pts.map(q=>q[1]);p.x=Math.min(...xs);p.y=Math.min(...ys);p.w=Math.max(...xs)-p.x;p.h=Math.max(...ys)-p.y;
+    netW=Math.max(netW,p.x+p.w+M);netH=Math.max(netH,p.y+p.h+M)});
+  return Object.assign({P,L,W,H,netW,netH,M,tk},meta);
+}
+function classify(P){
+  const m=new Map(), k=p=>p[0].toFixed(2)+','+p[1].toFixed(2), key=(a,b)=>[k(a),k(b)].sort().join('|');
+  const ring=(pts,fn)=>pts.forEach((a,i)=>fn(a,pts[(i+1)%pts.length]));
+  P.forEach(p=>{ring(p.pts,(a,b)=>{const kk=key(a,b),e=m.get(kk);if(e)e.n++;else m.set(kk,{a,b,n:1})});
+    (p.holes||[]).forEach(h=>ring(h,(a,b)=>m.set('h'+key(a,b),{a,b,n:1})))});
+  const byId=Object.fromEntries(P.map(p=>[p.id,p])),kids={},sup=new Set();
+  P.forEach(p=>{
+    if(!p.parent)return;(kids[p.parent]=kids[p.parent]||[]).push(p);
+    const par=byId[p.parent],pk=new Set();ring(par.pts,(a,b)=>pk.add(key(a,b)));
+    ring(p.pts,(a,b)=>{if(!p.hA&&pk.has(key(a,b))){p.hA=a;p.hB=b}});
+    if(!p.hA){p.hA=p.pts[0];p.hB=p.pts[1]}
+    const dx=p.hB[0]-p.hA[0],dy=p.hB[1]-p.hA[1],l=Math.hypot(dx,dy)||1,d=[dx/l,dy/l];
+    const c=p.pts.reduce((s,q)=>[s[0]+q[0]/p.pts.length,s[1]+q[1]/p.pts.length],[0,0]),mm=[(p.hA[0]+p.hB[0])/2,(p.hA[1]+p.hB[1])/2];
+    let n=[-d[1],d[0]];if((c[0]-mm[0])*n[0]+(c[1]-mm[1])*n[1]<0)n=[-n[0],-n[1]];
+    p.ax=-n[1];p.ay=n[0];
+    if(p.hideHinge)sup.add(key(p.hA,p.hB));
+  });
+  let cut=[];const fold=[];m.forEach((e,kk)=>{if(sup.has(kk))return;(e.n>1?fold:cut).push([e.a,e.b])});cut=mergeSegs(cut);
+  P.forEach(p=>(p.creases||[]).forEach(c=>c.forEach((a,i)=>{if(i)fold.push([c[i-1],a])})));
+  return {cut,fold,m,key,kids,byId};
+}
+const pathD=arr=>arr.map(([a,b])=>`M${a[0].toFixed(2)} ${a[1].toFixed(2)}L${b[0].toFixed(2)} ${b[1].toFixed(2)}`).join('');
+const ringD=(pts,f=2)=>'M'+pts.map(q=>q[0].toFixed(f)+' '+q[1].toFixed(f)).join('L')+'Z';
+const panelD=(p,f)=>ringD(p.pts,f)+(p.holes||[]).map(h=>ringD(h,f)).join('');
+const polyArea=pts=>Math.abs(pts.reduce((s,p,i)=>{const q=pts[(i+1)%pts.length];return s+p[0]*q[1]-q[0]*p[1]},0))/2;
+const panelArea=p=>polyArea(p.pts)-(p.holes||[]).reduce((s,h)=>s+polyArea(h),0);
+/* rotation helpers (CSS axes: x right, y down, z toward viewer) */
+const mul=(A,B)=>A.map(r=>[0,1,2].map(j=>r[0]*B[0][j]+r[1]*B[1][j]+r[2]*B[2][j]));
+const mulV=(A,v)=>A.map(r=>r[0]*v[0]+r[1]*v[1]+r[2]*v[2]);
+const vadd=(a,b)=>a.map((x,i)=>x+b[i]), vsub=(a,b)=>a.map((x,i)=>x-b[i]);
+const ID=[[1,0,0],[0,1,0],[0,0,1]];
+function rotAxis(x,y,z,deg){const c=Math.cos(deg*D2R),s=Math.sin(deg*D2R),t=1-c;
+  return[[t*x*x+c,t*x*y-s*z,t*x*z+s*y],[t*x*y+s*z,t*y*y+c,t*y*z-s*x],[t*x*z-s*y,t*y*z+s*x,t*z*z+c]]}
+const RX=a=>rotAxis(1,0,0,a), RY=a=>rotAxis(0,1,0,a), RZ=a=>rotAxis(0,0,1,a);
+// closed-shape center and size of one piece, relative to its root's center (mm)
+function closedBox(root){
+  const pts=[];
+  const walk=(p,Rm,t)=>{
+    p.pts.forEach(([x,y])=>pts.push(vadd(mulV(Rm,[x-p.x,y-p.y,0]),t)));
+    (E.kids[p.id]||[]).forEach(c=>{
+      const o=[c.x-p.x,c.y-p.y,0],O=[c.hA[0]-c.x,c.hA[1]-c.y,0],Rc=rotAxis(c.ax,c.ay,0,c.a);
+      walk(c,mul(Rm,Rc),vadd(mulV(Rm,vsub(vadd(o,O),mulV(Rc,O))),t));
+    });
+  };
+  walk(root,ID,[-root.w/2,-root.h/2,0]);
+  const mn=[0,1,2].map(i=>Math.min(...pts.map(q=>q[i]))),mx=[0,1,2].map(i=>Math.max(...pts.map(q=>q[i])));
+  return {c:mn.map((v,i)=>(v+mx[i])/2),size:mx.map((v,i)=>v-mn[i])};
+}
+
+const face=(o)=>Object.assign({title:'',sub:'',color:'',text:'#f3e6c8',font:'Archivo Black',size:100,pos:'middle',img:null,imgScale:55,imgY:-18},o);
+function sample(){return{
+  type:'rte',L:80,W:80,H:120,unit:'in',bunit:'mm',dimMode:'inner',thick:0.5,material:'kraft',bleed:3,tuck:15,glue:15,
+  hangTab:false,lockSeam:false,win:{on:false,w:60,h:45,y:0},nest:nestDefaults(),
+  base:'#2f3b2c',pattern:'stripes',accent:'#d9b26f',patOp:0.14,globalArt:null,barcode:true,
+  faces:{
+    front:face({title:'SUMMIT ROAST',sub:'Dark roast · whole bean · 340 g',pos:'bottom',size:110}),
+    back:face({title:'Small-batch roasted',sub:'Grind just before brewing. Store sealed, away from light.',font:'DM Serif Display',size:70,pos:'top'}),
+    left:face({title:'SUMMIT',sub:'Est. 2026',font:'Bebas Neue',size:120}),
+    right:face({title:'Tasting notes',sub:'Cocoa · cherry · smoke',font:'DM Serif Display',size:80}),
+    top:face({title:'SUMMIT ROAST',sub:'',color:'#d9b26f',text:'#2f3b2c',size:90}),
+    bottom:face({title:'',sub:'Sample design · replace with your own',font:'IBM Plex Mono',size:70})
+  }}}
+function loadState(st){const s=Object.assign(sample(),st);FACES.forEach(k=>s.faces[k]=face((st.faces||{})[k]||{}));
+  s.win=Object.assign({on:false,w:60,h:45,y:0},st.win||{});s.nest=Object.assign(nestDefaults(),st.nest||{});if(!TYPES[s.type])s.type='rte';if(GLUED_TO[s.type])s.type=GLUED_TO[s.type];if(!['mm','cm','in'].includes(s.bunit))s.bunit='mm';return s}
+let S=sample(), sel='front', fold=1, rx=-20, ry=-34, zoom=1, artURL=null, G, E;
+
+/* ---------- images ---------- */
+const imgCache=new Map();
+function getImg(src){
+  if(!src)return null;let im=imgCache.get(src);
+  if(!im){im=new Image();im.onload=()=>scheduleArt();im.src=src;imgCache.set(src,im)}
+  return im.complete&&im.naturalWidth?im:null;
+}
+function readFile(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)})}
+
+/* ---------- artwork painter (units: mm) ---------- */
+function drawCover(ctx,im,x,y,w,h){const s=Math.max(w/im.naturalWidth,h/im.naturalHeight),iw=im.naturalWidth*s,ih=im.naturalHeight*s;ctx.drawImage(im,x+(w-iw)/2,y+(h-ih)/2,iw,ih)}
+function drawPattern(ctx,w,h){
+  if(S.pattern==='none'||S.patOp<=0)return;
+  ctx.save();ctx.globalAlpha=S.patOp;ctx.strokeStyle=ctx.fillStyle=S.accent;
+  if(S.pattern==='stripes'){ctx.lineWidth=2.6;for(let i=-h;i<w+h;i+=8){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i+h,h);ctx.stroke()}}
+  if(S.pattern==='dots'){for(let y=3,r=0;y<h;y+=7,r++)for(let x=(r%2)*3.5+3;x<w;x+=7){ctx.beginPath();ctx.arc(x,y,1.25,0,7);ctx.fill()}}
+  if(S.pattern==='grid'){ctx.lineWidth=.45;for(let x=0;x<w;x+=10){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke()}for(let y=0;y<h;y+=10){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}}
+  if(S.pattern==='waves'){ctx.lineWidth=1.2;for(let y=0;y<h+10;y+=9){ctx.beginPath();for(let x=0;x<=w;x+=2)ctx.lineTo(x,y+Math.sin(x/7)*2.2);ctx.stroke()}}
+  ctx.restore();
+}
+function wrap(ctx,text,maxW){
+  const words=text.split(/\s+/).filter(Boolean),lines=[];let cur='';
+  words.forEach(w=>{const t=cur?cur+' '+w:w;if(ctx.measureText(t).width>maxW&&cur){lines.push(cur);cur=w}else cur=t});
+  if(cur)lines.push(cur);return lines;
+}
+function fontStr(name,px){const f=FONTS.find(x=>x[0]===name)||FONTS[0];return `${f[1]} ${px}px "${f[0]}", sans-serif`}
+let barSeed=[];for(let i=0,s=7;i<60;i++){s=(s*9301+49297)%233280;barSeed.push(s/233280)}
+const axisAligned=p=>p.pts.every((a,i)=>{const b=p.pts[(i+1)%p.pts.length];return Math.abs(a[0]-b[0])<1e-6||Math.abs(a[1]-b[1])<1e-6});
+function tracePath(ctx,p){ctx.beginPath();[p.pts,...(p.holes||[])].forEach(r=>{r.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));ctx.closePath()})}
+function drawFace(ctx,p,f){
+  const b=S.bleed;let {x,y,w,h}=p;
+  ctx.save();
+  if(axisAligned(p)){
+    const cutE=(a,c)=>{const e=E.m.get(E.key(a,c));return !e||e.n<2};
+    const tl=[x,y],tr=[x+w,y],br=[x+w,y+h],bl=[x,y+h];
+    const el=cutE(tl,bl)?b:0,er=cutE(tr,br)?b:0,et=cutE(tl,tr)?b:0,eb=cutE(bl,br)?b:0;
+    ctx.beginPath();ctx.rect(x-el,y-et,w+el+er,h+et+eb);ctx.clip();
+    if(f.color){ctx.fillStyle=f.color;ctx.fillRect(x-el,y-et,w+el+er,h+et+eb)}
+  }else{
+    ctx.beginPath();p.pts.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));ctx.closePath();ctx.clip();
+    if(f.color){ctx.fillStyle=f.color;ctx.fillRect(x,y,w,h)}
+  }
+  ctx.translate(x+w/2,y+h/2);
+  if(p.rot)ctx.rotate(Math.PI);
+  const pad=Math.min(w,h)*0.08,cw=w-2*pad;
+  const im=getImg(f.img);
+  if(im){let iw=cw*f.imgScale/100,ih=iw*im.naturalHeight/im.naturalWidth;if(ih>h*0.9){ih=h*0.9;iw=ih*im.naturalWidth/im.naturalHeight}
+    ctx.drawImage(im,-iw/2,f.imgY/100*h-ih/2,iw,ih)}
+  ctx.fillStyle=f.text;ctx.textAlign='center';ctx.textBaseline='alphabetic';
+  let fs=Math.min(w,h)*0.2*f.size/100, tLines=[];
+  if(f.title){
+    for(let i=0;i<30;i++){ctx.font=fontStr(f.font,fs);tLines=wrap(ctx,f.title,cw);
+      const widest=Math.max(...tLines.map(l=>ctx.measureText(l).width));
+      if(widest<=cw&&tLines.length<=3&&tLines.length*fs*1.05<=h*0.6)break;fs*=0.92}
+  }
+  let ss=Math.max(Math.min(w,h)*0.055,Math.min(fs*0.36,Math.min(w,h)*0.09)),sLines=[];
+  if(f.sub){ctx.font=`500 ${ss}px "Open Sans", sans-serif`;sLines=wrap(ctx,f.sub,cw*0.94).slice(0,6)}
+  const gap=tLines.length&&sLines.length?fs*0.35:0;
+  const bh=tLines.length*fs*1.05+gap+sLines.length*ss*1.35;
+  let top=f.pos==='top'?-h/2+pad:f.pos==='bottom'?h/2-pad-bh:-bh/2;
+  if(p.face==='back'&&S.barcode&&f.pos==='bottom')top-=Math.min(w*0.42,38)*0.6;
+  let yy=top;
+  ctx.font=fontStr(f.font,fs);tLines.forEach(l=>{yy+=fs*0.92;ctx.fillText(l,0,yy);yy+=fs*0.13});
+  yy+=gap;ctx.font=`500 ${ss}px "Open Sans", sans-serif`;ctx.globalAlpha=.88;
+  sLines.forEach(l=>{yy+=ss*1.05;ctx.fillText(l,0,yy);yy+=ss*.3});ctx.globalAlpha=1;
+  if(p.face==='back'&&S.barcode){
+    const bw=Math.min(w*0.42,38),bh2=bw*0.58,bx=-bw/2,by=h/2-pad-bh2;
+    ctx.fillStyle='#fff';ctx.fillRect(bx,by,bw,bh2);ctx.fillStyle='#111';
+    let cx=bx+bw*0.08;const ux=bw*0.84/95;
+    for(let i=0;i<95&&cx<bx+bw*0.92;){const n=1+Math.floor(barSeed[i%60]*3);ctx.fillRect(cx,by+bh2*0.1,ux*n,bh2*0.62);cx+=ux*(n+1+Math.floor(barSeed[(i+7)%60]*2));i++}
+    ctx.font=`500 ${bh2*0.16}px "IBM Plex Mono", monospace`;ctx.fillText('0 12345 67890 5',0,by+bh2*0.92);
+  }
+  ctx.restore();
+}
+function renderArt(ctx,s){
+  const {P,netW,netH}=G;
+  ctx.save();ctx.scale(s,s);
+  ctx.fillStyle=S.base;ctx.fillRect(0,0,netW,netH);
+  const gi=getImg(S.globalArt);if(gi)drawCover(ctx,gi,G.M-S.bleed,G.M-S.bleed,netW-2*(G.M-S.bleed),netH-2*(G.M-S.bleed));
+  drawPattern(ctx,netW,netH);
+  P.forEach(p=>{if(p.face&&S.faces[p.face])drawFace(ctx,p,S.faces[p.face])});
+  ctx.restore();
+}
+const artCanvas=document.createElement('canvas');
+let artPending=false;
+function scheduleArt(){if(artPending)return;artPending=true;requestAnimationFrame(paintArt)}
+function paintArt(){
+  artPending=false;
+  const s=Math.min(8,3200/G.netW,3200/G.netH);
+  artCanvas.width=Math.round(G.netW*s);artCanvas.height=Math.round(G.netH*s);
+  renderArt(artCanvas.getContext('2d'),s);
+  artCanvas.toBlob(b=>{if(!b)return;const old=artURL;artURL=URL.createObjectURL(b);
+    $('#pivot').style.setProperty('--art',`url(${artURL})`);
+    const im=$('#artImg');if(im)im.setAttribute('href',artURL);
+    if(old)setTimeout(()=>URL.revokeObjectURL(old),1500)},'image/png');
+  saveDraft();if(typeof nestArtLater==='function')nestArtLater();
+}
+
+/* ---------- 3D ---------- */
+const stage=$('#stage'),pivot=$('#pivot');
+let nodes={},roots=[],k3=1;
+const LD=(()=>{const v=[-0.45,-0.7,0.6],n=Math.hypot(...v);return v.map(x=>x/n)})();
+const seg=(f,t)=>clamp((f-t[0])/(t[1]-t[0]),0,1), ease=t=>t*t*(3-2*t);
+function build3D(){
+  const {P}=G,r=stage.getBoundingClientRect();
+  k3=Math.min(r.width||600,r.height||480)*0.52/Math.hypot(...G.size3);
+  pivot.innerHTML='';nodes={};
+  const inside=MATERIALS[S.material].inside;
+  const clip=(p,mirror)=>{const w=p.w*k3,tx=([x,y])=>{const lx=(x-p.x)*k3,ly=(y-p.y)*k3;return `${(mirror?w-lx:lx).toFixed(2)} ${ly.toFixed(2)}`};
+    return `path(evenodd, "${[p.pts,...(p.holes||[])].map(r=>'M'+r.map(tx).join(' L')+' Z').join(' ')}")`};
+  const make=(p,parentEl,par)=>{
+    const el=document.createElement('div');el.className='node';
+    const w=p.w*k3,h=p.h*k3;el.style.width=w+'px';el.style.height=h+'px';
+    if(par){el.style.left=(p.x-par.x)*k3+'px';el.style.top=(p.y-par.y)*k3+'px';
+      el.style.transformOrigin=`${((p.hA[0]-p.x)*k3).toFixed(2)}px ${((p.hA[1]-p.y)*k3).toFixed(2)}px`}
+    else{el.style.left=-w/2+'px';el.style.top=-h/2+'px'}
+    const fc=document.createElement('div');fc.className='face';
+    fc.style.clipPath=clip(p,false);
+    fc.style.backgroundColor=S.base;fc.style.backgroundSize=`${G.netW*k3}px ${G.netH*k3}px`;fc.style.backgroundPosition=`${-p.x*k3}px ${-p.y*k3}px`;
+    const ins=document.createElement('div');ins.className='inside';ins.style.clipPath=clip(p,true);ins.style.background=inside;
+    el.append(fc,ins);parentEl.append(el);nodes[p.id]={el,face:fc,ins,p};
+    (E.kids[p.id]||[]).forEach(c=>make(c,el,p));
+  };
+  roots=P.filter(p=>!p.parent);roots.forEach(p=>make(p,pivot,null));
+  if(artURL)pivot.style.setProperty('--art',`url(${artURL})`);
+  update3D();
+}
+function update3D(){
+  if(!roots.length)return;
+  const bodyE=ease(seg(fold,[0,.42])), R0=mul(RX(rx),RY(ry));
+  pivot.style.transform=`scale3d(${zoom},${zoom},${zoom}) rotateX(${rx}deg) rotateY(${ry}deg)`;
+  const walk=(n,M)=>{
+    let Mw=M;
+    if(n.p.parent){const e=ease(seg(fold,n.p.t)),a=n.p.a*e;
+      n.el.style.transform=`rotate3d(${n.p.ax.toFixed(5)},${n.p.ay.toFixed(5)},0,${a.toFixed(3)}deg)`+(n.p.dz?` translateZ(${(n.p.dz*e).toFixed(2)}px)`:'');
+      Mw=mul(M,rotAxis(n.p.ax,n.p.ay,0,a))}
+    const dot=Mw[0][2]*LD[0]+Mw[1][2]*LD[1]+Mw[2][2]*LD[2];
+    n.face.style.filter=`brightness(${(0.62+0.42*Math.max(0,dot)).toFixed(3)})`;
+    n.ins.style.filter=`brightness(${(0.5+0.4*Math.max(0,-dot)).toFixed(3)})`;
+    (E.kids[n.p.id]||[]).forEach(c=>walk(nodes[c.id],Mw));
+  };
+  roots.forEach((r,i)=>{
+    const pl=G.place[r.id], tilt=G.tilt[r.id]||0;
+    const flat=[(r.x+r.w/2-G.netW/2)*k3,(r.y+r.h/2-G.netH/2)*k3,0];
+    const fin=pl?pl.pos.map(v=>v*k3):mulV(RX(tilt),G.c3).map(v=>-v*k3);
+    const T=flat.map((v,j)=>v+(fin[j]-v)*bodyE), rz=(pl?pl.rz:0)*bodyE, tl=tilt*bodyE;
+    nodes[r.id].el.style.transform=`translate3d(${T[0].toFixed(2)}px,${T[1].toFixed(2)}px,${T[2].toFixed(2)}px) rotateZ(${rz}deg) rotateX(${tl}deg)`;
+    walk(nodes[r.id],mul(mul(R0,RZ(rz)),RX(tl)));
+  });
+  const fl=$('#floor');fl.style.opacity=(0.35+0.5*bodyE).toFixed(2);fl.style.width=clamp(30+16*zoom*(1-0.3*(1-bodyE)),20,80)+'%';
+  $('#foldOut').textContent=Math.round(fold*100)+'%';$('#fold').value=fold;
+  $('#btnPlay').textContent=fold>0.5?'Unfold':'Fold';
+}
+// drag & zoom
+const pointers=new Map();let pinch0=0,zoom0=1;
+stage.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;stage.setPointerCapture(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pointers.size===2){const [a,b]=[...pointers.values()];pinch0=Math.hypot(a.x-b.x,a.y-b.y);zoom0=zoom}});
+stage.addEventListener('pointermove',e=>{const p=pointers.get(e.pointerId);if(!p)return;
+  if(pointers.size===1){ry+=(e.clientX-p.x)*0.45;rx=clamp(rx-(e.clientY-p.y)*0.45,-88,88);update3D()}
+  p.x=e.clientX;p.y=e.clientY;
+  if(pointers.size===2&&pinch0){const [a,b]=[...pointers.values()];zoom=clamp(zoom0*Math.hypot(a.x-b.x,a.y-b.y)/pinch0,0.35,3);update3D()}});
+const up=e=>{pointers.delete(e.pointerId);if(pointers.size<2)pinch0=0};
+stage.addEventListener('pointerup',up);stage.addEventListener('pointercancel',up);
+stage.addEventListener('wheel',e=>{e.preventDefault();zoom=clamp(zoom*Math.exp(-e.deltaY*0.0012),0.35,3);update3D()},{passive:false});
+$('#zIn').onclick=()=>{zoom=clamp(zoom*1.15,0.35,3);update3D()};
+$('#zOut').onclick=()=>{zoom=clamp(zoom/1.15,0.35,3);update3D()};
+$('#btnView').onclick=()=>{rx=-20;ry=-34;zoom=1;update3D()};
+$('#fold').addEventListener('input',e=>{fold=+e.target.value;update3D()});
+let anim=null;
+$('#btnPlay').onclick=()=>{
+  if(anim)cancelAnimationFrame(anim);
+  const from=fold,to=fold>0.5?0:1,dur=2600*Math.abs(to-from)+1,t0=performance.now();
+  const step=t=>{const k=clamp((t-t0)/dur,0,1);fold=from+(to-from)*k;update3D();if(k<1)anim=requestAnimationFrame(step);else anim=null};
+  anim=requestAnimationFrame(step);
+};
+let spinOn=false;
+const spinLoop=()=>{if(!spinOn)return;ry+=0.3;update3D();requestAnimationFrame(spinLoop)};
+$('#spin').addEventListener('change',e=>{spinOn=e.target.checked;if(spinOn)requestAnimationFrame(spinLoop)});
+let roT;new ResizeObserver(()=>{clearTimeout(roT);roT=setTimeout(()=>G&&build3D(),120)}).observe(stage);
+
+/* ---------- units ---------- */
+const UNIT={in:{mm:25.4,dec:2,show:3,step:0.0625},cm:{mm:10,dec:1,show:2,step:0.1}};
+const U=()=>UNIT[S.unit]||UNIT.in;
+const fmt=(mm,dec)=>(mm/U().mm).toFixed(dec??U().dec);
+const fmtU=(mm,dec)=>fmt(mm,dec)+' '+S.unit;
+const BUNIT={mm:{mm:1,show:2,step:{thick:0.05,o:0.5},label:'mm'},cm:{mm:10,show:3,step:{thick:0.005,o:0.05},label:'cm'},in:{mm:25.4,show:3,step:{thick:0.001,o:0.0625},label:'in'}};
+const BU=()=>BUNIT[S.bunit]||BUNIT.mm;
+const bfmt=mm=>+(mm/BU().mm).toFixed(BU().show);
+
+/* ---------- 2D dieline ---------- */
+const svg=$('#svg2d');
+function build2D(){
+  const {P,netW,netH,M}=G,b=S.bleed,pad=Math.max(netW,netH)*0.07,fs=Math.max(netW,netH)/62;
+  const paths=P.map(p=>`<path fill-rule="evenodd" d="${panelD(p)}"/>`).join('');
+  const mk=`maskUnits="userSpaceOnUse" x="${-pad}" y="${-pad}" width="${netW+2*pad}" height="${netH+2*pad}"`;
+  const showArt=$('#tArt').checked, showL=$('#tLabels').checked, showD=$('#tDims').checked;
+  let lbl='';
+  if(showL)P.forEach(p=>{
+    const cx=p.x+p.w/2,cy=p.y+p.h/2,main=!!p.face&&axisAligned(p);
+    const t=main?`${p.name} ${fmt(p.w,1)}×${fmt(p.h,1)}`:p.name, f=main?fs*0.62:fs*0.5;
+    const vert=t.length*f*0.62>p.w*0.95&&p.h>p.w;
+    if(vert&&t.length*f*0.62>p.h*0.95)return;
+    if(!vert&&t.length*f*0.62>p.w*1.02)return;
+    lbl+=`<text class="lbl" x="${cx}" y="${cy}" font-size="${f}" stroke-width="${f*0.28}" text-anchor="middle" dominant-baseline="middle"${vert?` transform="rotate(-90 ${cx} ${cy})"`:''}>${t}</text>`;
+  });
+  let dims='';
+  if(showD){
+    const x0=M,x1=netW-M,y0=M,y1=netH-M,yy=-pad*0.45,xx=-pad*0.45,tk=pad*0.12;
+    dims=`<path class="dim" d="M${x0} ${yy}H${x1}M${x0} ${yy-tk}v${2*tk}M${x1} ${yy-tk}v${2*tk}M${xx} ${y0}V${y1}M${xx-tk} ${y0}h${2*tk}M${xx-tk} ${y1}h${2*tk}"/>
+      <text class="dimt lbl" x="${(x0+x1)/2}" y="${yy}" font-size="${fs*0.62}" stroke-width="${fs*0.2}" text-anchor="middle" dominant-baseline="middle">${fmtU(x1-x0)} die width</text>
+      <text class="dimt lbl" x="${xx}" y="${(y0+y1)/2}" font-size="${fs*0.62}" stroke-width="${fs*0.2}" text-anchor="middle" dominant-baseline="middle" transform="rotate(-90 ${xx} ${(y0+y1)/2})">${fmtU(y1-y0)}</text>`;
+  }
+  svg.setAttribute('viewBox',`${-pad} ${-pad} ${netW+2*pad} ${netH+2*pad}`);
+  svg.innerHTML=`<defs>
+    <mask id="mArt" ${mk}><g fill="#fff" stroke="#fff" stroke-width="${2*b}" stroke-linejoin="round">${paths}</g></mask>
+    <mask id="mBleed" ${mk}><g fill="#fff" stroke="#fff" stroke-width="${2*b}" stroke-linejoin="round">${paths}</g><g fill="#000">${paths}</g></mask></defs>
+    <g mask="url(#mArt)"><rect class="paper" x="0" y="0" width="${netW}" height="${netH}"/>${showArt?`<image id="artImg" x="0" y="0" width="${netW}" height="${netH}" preserveAspectRatio="none" href="${artURL||''}"/>`:''}</g>
+    <rect class="bleedzone" x="0" y="0" width="${netW}" height="${netH}" mask="url(#mBleed)"/>
+    <g>${P.map(p=>`<path fill-rule="evenodd" class="hit${p.face?'':' nf'}${p.face&&p.face===sel?' sel':''}" data-face="${p.face||''}" d="${panelD(p)}"><title>${p.name}${p.face?' · click to edit':''}</title></path>`).join('')}</g>
+    <path class="fold" stroke-dasharray="${(fs*0.45).toFixed(2)} ${(fs*0.3).toFixed(2)}" d="${pathD(E.fold)}"/>
+    <path class="cut" d="${pathD(E.cut)}"/>${lbl}${dims}`;
+}
+svg.addEventListener('click',e=>{const t=e.target.closest('.hit');if(!t||!t.dataset.face)return;selectFace(t.dataset.face);showTab('artwork')});
+['tArt','tLabels','tDims'].forEach(id=>$('#'+id).addEventListener('change',build2D));
+
+/* ---------- spec ---------- */
+function ups(w,h,SW,SH,gap=6){const f=(a,b)=>Math.floor((SW+gap)/(a+gap))*Math.floor((SH+gap)/(b+gap));return Math.max(f(w,h),f(h,w))}
+function glueText(){return 'Tab lock, no glue'}
+function updateSpec(){
+  const {L,W,H,netW,netH,M,P}=G,t=S.thick,noW=TYPES[S.type].noW;
+  const dieW=netW-2*M,dieH=netH-2*M,area=P.reduce((s,p)=>s+panelArea(p),0)/1e6;
+  const tri=a=>(noW?[a[0],a[2]]:a).map(v=>fmt(v)).join(' × ')+' '+S.unit;
+  const sw=dieW+2*S.bleed,sh=dieH+2*S.bleed;
+  const rows=[['Style',TYPES[S.type].name],['Inner',tri([L-t,W-t,H-t])],['Outer',tri([L+t,W+t,H+t])],['Flat die size',`${fmt(dieW)} × ${fmt(dieH)} ${S.unit}`],
+    ['Board per unit',`${(area).toFixed(4)} m² · ${(area*10.7639).toFixed(3)} ft²`],['Per 1,000 units',`${(area*1000).toFixed(1)} m²`],
+    ['Up on 20 × 28 in sheet',ups(sw,sh,508,711)],['Up on 28 × 40 in sheet',ups(sw,sh,711,1016)],['Board',`${MATERIALS[S.material].name}, ${bfmt(t)} ${BU().label}`],['Assembly',glueText()]];
+  $('#spec').innerHTML=rows.map(([a,b])=>`<div><dt>${a}</dt><dd>${b}</dd></div>`).join('');
+  $('#topSpec').textContent=`${TYPES[S.type].name} · ${noW?`${fmt(S.L)} × ${fmt(S.H)}`:`${fmt(S.L)} × ${fmt(S.W)} × ${fmt(S.H)}`} ${S.unit} ${S.dimMode}`;
+  const tkOn=TUCK_OK.includes(S.type);
+  $('#tuckHint').textContent=tkOn?`Deepest tuck for this size: ${bfmt(G.tkMax)} ${BU().label}.${S.tuck>G.tkMax+0.01?` Your ${bfmt(S.tuck)} ${BU().label} is being limited to that.`:''}`:'This style has no tuck flaps.';
+}
+
+/* ---------- UI wiring ---------- */
+function rebuild(){
+  G=build(S);E=classify(G.P);
+  const main=G.P.find(p=>!p.parent),cb=closedBox(main);G.c3=cb.c;G.size3=cb.size.map(v=>Math.max(v,1));
+  if(!G.P.some(p=>p.face===sel))sel='front';
+  build3D();build2D();updateSpec();syncFaceChips();scheduleArt();scheduleNest();
+}
+/* collapsible section cards */
+let closedSecs={};try{closedSecs=JSON.parse(localStorage.getItem('bds-closed')||'{}')}catch(_){}
+$$('.side .group').forEach(g=>{
+  const h=g.querySelector('h3'),extras=[...h.querySelectorAll('.seg,.hint')];
+  const key=h.firstChild.textContent.trim();
+  const head=document.createElement('div');head.className='card-head';
+  const btn=document.createElement('button');btn.type='button';btn.className='collapse';
+  const body=document.createElement('div');body.className='card-body';
+  while(h.nextSibling)body.appendChild(h.nextSibling);
+  extras.reverse().forEach(x=>body.prepend(x));
+  head.append(h,btn);g.append(head,body);
+  const set=open=>{g.classList.toggle('closed',!open);btn.textContent=open?'–':'+';btn.setAttribute('aria-expanded',open);btn.setAttribute('aria-label',(open?'Collapse ':'Expand ')+key)};
+  set(!closedSecs[key]);
+  head.addEventListener('click',e=>{if(e.target.closest('.seg'))return;const open=g.classList.contains('closed');set(open);closedSecs[key]=!open;try{localStorage.setItem('bds-closed',JSON.stringify(closedSecs))}catch(_){}});
+  g.openSec=()=>{set(true);closedSecs[key]=false};
+});
+function showTab(){const g=$('#secPanel').closest('.group');g.openSec();g.scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})}
+function segBind(id,cb){$$(`#${id} button`).forEach(b=>b.onclick=()=>{$$(`#${id} button`).forEach(x=>x.setAttribute('aria-pressed',x===b));cb(b.dataset.v)})}
+function segSet(id,v){$$(`#${id} button`).forEach(x=>x.setAttribute('aria-pressed',x.dataset.v===v))}
+// style catalog
+let cat='all';
+$('#catBar').innerHTML=[['all','All'],...Object.entries(CATS)].map(([k,v])=>`<button type="button" data-cat="${k}" aria-pressed="${k==='all'}">${v}</button>`).join('');
+$$('#catBar button').forEach(b=>b.onclick=()=>{cat=b.dataset.cat;$$('#catBar button').forEach(x=>x.setAttribute('aria-pressed',x===b));filterTypes()});
+function filterTypes(){$$('.type').forEach(b=>{const T=TYPES[b.dataset.type];b.hidden=!!T.hide||!(cat==='all'||T.cat===cat)})}
+$('#types').innerHTML=Object.entries(TYPES).filter(([k,v])=>!v.hide).map(([k,v])=>{
+  const sm={type:k,L:50,W:34,H:k==='display'?40:60,tuck:10,glue:10,bleed:0,thick:0,dimMode:'inner'};
+  const g=build(sm),e=classify(g.P);
+  return `<button class="type" type="button" data-type="${k}" aria-pressed="false"><svg viewBox="0 0 ${g.netW.toFixed(1)} ${g.netH.toFixed(1)}" preserveAspectRatio="xMidYMid meet"><path class="tc" d="${pathD(e.cut)}"/><path class="tf" d="${pathD(e.fold)}"/></svg><b>${v.name}</b></button>`}).join('');
+$$('.type').forEach(b=>b.onclick=()=>{S.type=b.dataset.type;syncUI();rebuild()});
+function presetFits(t){ // keep the user's size unless it is far outside what the style expects
+  const {L,W,H}=S;
+  if(t==='pyramid'||t==='hex')return H>=L*0.6;
+  if(t==='pillow')return W<=L*0.45&&H<=L*1.2;
+  if(['display','tray','twopiece','mailer','rsc','hsc','bakery','locktray','locktwopiece','lockdisplay','shallowtuck','hingedtray','slidebox'].includes(t))return H<=Math.max(L,W);
+  if(t==='gable')return H>=W*0.5;
+  return H>=Math.min(L,W)*0.5}
+function presetOptions(){
+  const v=$('#preset').value,opt=(p,i)=>`<option value="${i}">${p[0]} · ${fmt(p[1])} × ${fmt(p[2])} × ${fmt(p[3])} ${S.unit}</option>`;
+  const mine=PRESETS.map((p,i)=>[p,i]).filter(([p])=>p[4]===S.type),other=PRESETS.map((p,i)=>[p,i]).filter(([p])=>p[4]!==S.type);
+  $('#preset').innerHTML='<option value="">Custom size</option>'+(mine.length?`<optgroup label="${TYPES[S.type].name}">${mine.map(([p,i])=>opt(p,i)).join('')}</optgroup>`:'')+
+    Object.keys(CATS).map(c=>{const list=other.filter(([p])=>TYPES[p[4]].cat===c);return list.length?`<optgroup label="${CATS[c]} · switches style">${list.map(([p,i])=>opt(p,i).replace('</option>',` · ${TYPES[p[4]].name}</option>`)).join('')}</optgroup>`:''}).join('');
+  $('#preset').value=v}
+$('#preset').onchange=e=>{const p=PRESETS[e.target.value];if(!p)return;[S.L,S.W,S.H,S.type]=[p[1],p[2],p[3],p[4]];S.dimMode='inner';syncUI();rebuild();$('#preset').value=e.target.value};
+$('#material').innerHTML=Object.entries(MATERIALS).map(([k,v])=>`<option value="${k}">${v.name}</option>`).join('');
+$('#fFont').innerHTML=FONTS.map(f=>`<option>${f[0]}</option>`).join('');
+const toMM=v=>v*U().mm;
+['L','W','H'].forEach(k=>$('#dim'+k).addEventListener('change',e=>{const v=parseFloat(e.target.value);if(!isFinite(v))return syncUI();S[k]=clamp(toMM(v),10,1200);$('#preset').value='';syncUI();rebuild()}));
+[['thick',0,10],['tuck',5,150],['glue',5,40],['bleed',0,10]].forEach(([k,a,b])=>$('#'+k).addEventListener('change',e=>{const v=parseFloat(e.target.value);if(isFinite(v))S[k]=clamp(v*BU().mm,a,b);syncUI();rebuild()}));
+$('#material').onchange=e=>{S.material=e.target.value;if(e.target.value==='corr'&&S.thick<1)S.thick=1.6;syncUI();rebuild()};
+segBind('unitSeg',v=>{S.unit=v;syncUI();build2D();updateSpec()});
+segBind('bunitSeg',v=>{S.bunit=v;syncUI();updateSpec();saveDraft()});
+segBind('modeSeg',v=>{S.dimMode=v;rebuild()});
+segBind('viewSeg',v=>{$('#panes').dataset.view=v;if(v==='sheet')nestArtLater()});
+$('#optSeam').onchange=e=>{S.lockSeam=e.target.checked;rebuild()};
+$('#optHang').onchange=e=>{S.hangTab=e.target.checked;rebuild()};
+$('#optWin').onchange=e=>{S.win.on=e.target.checked;syncUI();rebuild()};
+[['winW','w'],['winH','h'],['winY','y']].forEach(([id,k])=>$('#'+id).addEventListener('input',e=>{S.win[k]=+e.target.value;rebuild()}));
+// global art
+$('#gBase').addEventListener('input',e=>{S.base=e.target.value;scheduleArt()});
+$('#gAccent').addEventListener('input',e=>{S.accent=e.target.value;scheduleArt()});
+$('#gPattern').onchange=e=>{S.pattern=e.target.value;scheduleArt()};
+$('#gPatOp').addEventListener('input',e=>{S.patOp=+e.target.value;scheduleArt()});
+$('#gBarcode').onchange=e=>{S.barcode=e.target.checked;scheduleArt()};
+$('#gArt').onchange=async e=>{const f=e.target.files[0];if(!f)return;S.globalArt=await readFile(f);getImg(S.globalArt);scheduleArt();toast('Artwork placed across the whole dieline')};
+$('#gArtClear').onclick=()=>{S.globalArt=null;$('#gArt').value='';scheduleArt()};
+// faces
+const faceName=f=>(G&&G.faceNames[f])||FACE_LABEL[f];
+function syncFaceChips(){
+  const has=new Set(G.P.map(p=>p.face).filter(Boolean));
+  $('#faceChips').innerHTML=FACES.map(f=>`<button type="button" data-face="${f}" aria-pressed="${f===sel}" ${has.has(f)?'':'disabled title="This box style has no '+faceName(f).toLowerCase()+' panel"'}>${faceName(f)}</button>`).join('');
+  $$('#faceChips button').forEach(b=>b.onclick=()=>selectFace(b.dataset.face));
+}
+function selectFace(f){sel=f;syncFaceChips();fillFace();$$('#svg2d .hit').forEach(h=>h.classList.toggle('sel',h.dataset.face===f))}
+function fillFace(){const f=S.faces[sel];
+  $('#fTitle').value=f.title;$('#fSub').value=f.sub;$('#fFont').value=f.font;$('#fText').value=f.text;$('#fSize').value=f.size;$('#fPos').value=f.pos;
+  $('#fColorOn').checked=!!f.color;$('#fColor').value=f.color||S.base;$('#fColor').disabled=!f.color;$('#fImgScale').value=f.imgScale;$('#fImgY').value=f.imgY;$('#fImg').value=''}
+const fset=(k,v)=>{S.faces[sel][k]=v;scheduleArt()};
+$('#fTitle').addEventListener('input',e=>fset('title',e.target.value));
+$('#fSub').addEventListener('input',e=>fset('sub',e.target.value));
+$('#fFont').onchange=e=>fset('font',e.target.value);
+$('#fText').addEventListener('input',e=>fset('text',e.target.value));
+$('#fSize').addEventListener('input',e=>fset('size',+e.target.value));
+$('#fPos').onchange=e=>fset('pos',e.target.value);
+$('#fColorOn').onchange=e=>{fset('color',e.target.checked?$('#fColor').value:'');$('#fColor').disabled=!e.target.checked};
+$('#fColor').addEventListener('input',e=>{if($('#fColorOn').checked)fset('color',e.target.value)});
+$('#fImg').onchange=async e=>{const f=e.target.files[0];if(!f)return;const u=await readFile(f);getImg(u);fset('img',u)};
+$('#fImgClear').onclick=()=>{fset('img',null);$('#fImg').value=''};
+$('#fImgScale').addEventListener('input',e=>fset('imgScale',+e.target.value));
+$('#fImgY').addEventListener('input',e=>fset('imgY',+e.target.value));
+
+function syncUI(){
+  const T=TYPES[S.type];
+  $$('.type').forEach(b=>b.setAttribute('aria-pressed',b.dataset.type===S.type));
+  if(cat!=='all'&&T.cat!==cat){cat=T.cat;$$('#catBar button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.cat===cat))}
+  filterTypes();
+  $('#typeNote').textContent=T.note+(T.seam?' The side seam locks with a tab and slot.':'');
+  $('#dimNote').hidden=!T.dimNote;$('#dimNote').textContent=T.dimNote||'';
+  if(!UNIT[S.unit])S.unit=S.unit==='mm'?'cm':'in';presetOptions();
+  const show=v=>+(v/U().mm).toFixed(U().show);
+  $('#dimL').value=show(S.L);$('#dimW').value=show(S.W);$('#dimH').value=show(S.H);
+  ['dimL','dimW','dimH'].forEach(id=>$('#'+id).step=U().step);
+  $('#dimW').disabled=!!T.noW;
+  segSet('unitSeg',S.unit);segSet('bunitSeg',S.bunit);segSet('modeSeg',S.dimMode);
+  $$('.bu').forEach(e=>e.textContent=BU().label);
+  $('#thick').value=bfmt(S.thick);$('#thick').step=BU().step.thick;
+  [['tuck',S.tuck],['glue',S.glue],['bleed',S.bleed]].forEach(([id,v])=>{$('#'+id).value=bfmt(v);$('#'+id).step=BU().step.o});
+  $('#material').value=S.material;
+  $('#tuck').disabled=!TUCK_OK.includes(S.type);
+  const hangOk=HANG_OK.includes(S.type),winOk=S.type!=='pyramid',seamOk=!!T.seam;
+  $('#optSeamRow').hidden=true;
+  $('#optHang').checked=S.hangTab&&hangOk;$('#optHang').disabled=!hangOk;
+  $('#optWin').checked=S.win.on&&winOk;$('#optWin').disabled=!winOk;
+  $('#winRow').hidden=!(S.win.on&&winOk);$('#winW').value=S.win.w;$('#winH').value=S.win.h;$('#winY').value=S.win.y;
+  $('#optNote').textContent=[!hangOk?'Hang tabs are available on tuck-top cartons.':'',!winOk?'Windows need a flat rectangular front panel.':'',T.winFace==='top'?'The window goes on the lid.':''].filter(Boolean).join(' ');
+  $('#gBase').value=S.base;$('#gAccent').value=S.accent;$('#gPattern').value=S.pattern;$('#gPatOp').value=S.patOp;$('#gBarcode').checked=S.barcode;
+  fillFace();syncNestUI();
+}
+
+/* ---------- exports ---------- */
+function download(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000)}
+const baseName=()=>`${S.type}-${Math.round(S.L)}x${Math.round(S.W)}x${Math.round(S.H)}mm`;
+function toast(msg){const t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,2600)}
+function exportSVG(withArt){
+  const {P,netW,netH}=G,b=S.bleed;
+  const paths=P.map(p=>`<path fill-rule="evenodd" d="${panelD(p,3)}"/>`).join('');
+  let art='';
+  if(withArt){const s=Math.min(11.811,9000/netW,9000/netH),c=document.createElement('canvas');c.width=Math.round(netW*s);c.height=Math.round(netH*s);renderArt(c.getContext('2d'),s);
+    art=`<defs><mask id="artmask" maskUnits="userSpaceOnUse" x="0" y="0" width="${netW}" height="${netH}"><g fill="#fff" stroke="#fff" stroke-width="${2*b}" stroke-linejoin="round">${paths}</g></mask></defs>
+<g id="ARTWORK" mask="url(#artmask)"><image x="0" y="0" width="${netW}" height="${netH}" preserveAspectRatio="none" href="${c.toDataURL('image/png')}"/></g>`}
+  const out=`<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="${netW.toFixed(3)}mm" height="${netH.toFixed(3)}mm" viewBox="0 0 ${netW.toFixed(3)} ${netH.toFixed(3)}">
+<title>${TYPES[S.type].name} ${S.L.toFixed(1)}x${S.W.toFixed(1)}x${S.H.toFixed(1)} mm (${S.dimMode}), ${MATERIALS[S.material].name} ${S.thick} mm</title>
+<g id="BLEED"><g fill="none" stroke="#00A651" stroke-opacity="0.45" stroke-width="${2*b}" stroke-linejoin="round">${paths}</g>${withArt?'':`<g fill="#FFFFFF">${paths}</g>`}</g>
+${art}
+<g id="CREASE" fill="none" stroke="#00AEEF" stroke-width="0.3" stroke-dasharray="2 1.2"><path d="${pathD(E.fold)}"/></g>
+<g id="CUT" fill="none" stroke="#ED1C24" stroke-width="0.3"><path d="${pathD(E.cut)}"/></g>
+</svg>`;
+  download(new Blob([out],{type:'image/svg+xml'}),`${baseName()}${withArt?'-art':''}-dieline.svg`);toast('SVG downloaded');
+}
+$('#btnSvg').onclick=()=>exportSVG(false);
+$('#btnSvgArt').onclick=()=>exportSVG(true);
+$('#btnDxf').onclick=()=>{
+  const H=G.netH,layer=(n,c)=>`0\nLAYER\n2\n${n}\n70\n0\n62\n${c}\n6\nCONTINUOUS\n`;
+  let s=`0\nSECTION\n2\nHEADER\n9\n$INSUNITS\n70\n4\n0\nENDSEC\n0\nSECTION\n2\nTABLES\n0\nTABLE\n2\nLAYER\n70\n2\n${layer('CUT',1)}${layer('CREASE',5)}0\nENDTAB\n0\nENDSEC\n0\nSECTION\n2\nENTITIES\n`;
+  const ln=(l,[a,b])=>`0\nLINE\n8\n${l}\n10\n${a[0].toFixed(3)}\n20\n${(H-a[1]).toFixed(3)}\n30\n0\n11\n${b[0].toFixed(3)}\n21\n${(H-b[1]).toFixed(3)}\n31\n0\n`;
+  E.cut.forEach(x=>s+=ln('CUT',x));E.fold.forEach(x=>s+=ln('CREASE',x));
+  s+='0\nENDSEC\n0\nEOF\n';download(new Blob([s],{type:'application/dxf'}),`${baseName()}-dieline.dxf`);toast('DXF downloaded');
+};
+$('#btnPng').onclick=()=>{
+  const dpi=+$('#dpi').value;let s=dpi/25.4;const cap=12000;
+  if(G.netW*s>cap||G.netH*s>cap)s=Math.min(cap/G.netW,cap/G.netH);
+  const c=document.createElement('canvas');c.width=Math.round(G.netW*s);c.height=Math.round(G.netH*s);const ctx=c.getContext('2d');
+  renderArt(ctx,s);
+  ctx.save();ctx.globalCompositeOperation='destination-in';
+  const mc=document.createElement('canvas');mc.width=c.width;mc.height=c.height;const m=mc.getContext('2d');m.scale(s,s);m.lineJoin='round';m.lineWidth=2*S.bleed;m.fillStyle=m.strokeStyle='#000';
+  G.P.forEach(p=>{tracePath(m,p);m.fill('evenodd');if(S.bleed>0)m.stroke()});
+  ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(mc,0,0);ctx.restore();
+  if($('#pngLines').checked){ctx.save();ctx.scale(s,s);ctx.lineWidth=0.3;
+    const draw=(arr)=>{ctx.beginPath();arr.forEach(([a,b])=>{ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1])});ctx.stroke()};
+    ctx.strokeStyle='#ED1C24';draw(E.cut);ctx.setLineDash([2,1.2]);ctx.strokeStyle='#00AEEF';draw(E.fold);ctx.restore()}
+  c.toBlob(b=>{download(b,`${baseName()}-print-${dpi}dpi.png`);toast(s<dpi/25.4?`PNG capped at ${Math.round(s*25.4)} dpi for size`:'Print PNG downloaded')},'image/png');
+};
+$('#btnSave').onclick=()=>{download(new Blob([JSON.stringify({app:'box-dieline-studio',v:2,state:S},null,1)],{type:'application/json'}),`${baseName()}-project.json`);toast('Project saved')};
+$('#fileLoad').onchange=async e=>{const f=e.target.files[0];if(!f)return;
+  try{const j=JSON.parse(await f.text());const st=j.state||j;if(!st.faces||!st.type)throw 0;
+    S=loadState(st);$('#sampleNote').hidden=true;syncUI();rebuild();toast('Project opened')}
+  catch(_){toast('That file is not a Box Dieline Studio project')}e.target.value=''};
+function blankArt(){
+  S.base='#ffffff';S.pattern='none';S.patOp=0.14;S.accent='#76bd1d';S.globalArt=null;S.barcode=false;
+  FACES.forEach(k=>S.faces[k]=face({text:'#2a2d2e',font:'Jost'}));
+}
+const dlg=$('#newDlg');let lastFocus=null;
+const openNew=()=>{lastFocus=document.activeElement;dlg.hidden=false;$('#newArt').focus()};
+const closeNew=()=>{dlg.hidden=true;lastFocus&&lastFocus.focus()};
+$('#btnNew').onclick=openNew;$('#btnNew2').onclick=openNew;$('#newCancel').onclick=closeNew;
+dlg.addEventListener('click',e=>{if(e.target===dlg)closeNew()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!dlg.hidden)closeNew()});
+const finishNew=msg=>{sel='front';['gArt','fImg'].forEach(id=>$('#'+id).value='');$('#sampleNote').hidden=true;$('#preset').value='';syncUI();rebuild();closeNew();toast(msg)};
+$('#newArt').onclick=()=>{blankArt();finishNew('Artwork cleared. Box size kept.')};
+$('#newAll').onclick=()=>{const unit=S.unit,bunit=S.bunit;S=sample();Object.assign(S,{unit,bunit,type:'rte',L:76.2,W:76.2,H:101.6,dimMode:'inner',material:'white',thick:0.5,tuck:15,glue:15,bleed:3});blankArt();fold=1;finishNew('New blank design started')};
+$('#btnReset').onclick=()=>{const unit=S.unit,bunit=S.bunit;S=sample();S.unit=unit;S.bunit=bunit;sel='front';$('#sampleNote').hidden=false;syncUI();rebuild();toast('Sample design restored')};
+
+/* ---------- sheet nesting (common-line) ---------- */
+function nestDefaults(){return{sw:40*25.4,sh:28*25.4,grip:0.375*25.4,mar:0.25*25.4,mode:'auto',rot:true,qty:1000}}
+const SHEETS=[[25,19],[26,20],[28,20],[29,23],[35,23],[38,25],[40,26],[40,28],[48,40]]; // inches, width × height
+const mM=(A,B)=>[A[0]*B[0]+A[2]*B[1],A[1]*B[0]+A[3]*B[1],A[0]*B[2]+A[2]*B[3],A[1]*B[2]+A[3]*B[3],A[0]*B[4]+A[2]*B[5]+A[4],A[1]*B[4]+A[3]*B[5]+A[5]];
+const mP=(M,q)=>[M[0]*q[0]+M[2]*q[1]+M[4],M[1]*q[0]+M[3]*q[1]+M[5]];
+const mT=(x,y)=>[1,0,0,1,x,y];
+const mR=d=>({0:[1,0,0,1,0,0],90:[0,1,-1,0,0,0],180:[-1,0,0,-1,0,0],270:[0,-1,1,0,0,0]})[((d%360)+360)%360];
+const NEP=2e-3;
+function nestBase(){let mx=Infinity,my=Infinity;G.P.forEach(p=>p.pts.forEach(([x,y])=>{mx=Math.min(mx,x);my=Math.min(my,y)}));return{M:mT(-mx,-my)}}
+function mkVariant(base,deg){
+  const M0=mM(mR(deg),base.M);
+  let polys=G.P.map(p=>p.pts.map(q=>mP(M0,q)));
+  let mx=Infinity,my=Infinity,Mx=-Infinity,My=-Infinity;
+  polys.forEach(pl=>pl.forEach(([x,y])=>{mx=Math.min(mx,x);my=Math.min(my,y);Mx=Math.max(Mx,x);My=Math.max(My,y)}));
+  polys=polys.map(pl=>pl.map(([x,y])=>[x-mx,y-my]));
+  const P=polys.map(pts=>{const xs=pts.map(q=>q[0]),ys=pts.map(q=>q[1]);return{pts,x0:Math.min(...xs),x1:Math.max(...xs),y0:Math.min(...ys),y1:Math.max(...ys)}});
+  const uniq=a=>{const m=new Map();a.forEach(v=>m.set(Math.round(v*1000),v));return[...m.values()].sort((p,q)=>p-q)};
+  return{deg:((deg%360)+360)%360,M:mM(mT(-mx,-my),M0),P,w:Mx-mx,h:My-my,xs:uniq(polys.flat().map(q=>q[0])),ys:uniq(polys.flat().map(q=>q[1]))};
+}
+function colRange(V,x){let lo=Infinity,hi=-Infinity;
+  for(const p of V.P){if(x<=p.x0||x>=p.x1)continue;const t=p.pts,n=t.length;
+    for(let i=0;i<n;i++){const a=t[i],b=t[(i+1)%n];if((a[0]<x)!==(b[0]<x)){const y=a[1]+(x-a[0])*(b[1]-a[1])/(b[0]-a[0]);if(y<lo)lo=y;if(y>hi)hi=y}}}
+  return lo<=hi?[lo,hi]:null}
+function rowRange(V,y){let lo=Infinity,hi=-Infinity;
+  for(const p of V.P){if(y<=p.y0||y>=p.y1)continue;const t=p.pts,n=t.length;
+    for(let i=0;i<n;i++){const a=t[i],b=t[(i+1)%n];if((a[1]<y)!==(b[1]<y)){const x=a[0]+(y-a[1])*(b[0]-a[0])/(b[1]-a[1]);if(x<lo)lo=x;if(x>hi)hi=x}}}
+  return lo<=hi?[lo,hi]:null}
+function selfDx(V){let d=0;V.ys.forEach(y=>[y-NEP,y+NEP].forEach(q=>{const r=rowRange(V,q);if(r&&r[1]-r[0]>d)d=r[1]-r[0]}));return d||V.w}
+function stripBot(V,dx,x){let r=-Infinity;for(let k=Math.ceil((x-V.w)/dx);k<=Math.floor(x/dx);k++){const c=colRange(V,x-k*dx);if(c&&c[1]>r)r=c[1]}return r}
+function stripTop(V,dx,x){let r=Infinity;for(let k=Math.ceil((x-V.w)/dx);k<=Math.floor(x/dx);k++){const c=colRange(V,x-k*dx);if(c&&c[0]<r)r=c[0]}return r}
+// exact vertical step from a row of T down to a row of B shifted sideways by sx
+function pairDy(T,B,dx,sx){const md=v=>((v%dx)+dx)%dx;let d=-Infinity;
+  const test=x=>{const b=stripBot(T,dx,x),t=stripTop(B,dx,x-sx);if(b>-Infinity&&t<Infinity&&b-t>d)d=b-t};
+  T.xs.forEach(v=>{const x=md(v);test(x-NEP);test(x+NEP)});B.xs.forEach(v=>{const x=md(v+sx);test(x-NEP);test(x+NEP)});
+  return d===-Infinity?Math.max(T.h,B.h):Math.max(0,d)}
+function nestProfile(V,dx,N,bot){const cw=dx/N,arr=new Float64Array(N).fill(bot?-Infinity:Infinity),pts=[];
+  for(let i=0;i<N;i++)pts.push(i*cw);V.xs.forEach(v=>pts.push(((v%dx)+dx)%dx));
+  pts.forEach(p=>[p-NEP,p+NEP].forEach(q=>{const v=bot?stripBot(V,dx,q):stripTop(V,dx,q);const c=((Math.floor(q/cw)%N)+N)%N;if(bot?v>arr[c]:v<arr[c])arr[c]=v}));
+  return arr}
+// best sideways offset for the next row: fast profile scan, then exact check at vertex-aligned offsets
+function bestPair(T,B,dx){
+  const N=Math.max(120,Math.min(1600,Math.round(dx/0.5))),cw=dx/N,bot=nestProfile(T,dx,N,true),top=nestProfile(B,dx,N,false),ap=new Float64Array(N);
+  for(let s=0;s<N;s++){let d=-Infinity;for(let i=0;i<N;i++){const b=bot[i],t=top[(i-s+N)%N];if(b>-Infinity&&t<Infinity&&b-t>d)d=b-t}ap[s]=d}
+  const order=[...Array(N).keys()].sort((a,b)=>ap[a]-ap[b]),picks=[0];
+  for(const s of order){if(picks.length>=7)break;if(picks.every(p=>Math.min(Math.abs(p-s),N-Math.abs(p-s))>2))picks.push(s)}
+  const md=v=>((v%dx)+dx)%dx,cm=new Map();T.xs.forEach(a=>B.xs.forEach(b=>{const v=md(a-b);cm.set(Math.round(v*1000),v)}));const C=[...cm.values()];
+  const circ=v=>Math.min(md(v),dx-md(v));
+  let best={sx:0,dy:pairDy(T,B,dx,0)};
+  const tryS=sx=>{const dy=pairDy(T,B,dx,sx);if(dy<best.dy-0.01||(Math.abs(dy-best.dy)<=0.01&&circ(sx)<circ(best.sx)-1e-6))best={sx,dy}};
+  picks.forEach(s=>{const c0=s*cw;C.map(c=>[c,Math.abs((((c-c0)+dx/2)%dx+dx)%dx-dx/2)]).filter(v=>v[1]<=2.5*cw).sort((a,b)=>a[1]-b[1]).slice(0,40).forEach(v=>tryS(v[0]))});
+  return best}
+function layoutFrame(T,B,dx,o1,o2,rect,phase){
+  const pl=[];let y=rect.v0,xs=rect.u0+phase,i=0,rows=0,perRow=0;
+  while(i<3000){const V=i%2?B:T;if(y+V.h>rect.v1+1e-6)break;
+    const k0=Math.ceil((rect.u0-xs)/dx-1e-9),k1=Math.floor((rect.u1-V.w-xs)/dx+1e-9);let n=0;
+    for(let k=k0;k<=k1;k++){pl.push({V,x:xs+k*dx,y});n++}
+    if(n){rows++;perRow=Math.max(perRow,n)}
+    const o=i%2?o2:o1;if(o.dy<0.1)break;y+=o.dy;xs+=o.sx;i++}
+  return{pl,rows,perRow}}
+function computeNest(){
+  const N=S.nest,Ws=N.sw,Hs=N.sh,ux0=N.mar,ux1=Ws-N.mar,uy0=N.grip,uy1=Hs-N.mar;
+  if(ux1<=ux0||uy1<=uy0)return{count:0,error:'The margins are larger than the sheet.'};
+  const base=nestBase(),vc={},V=d=>{d=((d%360)+360)%360;return vc[d]||(vc[d]=mkVariant(base,d))};
+  const dxc={},DX=v=>dxc[v.deg]??(dxc[v.deg]=selfDx(v)),pc={},PR=(a,b)=>{const k=a.deg+'-'+b.deg;return pc[k]||(pc[k]=bestPair(a,b,DX(a)))};
+  const degs=N.rot?[0,90,180,270]:[0,180];
+  const combos={auto:[['same','H'],['same','V'],['alt','H'],['alt','V']],same:[['same','H'],['same','V']],altRows:[['alt','H']],altCols:[['alt','V']]}[N.mode]||[['same','H']];
+  let best=null;
+  const better=(c,b)=>{if(!b)return true;if(c.count!==b.count)return c.count>b.count;if(c.area<b.area*0.98)return true;if(c.area>b.area*1.02)return false;
+    const sc=x=>(x.stagger?1:0)+(x.mode==='alt'?1:0);return sc(c)<sc(b)};
+  for(const o of degs)for(const [mode,fr] of combos){
+    const fd=fr==='H'?o:o-90,T=V(fd),B=mode==='alt'?V(fd+180):T,dx=DX(T);
+    const F=fr==='H'?[1,0,0,1,0,0]:[0,1,-1,0,Ws,0];
+    const rect=fr==='H'?{u0:ux0,u1:ux1,v0:uy0,v1:uy1}:{u0:uy0,u1:uy1,v0:Ws-ux1,v1:Ws-ux0};
+    if(T.w>rect.u1-rect.u0+1e-6||T.h>rect.v1-rect.v0+1e-6)continue;
+    const md=v=>((v%dx)+dx)%dx;
+    let o1={...PR(T,B)},o2=mode==='alt'?{...PR(B,T)}:o1;
+    const tot=md(o1.sx+o2.sx),need=Math.max(pairDy(T,T,dx,tot),mode==='alt'?pairDy(B,B,dx,tot):0);
+    if(o1.dy+o2.dy<need-1e-6){if(mode==='alt')o2.dy=need-o1.dy;else o1.dy=need/2}
+    for(const ph of [0,md(-o1.sx)]){
+      const L=layoutFrame(T,B,dx,o1,o2,rect,ph),count=L.pl.length;if(!count)continue;
+      let place=L.pl.map(p=>mM(F,mM(mT(p.x,p.y),p.V.M)));
+      let bx0=Infinity,by0=Infinity,bx1=-Infinity,by1=-Infinity;
+      L.pl.forEach(p=>[[0,0],[p.V.w,0],[0,p.V.h],[p.V.w,p.V.h]].forEach(c=>{const q=mP(F,[p.x+c[0],p.y+c[1]]);bx0=Math.min(bx0,q[0]);bx1=Math.max(bx1,q[0]);by0=Math.min(by0,q[1]);by1=Math.max(by1,q[1])}));
+      const sh=(ux0+ux1)/2-(bx0+bx1)/2;place=place.map(M=>mM(mT(sh,0),M));
+      const cand={count,place,bb:[bx0+sh,by0,bx1+sh,by1],area:(bx1-bx0)*(by1-by0),mode,fr,o:((o%360)+360)%360,rows:L.rows,perRow:L.perRow,stagger:Math.min(md(o1.sx),dx-md(o1.sx))>0.01};
+      if(better(cand,best))best=cand;
+    }
+  }
+  return best||{count:0,error:'The box is larger than the usable area of this sheet.'};
+}
+function mergeSegs(segs){
+  const it=[];
+  segs.forEach(([a,b])=>{const dx=b[0]-a[0],dy=b[1]-a[1],l=Math.hypot(dx,dy);if(l<1e-6)return;let ux=dx/l,uy=dy/l;if(ux<-1e-9||(Math.abs(ux)<=1e-9&&uy<0)){ux=-ux;uy=-uy}
+    const off=-uy*a[0]+ux*a[1],t1=ux*a[0]+uy*a[1],t2=ux*b[0]+uy*b[1];it.push({ak:Math.round(Math.atan2(uy,ux)*1e4),ux,uy,off,t0:Math.min(t1,t2),t1:Math.max(t1,t2)})});
+  it.sort((p,q)=>p.ak-q.ak||p.off-q.off);
+  const out=[];let i=0;
+  while(i<it.length){let j=i;const g=[it[i]];while(j+1<it.length&&it[j+1].ak===it[i].ak&&it[j+1].off-it[i].off<0.01){j++;g.push(it[j])}
+    g.sort((p,q)=>p.t0-q.t0);const{ux,uy,off}=g[0];let s=g[0].t0,e=g[0].t1;
+    const emit=()=>out.push([[s*ux-off*uy,s*uy+off*ux],[e*ux-off*uy,e*uy+off*ux]]);
+    for(let k=1;k<g.length;k++){if(g[k].t0<=e+0.01)e=Math.max(e,g[k].t1);else{emit();s=g[k].t0;e=g[k].t1}}
+    emit();i=j+1}
+  return out}
+const segLen=a=>a.reduce((s,[p,q])=>s+Math.hypot(q[0]-p[0],q[1]-p[1]),0);
+function nestLines(R){const cut=[],fold=[];
+  R.place.forEach(M=>{E.cut.forEach(([a,b])=>cut.push([mP(M,a),mP(M,b)]));E.fold.forEach(([a,b])=>fold.push([mP(M,a),mP(M,b)]))});
+  const mc=mergeSegs(cut);return{cut:mc,fold:mergeSegs(fold),rawCut:segLen(cut),knife:segLen(mc)}}
+let NEST=null,nestTimer=null,NP=null,nestArtURL=null,nestArtTimer=null;
+function nestPaths(){if(NP&&NP.G===G)return NP;
+  const ex=new Path2D(),bl=new Path2D(),b=S.bleed;
+  const orient=(pts,pos)=>{const a=pts.reduce((s,p,i)=>{const q=pts[(i+1)%pts.length];return s+p[0]*q[1]-q[0]*p[1]},0);return(a>0)===pos?pts:pts.slice().reverse()};
+  const add=(path,pts)=>{pts.forEach((q,i)=>i?path.lineTo(q[0],q[1]):path.moveTo(q[0],q[1]));path.closePath()};
+  G.P.forEach(p=>{add(ex,orient(p.pts,true));(p.holes||[]).forEach(h=>add(ex,orient(h,false)));add(bl,orient(p.pts,true));
+    if(b>0){const n=p.pts.length;p.pts.forEach((a,i)=>{const c=p.pts[(i+1)%n],dx=c[0]-a[0],dy=c[1]-a[1],l=Math.hypot(dx,dy)||1,nx=-dy/l*b,ny=dx/l*b;
+      add(bl,orient([[a[0]+nx,a[1]+ny],[c[0]+nx,c[1]+ny],[c[0]-nx,c[1]-ny],[a[0]-nx,a[1]-ny]],true));
+      add(bl,orient([...Array(12)].map((_,k)=>[a[0]+b*Math.cos(k*Math.PI/6),a[1]+b*Math.sin(k*Math.PI/6)]),true))})}});
+  return NP={G,ex,bl}}
+// pass 1 paints each box with its bleed, pass 2 trims every box exactly, so shared edges get no bleed from the neighbour
+function drawNestArt(ctx,s,art){const np=nestPaths();
+  [S.bleed>0?np.bl:null,np.ex].forEach(path=>{if(!path)return;NEST.place.forEach(M=>{ctx.save();ctx.setTransform(s*M[0],s*M[1],s*M[2],s*M[3],s*M[4],s*M[5]);ctx.clip(path);ctx.drawImage(art,0,0,G.netW,G.netH);ctx.restore()})})}
+const fracIn=mm=>{const n=Math.round(mm/25.4*16),w=Math.floor(n/16);let r=n%16,d=16;if(!r)return`${w}`;while(r%2===0){r/=2;d/=2}return w?`${w} ${r}/${d}`:`${r}/${d}`};
+const fmtS=mm=>S.unit==='in'?fracIn(mm)+' in':(mm/10).toFixed(1)+' cm';
+const fmtLen=mm=>S.unit==='in'?(mm/304.8).toFixed(1)+' ft':(mm/1000).toFixed(2)+' m';
+function nestView(){return $('#panes').dataset.view==='sheet'}
+function scheduleNest(){clearTimeout(nestTimer);nestTimer=setTimeout(runNest,250)}
+function runNest(){
+  try{NEST=computeNest();if(NEST.count)Object.assign(NEST,nestLines(NEST))}catch(e){console.error(e);NEST={count:0,error:'This box could not be laid out on the sheet.'}}
+  NP=null;renderNestStats();renderNest();nestArtLater()}
+function nestDesc(){const R=NEST,across=R.fr==='H'?R.perRow:R.rows,down=R.fr==='H'?R.rows:R.perRow;
+  const grid=R.count===across*down?`${across} across × ${down} down`:`${R.rows} ${R.fr==='H'?'rows':'columns'}, up to ${R.perRow} in each`;
+  const how=R.mode==='alt'?(R.fr==='H'?'every other row turned 180°':'every other column turned 180°'):'all facing the same way';
+  return{grid,how:how+(R.o===90||R.o===270?', turned 90° on the sheet':'')+(R.stagger?', rows offset':'')}}
+function renderNestStats(){const el=$('#nStats'),sum=$('#nSum');
+  if(!NEST){el.innerHTML='<p class="hint">Working out the layout…</p>';sum.textContent='';return}
+  if(!NEST.count){el.innerHTML=`<p class="hint nerr">${NEST.error}</p>`;sum.textContent=NEST.error;return}
+  const N=S.nest,d=nestDesc(),dieA=G.P.reduce((s,p)=>s+panelArea(p),0),used=NEST.count*dieA/(N.sw*N.sh)*100,saved=NEST.rawCut-NEST.knife,sheets=Math.ceil((N.qty||0)/NEST.count);
+  el.innerHTML=`<div class="nbig"><b>${NEST.count}</b><span>boxes per sheet</span></div>
+    <dl class="spec"><div><dt>Layout</dt><dd>${d.grid}</dd></div><div><dt>Direction</dt><dd class="txt">${d.how}</dd></div>
+    <div><dt>Sheet used</dt><dd>${used.toFixed(1)}%</dd></div><div><dt>Knife per sheet</dt><dd>${fmtLen(NEST.knife)}</dd></div>
+    <div><dt>Saved by shared cuts</dt><dd>${saved>1?`${fmtLen(saved)} (${(saved/NEST.rawCut*100).toFixed(0)}%)`:"None. No edges line up"}</dd></div>
+    <div><dt>Sheets for ${(N.qty||0).toLocaleString()} boxes</dt><dd>${sheets.toLocaleString()}</dd></div></dl>`;
+  sum.textContent=`${NEST.count} per sheet · ${d.grid} · ${used.toFixed(0)}% used`}
+function renderNest(){const svgN=$('#svgNest'),N=S.nest,Ws=N.sw,Hs=N.sh,pad=Math.max(Ws,Hs)*0.085,fs=Math.max(Ws,Hs)/58;
+  svgN.setAttribute('viewBox',`${-pad} ${-pad} ${Ws+2*pad} ${Hs+2*pad}`);
+  const t=(x,y,s,rot)=>`<text class="dimt lbl" x="${x}" y="${y}" font-size="${fs*0.75}" stroke-width="${fs*0.22}" text-anchor="middle" dominant-baseline="middle"${rot?` transform="rotate(-90 ${x} ${y})"`:''}>${s}</text>`;
+  const hd=(x0,x1,y,s)=>{const k=pad*0.1;return`<path class="dim" d="M${x0} ${y}H${x1}M${x0} ${y-k}v${2*k}M${x1} ${y-k}v${2*k}"/>`+t((x0+x1)/2,y-fs*0.75,s)};
+  const vd=(y0,y1,x,s)=>{const k=pad*0.1;return`<path class="dim" d="M${x} ${y0}V${y1}M${x-k} ${y0}h${2*k}M${x-k} ${y1}h${2*k}"/>`+t(x-fs*0.75,(y0+y1)/2,s,true)};
+  let body=`<rect class="nsheet" x="0" y="0" width="${Ws}" height="${Hs}"/>
+    <rect class="ngrip" x="0" y="0" width="${Ws}" height="${N.grip}"/>${N.grip>fs?`<text class="ngript" x="${Ws/2}" y="${N.grip/2}" font-size="${Math.min(fs*0.7,N.grip*0.6)}" text-anchor="middle" dominant-baseline="middle">GRIPPER EDGE</text>`:''}
+    <rect class="nusable" x="${N.mar}" y="${N.grip}" width="${Math.max(0,Ws-2*N.mar)}" height="${Math.max(0,Hs-N.grip-N.mar)}"/>`;
+  if(NEST&&NEST.count){
+    if($('#nArt').checked)body+=`<image id="nArtImg" x="0" y="0" width="${Ws}" height="${Hs}" preserveAspectRatio="none" href="${nestArtURL||''}"/>`;
+    body+=`<path class="fold" stroke-dasharray="${(fs*0.4).toFixed(2)} ${(fs*0.28).toFixed(2)}" d="${pathD(NEST.fold)}"/><path class="cut" d="${pathD(NEST.cut)}"/>`;
+    if($('#nDims').checked){const[b0,b1,b2,b3]=NEST.bb;body+=hd(b0,b2,Hs+pad*0.55,`${fmtS(b2-b0)} layout`)+vd(b1,b3,Ws+pad*0.62,`${fmtS(b3-b1)}`)}
+  }
+  if($('#nDims').checked)body+=hd(0,Ws,-pad*0.5,`${fmtS(Ws)} sheet`)+vd(0,Hs,-pad*0.38,fmtS(Hs));
+  svgN.innerHTML=body}
+function nestArtLater(){clearTimeout(nestArtTimer);nestArtTimer=setTimeout(renderNestArt,300)}
+function renderNestArt(){if(!nestView()||!NEST||!NEST.count||!$('#nArt').checked||!artCanvas.width)return;
+  const N=S.nest,s=Math.min(2400/N.sw,2400/N.sh),c=document.createElement('canvas');c.width=Math.round(N.sw*s);c.height=Math.round(N.sh*s);
+  drawNestArt(c.getContext('2d'),s,artCanvas);
+  c.toBlob(b=>{if(!b)return;const old=nestArtURL;nestArtURL=URL.createObjectURL(b);const im=$('#nArtImg');if(im)im.setAttribute('href',nestArtURL);if(old)setTimeout(()=>URL.revokeObjectURL(old),1500)},'image/png')}
+function syncNestUI(){const N=S.nest,u=U(),show=v=>+(v/u.mm).toFixed(u.show);
+  $$('.su').forEach(e=>e.textContent=S.unit);
+  [['nSW',N.sw],['nSH',N.sh],['nGrip',N.grip],['nMar',N.mar]].forEach(([id,v])=>{$('#'+id).value=show(v);$('#'+id).step=u.step});
+  const idx=SHEETS.findIndex(([w,h])=>Math.abs(w*25.4-N.sw)<0.5&&Math.abs(h*25.4-N.sh)<0.5);
+  $('#nPreset').innerHTML='<option value="">Custom sheet</option>'+SHEETS.map(([w,h],i)=>`<option value="${i}">${h} × ${w} in${S.unit==='cm'?` (${(h*2.54).toFixed(1)} × ${(w*2.54).toFixed(1)} cm)`:''}${w===48?' · corrugated':''}</option>`).join('');
+  $('#nPreset').value=idx<0?'':String(idx);
+  $('#nMode').value=N.mode;$('#nRot').checked=N.rot;$('#nQty').value=N.qty;
+  if(NEST){renderNestStats();renderNest()}}
+$('#nPreset').onchange=e=>{const p=SHEETS[e.target.value];if(!p)return;S.nest.sw=p[0]*25.4;S.nest.sh=p[1]*25.4;syncNestUI();scheduleNest();saveDraft()};
+[['nSW','sw',25],['nSH','sh',25],['nGrip','grip',0],['nMar','mar',0]].forEach(([id,k,min])=>$('#'+id).addEventListener('change',e=>{const v=parseFloat(e.target.value);if(isFinite(v))S.nest[k]=clamp(v*U().mm,min,3000);syncNestUI();scheduleNest();saveDraft()}));
+$('#nSwap').onclick=()=>{[S.nest.sw,S.nest.sh]=[S.nest.sh,S.nest.sw];syncNestUI();scheduleNest();saveDraft()};
+$('#nMode').onchange=e=>{S.nest.mode=e.target.value;scheduleNest();saveDraft()};
+$('#nRot').onchange=e=>{S.nest.rot=e.target.checked;scheduleNest();saveDraft()};
+$('#nQty').addEventListener('input',e=>{const v=parseInt(e.target.value,10);S.nest.qty=isFinite(v)&&v>0?v:0;renderNestStats();saveDraft()});
+$('#nShow').onclick=()=>{segSet('viewSeg','sheet');$('#panes').dataset.view='sheet';nestArtLater();$('#panes').scrollIntoView({block:'start'})};
+['nArt','nDims'].forEach(id=>$('#'+id).addEventListener('change',()=>{renderNest();nestArtLater()}));
+const nestReady=()=>{if(!NEST||!NEST.count){toast(NEST?NEST.error:'Still working out the layout. Try again in a moment.');return false}return true};
+const nestName=ext=>`${baseName()}-${NEST.count}up-sheet.${ext}`;
+$('#btnNSvg').onclick=()=>{if(!nestReady())return;const N=S.nest;
+  const out=`<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="${N.sw.toFixed(3)}mm" height="${N.sh.toFixed(3)}mm" viewBox="0 0 ${N.sw.toFixed(3)} ${N.sh.toFixed(3)}">
+<title>${NEST.count}-up ${TYPES[S.type].name} on ${fmtS(N.sh)} × ${fmtS(N.sw)} sheet, shared cut lines</title>
+<g id="SHEET" fill="none" stroke="#000000" stroke-width="0.3"><rect x="0" y="0" width="${N.sw.toFixed(3)}" height="${N.sh.toFixed(3)}"/><path stroke-dasharray="3 2" d="M0 ${N.grip.toFixed(3)}H${N.sw.toFixed(3)}"/></g>
+<g id="CREASE" fill="none" stroke="#00AEEF" stroke-width="0.3" stroke-dasharray="2 1.2"><path d="${pathD(NEST.fold)}"/></g>
+<g id="CUT" fill="none" stroke="#ED1C24" stroke-width="0.3"><path d="${pathD(NEST.cut)}"/></g>
+</svg>`;
+  download(new Blob([out],{type:'image/svg+xml'}),nestName('svg'));toast('Sheet layout SVG downloaded')};
+$('#btnNDxf').onclick=()=>{if(!nestReady())return;const N=S.nest,H=N.sh,layer=(n,c)=>`0\nLAYER\n2\n${n}\n70\n0\n62\n${c}\n6\nCONTINUOUS\n`;
+  let s=`0\nSECTION\n2\nHEADER\n9\n$INSUNITS\n70\n4\n0\nENDSEC\n0\nSECTION\n2\nTABLES\n0\nTABLE\n2\nLAYER\n70\n3\n${layer('SHEET',7)}${layer('CUT',1)}${layer('CREASE',5)}0\nENDTAB\n0\nENDSEC\n0\nSECTION\n2\nENTITIES\n`;
+  const ln=(l,[a,b])=>`0\nLINE\n8\n${l}\n10\n${a[0].toFixed(3)}\n20\n${(H-a[1]).toFixed(3)}\n30\n0\n11\n${b[0].toFixed(3)}\n21\n${(H-b[1]).toFixed(3)}\n31\n0\n`;
+  const W=N.sw;[[[0,0],[W,0]],[[W,0],[W,H]],[[W,H],[0,H]],[[0,H],[0,0]]].forEach(x=>s+=ln('SHEET',x));
+  NEST.cut.forEach(x=>s+=ln('CUT',x));NEST.fold.forEach(x=>s+=ln('CREASE',x));
+  s+='0\nENDSEC\n0\nEOF\n';download(new Blob([s],{type:'application/dxf'}),nestName('dxf'));toast('Sheet layout DXF downloaded')};
+$('#btnNPng').onclick=()=>{if(!nestReady())return;const N=S.nest,dpi=+$('#dpi').value;let s=dpi/25.4;
+  if(N.sw*N.sh*s*s>80e6)s=Math.sqrt(80e6/(N.sw*N.sh));s=Math.min(s,16000/N.sw,16000/N.sh);
+  const as=Math.min(s,8000/G.netW,8000/G.netH),art=document.createElement('canvas');art.width=Math.round(G.netW*as);art.height=Math.round(G.netH*as);renderArt(art.getContext('2d'),as);
+  const c=document.createElement('canvas');c.width=Math.round(N.sw*s);c.height=Math.round(N.sh*s);const ctx=c.getContext('2d');
+  drawNestArt(ctx,s,art);
+  if($('#pngLines').checked){ctx.save();ctx.scale(s,s);ctx.lineWidth=0.3;const draw=a=>{ctx.beginPath();a.forEach(([p,q])=>{ctx.moveTo(p[0],p[1]);ctx.lineTo(q[0],q[1])});ctx.stroke()};
+    ctx.strokeStyle='#ED1C24';draw(NEST.cut);ctx.setLineDash([2,1.2]);ctx.strokeStyle='#00AEEF';draw(NEST.fold);ctx.restore()}
+  c.toBlob(b=>{if(!b){toast('The sheet is too large to export as one PNG at this resolution.');return}download(b,nestName('png'));toast(s<dpi/25.4-0.01?`Sheet PNG saved at ${Math.round(s*25.4)} dpi to keep the file a workable size`:'Sheet print PNG downloaded')},'image/png')};
+
+/* ---------- draft (per-browser convenience) ---------- */
+let draftT;function saveDraft(){clearTimeout(draftT);draftT=setTimeout(()=>{try{localStorage.setItem('bds-draft',JSON.stringify(S))}catch(_){}},600)}
+try{const d=JSON.parse(localStorage.getItem('bds-draft')||'null');if(d&&d.faces&&d.type){S=loadState(d);$('#sampleNote').hidden=true}}catch(_){}
+
+syncUI();rebuild();
+if(document.fonts)Promise.all(FONTS.map(f=>document.fonts.load(`${f[1]} 24px "${f[0]}"`).catch(()=>{}))).then(scheduleArt);
+
+})();
+</script>
