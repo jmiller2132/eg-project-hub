@@ -1,0 +1,151 @@
+{
+  "_help": "Every card on the hub. Edit this file to add, change or hide a tool. See CLAUDE.md / README.md.",
+  "sections": [
+    {
+      "id": "apps",
+      "eyebrow": "Operations",
+      "title": "Web Apps",
+      "blurb": "Order, store and fulfillment tools. Open and go.",
+      "items": [
+        {
+          "name": "ShopWorks Bulk Order Import",
+          "description": "Turn a bulk order CSV into a ShopWorks import file. Replaces the old GUI_V2 desktop program.",
+          "icon": "clip",
+          "url": "/tools/order-import.html",
+          "tag": "Web"
+        },
+        {
+          "name": "Quote Builder",
+          "description": "Garment cost and quantities in, a priced quote and customer presentation out.",
+          "icon": "calc",
+          "url": "/tools/quote-builder.html",
+          "tag": "Web"
+        },
+        {
+          "name": "Customer Inventory Report",
+          "description": "Drop in Brightsites inventory exports and get a branded customer report with reorders first.",
+          "icon": "chart",
+          "url": "/tools/inventory-report.html",
+          "tag": "Web"
+        },
+        {
+          "name": "Random Code Generator",
+          "description": "Unique code batches for promos, rewards and store redemptions, with Excel-safe CSV export.",
+          "icon": "hash",
+          "url": "/tools/code-generator.html",
+          "tag": "Web"
+        },
+        {
+          "name": "BrightSites Packing Slips",
+          "description": "Generate and print packing slips for BrightSites orders.",
+          "icon": "truck",
+          "url": "https://brightsites-packing-slips.vercel.app/",
+          "tag": "Live",
+          "hidden": true
+        },
+        {
+          "name": "EG Store Manager",
+          "description": "Manage company and team web stores from one dashboard.",
+          "icon": "store",
+          "url": "https://eg-store-manager.vercel.app/",
+          "tag": "Live"
+        },
+        {
+          "name": "Discrepancy Report",
+          "description": "Log and track receiving discrepancies against POs.",
+          "icon": "alert",
+          "url": "https://eg-discrepancy-report.vercel.app/",
+          "tag": "Live"
+        }
+      ]
+    },
+    {
+      "id": "studios",
+      "eyebrow": "Art Department",
+      "title": "Design Studios",
+      "blurb": "Prompt builders and layout tools for the art team. Each opens in a new tab.",
+      "shaded": true,
+      "items": [
+        {
+          "name": "Design Prompt Studio",
+          "description": "Batch of 1–24 screen-print-ready vector prompts, tuned by niche, audience and ink count.",
+          "icon": "shirt",
+          "url": "/tools/design-prompt-studio.html",
+          "tag": "v2.1"
+        },
+        {
+          "name": "Sign & Vehicle Wrap Prompt Studio",
+          "description": "Prompt generator for Eagle Sign & Design wraps, banners and signage concepts.",
+          "icon": "car",
+          "url": "/tools/vehicle-wrap-prompt-studio.html",
+          "tag": "v2.1"
+        },
+        {
+          "name": "Web Store Banner Studio",
+          "description": "Build store header banners with live preview and brand-ready type.",
+          "icon": "flag",
+          "url": "/tools/web-store-banner-studio.html",
+          "tag": "v10"
+        },
+        {
+          "name": "Background Knockout Studio",
+          "description": "Remove backgrounds from product photos and logos right in the browser. Batch several and download as a zip.",
+          "icon": "scissors",
+          "url": "/tools/background-knockout-studio.html",
+          "tag": "Images"
+        },
+        {
+          "name": "Box Dieline Studio",
+          "description": "Build a packaging dieline from 20 box styles, add artwork, fold it in 3D and export for print.",
+          "icon": "box",
+          "url": "/tools/box-dieline-studio.html",
+          "tag": "Packaging"
+        },
+        {
+          "name": "Eagle Flyer Builder",
+          "description": "Lay out promotional flyers from templates and export for print.",
+          "icon": "file",
+          "url": "/tools/flyer-builder.html",
+          "tag": "v10"
+        }
+      ]
+    },
+    {
+      "id": "resources",
+      "eyebrow": "Reference",
+      "title": "Resources",
+      "blurb": "Templates, email tools and brand standards.",
+      "items": [
+        {
+          "name": "Bulk Order CSV Template",
+          "description": "Column layout for the ShopWorks Bulk Order Import: locations, designs, style, size, color, quantity, price.",
+          "icon": "table",
+          "url": "/downloads/GUITemplate.csv",
+          "tag": "CSV",
+          "download": true
+        },
+        {
+          "name": "Brand Guide",
+          "description": "Logo downloads, colors with codes, fonts and writing rules. Start here before building anything new.",
+          "icon": "palette",
+          "url": "/tools/brand-guide.html",
+          "tag": "Brand"
+        },
+        {
+          "name": "Email Signature Builder",
+          "description": "Build a branded Eagle Graphics email signature and copy it straight into Outlook.",
+          "icon": "mail",
+          "url": "/tools/email-signature-builder.html",
+          "tag": "Email"
+        },
+        {
+          "name": "Email Templates",
+          "description": "Plug-and-play Constant Contact e-blast templates: store launches, product grids, promos and more.",
+          "icon": "layout",
+          "url": "/tools/email-templates.html",
+          "tag": "Email"
+        }
+      ]
+    }
+  ]
+}
