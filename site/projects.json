@@ -12,14 +12,16 @@
           "description": "Turn a bulk order CSV into a ShopWorks import file. Replaces the old GUI_V2 desktop program.",
           "icon": "clip",
           "url": "/tools/order-import.html",
-          "tag": "Web"
+          "tag": "Web",
+          "beta": "New web version. Compare the first few files against the old program before importing."
         },
         {
           "name": "Quote Builder",
           "description": "Garment cost and quantities in, a priced quote and customer presentation out.",
           "icon": "calc",
           "url": "/tools/quote-builder.html",
-          "tag": "Web"
+          "tag": "Web",
+          "beta": true
         },
         {
           "name": "Customer Inventory Report",
@@ -68,7 +70,7 @@
       "items": [
         {
           "name": "Design Prompt Studio",
-          "description": "Batch of 1–24 screen-print-ready vector prompts, tuned by niche, audience and ink count.",
+          "description": "Batch of 1\u201324 screen-print-ready vector prompts, tuned by niche, audience and ink count.",
           "icon": "shirt",
           "url": "/tools/design-prompt-studio.html",
           "tag": "v2.1"
@@ -92,14 +94,16 @@
           "description": "Remove backgrounds from product photos and logos right in the browser. Batch several and download as a zip.",
           "icon": "scissors",
           "url": "/tools/background-knockout-studio.html",
-          "tag": "Images"
+          "tag": "Images",
+          "beta": true
         },
         {
           "name": "Box Dieline Studio",
           "description": "Build a packaging dieline from 20 box styles, add artwork, fold it in 3D and export for print.",
           "icon": "box",
           "url": "/tools/box-dieline-studio.html",
-          "tag": "Packaging"
+          "tag": "Packaging",
+          "beta": true
         },
         {
           "name": "Eagle Flyer Builder",

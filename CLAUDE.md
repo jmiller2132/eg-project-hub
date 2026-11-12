@@ -49,6 +49,9 @@ every commit to `main` deploys to production in about a minute. Owner: Jeff Mill
    - External apps use their full `https://` URL.
    - `"download": true` for files that should download instead of open.
    - `"comingSoon": true` with no `url` for a placeholder card.
+   - `"beta": true` adds a Beta label and a "still in the works" note. Use a string instead of
+     `true` for a custom note, e.g. `"beta": "Compare against the old program first."` Remove it once
+     the tool is proven.
 4. Run `python build.py`, test, commit, open a PR (or push, if Jeff says so).
 
 ### Hide or remove a tool

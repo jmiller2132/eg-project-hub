@@ -69,7 +69,8 @@ a.card:active{transform:translateY(-1px)}
 .go svg{width:16px;height:16px;transition:transform 140ms var(--ease)}
 a.card:hover .go{color:var(--g800)}
 a.card:hover .go svg{transform:translateX(2px)}
-.tag{position:absolute;top:20px;right:20px;font:600 10px/1 var(--body);text-transform:uppercase;letter-spacing:.1em;padding:5px 8px;border-radius:2px;border:1px solid var(--k300);color:var(--k600);background:#fff}
+.flags{position:absolute;top:20px;right:20px;display:flex;gap:6px}
+.tag{font:600 10px/1 var(--body);text-transform:uppercase;letter-spacing:.1em;padding:5px 8px;border-radius:2px;border:1px solid var(--k300);color:var(--k600);background:#fff}
 .tag.live{border-color:var(--g600);color:var(--g700)}
 .tag.win{border-color:var(--k400)}
 .card.soon{background:var(--k100);border-style:dashed}
@@ -77,6 +78,9 @@ a.card:hover .go svg{transform:translateX(2px)}
 .card.soon .go{color:var(--k500)}
 .card.pending{pointer-events:none}
 .card.pending .tag{border-color:#c98a12;color:#8a5d0a}
+.beta{font:700 10px/1 var(--body);text-transform:uppercase;letter-spacing:.1em;padding:5px 8px;border-radius:2px;background:#fdf1dc;color:#8a5d0a;border:1px solid #f0d39a}
+.betanote{display:flex;gap:6px;align-items:flex-start;margin:10px 0 0;font-size:12.5px;line-height:1.5;color:#8a5d0a}
+.betanote::before{content:"";flex:none;width:6px;height:6px;margin-top:7px;background:#d98800}
 .hidden{display:none!important}
 .loaderr{margin:48px 0;padding:16px 18px;border:1px solid #f4b4ac;background:#fdecea;color:#b42318;border-radius:3px;font-size:14px}
 .empty{display:none;padding:40px 0;color:var(--k600)}
@@ -155,15 +159,15 @@ function render(data){
     g.items.forEach(x=>{
       count++;
       const ic=`<div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${iconFor(x.icon)}</svg></div>`;
-      const find=esc((x.name+" "+x.description+" "+g.title).toLowerCase());
+      const find=esc((x.name+" "+x.description+" "+g.title+(x.beta?" beta":"")).toLowerCase());
       if(x.comingSoon||!x.url){
-        grid.insertAdjacentHTML("beforeend",`<div class="card soon" data-s="${find}"><span class="tag">Coming Soon</span>${ic}<h3>${esc(x.name)}</h3><p>${esc(x.description)}</p><div class="meta"><span class="where">Not linked yet</span><span class="go">Pending</span></div></div>`);
+        grid.insertAdjacentHTML("beforeend",`<div class="card soon" data-s="${find}"><span class="flags"><span class="tag">Coming Soon</span></span>${ic}<h3>${esc(x.name)}</h3><p>${esc(x.description)}</p><div class="meta"><span class="where">Not linked yet</span><span class="go">Pending</span></div></div>`);
         return;
       }
       const tagCls=(x.tag==="Live"||x.tag==="Web")?"tag live":"tag";
       const attrs=x.download?` download`:` target="_blank" rel="noopener"`;
       const local=x.url.startsWith("/");
-      grid.insertAdjacentHTML("beforeend",`<a class="card" href="${esc(x.url)}"${attrs} data-s="${find}"${local?` data-local="${esc(x.url)}"`:""}>${x.tag?`<span class="${tagCls}">${esc(x.tag)}</span>`:""}${ic}<h3>${esc(x.name)}</h3><p>${esc(x.description)}</p><div class="meta"><span class="where">${esc(host(x.url))}</span><span class="go">${x.download?"Download "+DL:"Open "+ARROW}</span></div></a>`);
+      grid.insertAdjacentHTML("beforeend",`<a class="card" href="${esc(x.url)}"${attrs} data-s="${find}"${local?` data-local="${esc(x.url)}"`:""}><span class="flags">${x.beta?`<span class="beta">Beta</span>`:""}${x.tag?`<span class="${tagCls}">${esc(x.tag)}</span>`:""}</span>${ic}<h3>${esc(x.name)}</h3><p>${esc(x.description)}</p>${x.beta?`<p class="betanote">${esc(typeof x.beta==="string"?x.beta:"Still in the works. Double-check results before relying on them.")}</p>`:""}<div class="meta"><span class="where">${esc(host(x.url))}</span><span class="go">${x.download?"Download "+DL:"Open "+ARROW}</span></div></a>`);
     });
     main.appendChild(s);
   });

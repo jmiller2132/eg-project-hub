@@ -33,8 +33,9 @@ for s in data.get("sections", []):
         if x.get("icon") not in icons: problems.append(f"{where}: icon '{x.get('icon')}' doesn't exist. Use one of: {', '.join(sorted(icons))}.")
         url = x.get("url", "")
         if not url and not x.get("comingSoon"): problems.append(f"{where} has no url (add one, or set \"comingSoon\": true).")
+        if "beta" in x and not isinstance(x["beta"], (bool, str)): problems.append(f"{where}: beta must be true or a short note in quotes.")
         if url.startswith("/") and not (site / url.lstrip("/")).exists(): problems.append(f"{where} points to {url}, but that file isn't in site/.")
-        unknown = set(x) - {"name", "description", "icon", "url", "tag", "download", "comingSoon", "hidden"}
+        unknown = set(x) - {"name", "description", "icon", "url", "tag", "download", "comingSoon", "hidden", "beta"}
         if unknown: problems.append(f"{where} has unknown field(s): {', '.join(sorted(unknown))}.")
 if problems:
     sys.exit("projects.json has problems:\n- " + "\n- ".join(problems))
