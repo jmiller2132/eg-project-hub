@@ -641,6 +641,17 @@ function mergeSettings(src){
   for (const k in out.lines) Object.assign(out.lines[k], (src && src.lines && src.lines[k]) || {});
   return out;
 }
+/* Outside Claude (the hub): a normal browser download. Returns false if the browser refused. */
+function browserDownload(data, name, type){
+  if (window.claude) return false;
+  try {
+    const blob = data instanceof Blob ? data : new Blob([data], {type});
+    const url = URL.createObjectURL(blob), a = document.createElement("a");
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+    return true;
+  } catch (e) { return false; }
+}
 function projStatus(t){ $("projStatus").textContent = t; }
 $("saveProj").addEventListener("click", async () => {
   $("projFallback").hidden = true;
@@ -656,6 +667,7 @@ $("saveProj").addEventListener("click", async () => {
       if (err && err.code==="rate_limited"){ projStatus("A save prompt is already open. Finish it, then try again."); return; }
     }
   }
+  if (browserDownload(text, name, "application/json")){ projStatus(`Downloaded ${name}. Use Open Project to pick up where you left off.`); return; }
   $("projText").value = text; $("projFallback").hidden = false; projStatus("");
 });
 $("copyProj").addEventListener("click", () => {
@@ -1213,15 +1225,7 @@ $("exportBtn").addEventListener("click", async () => {
       if (err && err.code==="rate_limited"){ setStatus("A save prompt is already open. Finish it, then try again."); return; }
     }
   }
-  /* Outside Claude (the hub): a normal browser download. */
-  if (!window.claude){
-    try {
-      const url = URL.createObjectURL(blob), a = document.createElement("a");
-      a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 2000);
-      setStatus(`Downloaded ${name} (${S.w} × ${S.h}).` + fontNote); return;
-    } catch (e) { /* fall through to the save-image fallback */ }
-  }
+  if (browserDownload(blob, name)){ setStatus(`Downloaded ${name} (${S.w} × ${S.h}).` + fontNote); return; }
   $("fallbackImg").src = URL.createObjectURL(blob); $("fallback").hidden = false;
   setStatus(`${name} is ready below.`);
 });
