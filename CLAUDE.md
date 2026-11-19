@@ -76,6 +76,11 @@ Tools usually come from Claude chats or Claude Design. Check each one for:
   ```
 - **Claude-only features:** search for `window.claude`, `sendPrompt`, `window.storage` and links to
   `claude.ai`. These don't work for people without Claude. Tell the user what won't work.
+- **Saving through Claude only:** tools built in Claude often save files with
+  `window.claude.use("downloads")` and otherwise show "Saving isn't available in this view". On the
+  hub that means nothing downloads. Add a normal browser download for when `window.claude` is missing
+  (see `browserDownload()` in `site/tools/web-store-banner-studio.html`) and call it before the
+  fallback. Check every save button: banner, project file, CSV, and so on.
 - **Outside requests:** list any `fetch()` calls and CDN scripts. Public CDNs are fine.
 
 ## Design
