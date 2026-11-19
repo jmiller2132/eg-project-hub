@@ -319,10 +319,12 @@ button{font:inherit;cursor:pointer;border-radius:3px}
           <div class="row">
             <label class="f" style="flex:2 1 160px"><span>File name</span><input type="text" id="fname" data-k="fname" placeholder="store-banner"></label>
             <label class="f"><span>Format</span><select id="fmt" data-k="fmt"><option value="png">PNG</option><option value="jpg">JPG</option><option value="svg">SVG (vector)</option></select></label>
+            <label class="f"><span>Resolution</span><select id="scale" data-k="scale"><option value="1">1× (exact size)</option><option value="2">2× sharp (recommended)</option><option value="3">3× extra sharp</option></select></label>
           </div>
           <div class="btns">
             <button class="btn primary" id="exportBtn" type="button">Download Banner</button>
           </div>
+          <p class="hint">2× is the same layout with twice the pixels, so it stays crisp full width and on high-resolution screens. Upload it at the size the store asks for and it scales down cleanly. SVG ignores this setting.</p>
           <p class="status" id="status" role="status"></p>
           <div class="fallback" id="fallback" hidden>
             <p class="hint">Saving isn't available in this view. Right-click (or long-press) the image below and choose Save image.</p>
@@ -357,7 +359,7 @@ const DEFAULTS = {
   pattern:"mesh", patternAlpha:10, photoDim:60,
   logoPos:"inherit", logoSize:22,
   effect:"shadow", effectColor:"#F2B33D", badgeShape:"slant", upperTitle:true, underline:true,
-  fname:"pivot-point-store-banner", fmt:"png",
+  fname:"pivot-point-store-banner", fmt:"png", scale:"2",
   sides:[], pos:{},
   lines:{
     eyebrow:{on:true,text:"2026 Team Store",font:"Saira Condensed",size:7,color:"#F2B33D",italic:false},
@@ -488,6 +490,7 @@ function syncInputs(){
   });
   if (!(S.logoSize >= 8 && S.logoSize <= 45)) S.logoSize = 22;
   if (!["inherit","left","center","right"].includes(S.logoPos)) S.logoPos = "inherit";
+  if (!["1","2","3"].includes(String(S.scale))) S.scale = "2";
   $("logoPos").value = S.logoPos; $("logoSize").value = S.logoSize;
   $("badge-autocolor").checked = S.lines.badge.color==="auto";
   $("badge-color").disabled = S.lines.badge.color==="auto";
@@ -730,7 +733,7 @@ document.querySelectorAll(".reset-btn").forEach(btn => {
   const rail = document.querySelector(".rail");
   const wake = () => { if (cleared){ cleared = false; schedule(); } };
   rail.addEventListener("input", e => { if (e.target.id !== "fname") wake(); }, true);
-  rail.addEventListener("change", e => { if (!["fname","fmt"].includes(e.target.id)) wake(); }, true);
+  rail.addEventListener("change", e => { if (!["fname","fmt","scale"].includes(e.target.id)) wake(); }, true);
   rail.addEventListener("click", e => { if (e.target.closest("[data-style],[data-pal]")) wake(); }, true);
 }
 $("showGuide").addEventListener("change", drawGuide);
@@ -1203,29 +1206,31 @@ $("exportBtn").addEventListener("click", async () => {
   setStatus("Preparing image…"); $("fallback").hidden = true;
   await ensureFonts();
   const jpg = S.fmt==="jpg", svg = S.fmt==="svg";
-  let blob, svgFonts = [];
+  let blob, svgFonts = [], outW = S.w, outH = S.h;
   if (svg){
     const sctx = SvgCtx(S.w, S.h); render(sctx, S.w, S.h);
     svgFonts = sctx.fontsUsed();
     blob = new Blob([sctx.toSVG()], {type:"image/svg+xml"});
   } else {
-    const off = document.createElement("canvas"); off.width=S.w; off.height=S.h;
+    /* Draw at 2x or 3x the banner size: same layout, more pixels, so it stays sharp full width and on high-density screens. */
+    const k = Math.max(1, Math.min(3, parseInt(S.scale, 10) || 2)); outW = S.w*k; outH = S.h*k;
+    const off = document.createElement("canvas"); off.width=outW; off.height=outH;
     const ctx = off.getContext("2d");
-    if (jpg){ ctx.fillStyle="#FFFFFF"; ctx.fillRect(0,0,S.w,S.h); }
-    render(ctx, S.w, S.h);
+    if (jpg){ ctx.fillStyle="#FFFFFF"; ctx.fillRect(0,0,outW,outH); }
+    render(ctx, outW, outH);
     blob = await new Promise(r => off.toBlob(r, jpg ? "image/jpeg" : "image/png", 0.93));
   }
   const name = (S.fname || "store-banner").replace(/[^\w\-]+/g,"-").replace(/^-+|-+$/g,"") + (jpg ? ".jpg" : svg ? ".svg" : ".png");
   const fontNote = svg && svgFonts.length ? ` Install ${svgFonts.join(", ")} (free on Google Fonts) to edit the text in Illustrator.` : "";
   const dl = await downloadsP;
   if (dl){
-    try { await dl.save({filename:name, data:blob}); setStatus(`Saved ${name} (${S.w} × ${S.h}).` + fontNote); return; }
+    try { await dl.save({filename:name, data:blob}); setStatus(`Saved ${name} (${outW} × ${outH}${svg ? ", vector" : ""}).` + fontNote); return; }
     catch(err){
       if (err && err.code==="declined"){ setStatus("Download cancelled."); return; }
       if (err && err.code==="rate_limited"){ setStatus("A save prompt is already open. Finish it, then try again."); return; }
     }
   }
-  if (browserDownload(blob, name)){ setStatus(`Downloaded ${name} (${S.w} × ${S.h}).` + fontNote); return; }
+  if (browserDownload(blob, name)){ setStatus(`Downloaded ${name} (${outW} × ${outH}${svg ? ", vector" : ""}).` + fontNote); return; }
   $("fallbackImg").src = URL.createObjectURL(blob); $("fallback").hidden = false;
   setStatus(`${name} is ready below.`);
 });
