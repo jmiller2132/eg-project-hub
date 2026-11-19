@@ -84,7 +84,7 @@
         },
         {
           "name": "Web Store Banner Studio",
-          "description": "Build store header banners with live preview and brand-ready type.",
+          "description": "Build store header banners with a live preview. Download as PNG, JPG or SVG to edit in Illustrator.",
           "icon": "flag",
           "url": "/tools/web-store-banner-studio.html",
           "tag": "v10"

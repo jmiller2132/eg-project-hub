@@ -318,7 +318,7 @@ button{font:inherit;cursor:pointer;border-radius:3px}
         <div class="sec-body">
           <div class="row">
             <label class="f" style="flex:2 1 160px"><span>File name</span><input type="text" id="fname" data-k="fname" placeholder="store-banner"></label>
-            <label class="f"><span>Format</span><select id="fmt" data-k="fmt"><option value="png">PNG</option><option value="jpg">JPG</option></select></label>
+            <label class="f"><span>Format</span><select id="fmt" data-k="fmt"><option value="png">PNG</option><option value="jpg">JPG</option><option value="svg">SVG (vector)</option></select></label>
           </div>
           <div class="btns">
             <button class="btn primary" id="exportBtn" type="button">Download Banner</button>
@@ -1039,22 +1039,175 @@ function updateStore(){
   $("storeNote").textContent = S.lines.sub.on && S.lines.sub.text ? S.lines.sub.text : "Store details appear here.";
 }
 
+
+/* ---------- SVG export ----------
+   Records the same drawing calls render() makes on a canvas and writes them out as SVG,
+   so the vector file matches the preview. Text stays editable; photos and logos stay as images. */
+function SvgCtx(W, H){
+  const mc = document.createElement("canvas").getContext("2d");
+  const defs = [], body = [], imgCache = new Map(), fontsUsed = new Set();
+  let uid = 0, path = [], cur = null, start = null;
+  let st = { fillStyle:"#000", strokeStyle:"#000", lineWidth:1, lineJoin:"miter", globalAlpha:1, font:"10px sans-serif",
+    textAlign:"start", textBaseline:"alphabetic", letterSpacing:"0px", shadowColor:"transparent", shadowBlur:0,
+    shadowOffsetX:0, shadowOffsetY:0, m:[1,0,0,1,0,0], clip:null };
+  const stack = [];
+  const n = v => +(+v).toFixed(2);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const tp = (x,y) => { const m = st.m; return [m[0]*x + m[2]*y + m[4], m[1]*x + m[3]*y + m[5]]; };
+  const sc = () => Math.sqrt(Math.abs(st.m[0]*st.m[3] - st.m[1]*st.m[2]));
+  function color(c){
+    if (c && typeof c === "object") return { v:"url(#"+c.id+")", o:1 };
+    c = String(c||"").trim();
+    if (c === "transparent" || c === "none") return { v:"none", o:0 };
+    const m = c.match(/^rgba?\(([^)]+)\)$/i);
+    if (m){ const p = m[1].split(",").map(s=>s.trim()); const hex = "#" + p.slice(0,3).map(v => Math.round(+v).toString(16).padStart(2,"0")).join("");
+      return { v:hex, o: p.length > 3 ? +p[3] : 1 }; }
+    return { v:c, o:1 };
+  }
+  function shadowAttr(){
+    const c = color(st.shadowColor);
+    if (!c.o || (!st.shadowBlur && !st.shadowOffsetX && !st.shadowOffsetY)) return "";
+    const id = "sh" + (++uid);
+    defs.push(`<filter id="${id}" x="-20%" y="-20%" width="140%" height="160%"><feDropShadow dx="${n(st.shadowOffsetX)}" dy="${n(st.shadowOffsetY)}" stdDeviation="${n(st.shadowBlur/2)}" flood-color="${c.v}" flood-opacity="${n(c.o)}"/></filter>`);
+    return ` filter="url(#${id})"`;
+  }
+  const common = () => (st.globalAlpha < 1 ? ` opacity="${n(st.globalAlpha)}"` : "") + (st.clip ? ` clip-path="url(#${st.clip})"` : "");
+  function paint(kind){
+    const c = color(kind === "fill" ? st.fillStyle : st.strokeStyle);
+    if (kind === "fill") return ` fill="${c.v}"` + (c.o < 1 ? ` fill-opacity="${n(c.o)}"` : "");
+    return ` fill="none" stroke="${c.v}"` + (c.o < 1 ? ` stroke-opacity="${n(c.o)}"` : "") + ` stroke-width="${n(st.lineWidth*sc())}" stroke-linejoin="${st.lineJoin}"`;
+  }
+  /* Shapes drawn one after another with the same style (texture dots, stripes) become one path. */
+  let lastAttrs = null;
+  function emitPath(p){
+    if (!path.length) return;
+    const attrs = p + common(), sh = shadowAttr(), d = path.join("");
+    if (!sh && attrs === lastAttrs && body.length && body[body.length-1].startsWith('<path d="')){
+      body[body.length-1] = body[body.length-1].replace(/^<path d="([^"]*)"/, (m, old) => `<path d="${old}${d}"`);
+      return;
+    }
+    body.push(`<path d="${d}"${attrs}${sh}/>`); lastAttrs = sh ? null : attrs;
+  }
+  function moveAbs(x,y){ path.push(`M${n(x)} ${n(y)}`); cur = [x,y]; start = [x,y]; }
+  function lineAbs(x,y){ if (!cur) return moveAbs(x,y); path.push(`L${n(x)} ${n(y)}`); cur = [x,y]; }
+  function arcAbs(cx, cy, r, a0, a1, ccw){
+    let sweep = ccw ? a0 - a1 : a1 - a0;
+    if (sweep < 0) sweep += Math.PI*2;
+    if (Math.abs(a1 - a0) >= Math.PI*2 - 1e-6) sweep = Math.PI*2;
+    const sx = cx + r*Math.cos(a0), sy = cy + r*Math.sin(a0);
+    cur ? lineAbs(sx, sy) : moveAbs(sx, sy);
+    const steps = sweep > Math.PI ? 2 : 1, dir = ccw ? -1 : 1;
+    for (let i = 1; i <= steps; i++){
+      const a = a0 + dir*sweep*i/steps, x = cx + r*Math.cos(a), y = cy + r*Math.sin(a);
+      path.push(`A${n(r)} ${n(r)} 0 0 ${ccw ? 0 : 1} ${n(x)} ${n(y)}`); cur = [x,y];
+    }
+  }
+  function imgData(img){
+    if (imgCache.has(img)) return imgCache.get(img);
+    let d = img.src && /^data:image\//.test(img.src) ? img.src : "";
+    if (!d){ const c = document.createElement("canvas"); c.width = img.naturalWidth || img.width; c.height = img.naturalHeight || img.height;
+      c.getContext("2d").drawImage(img, 0, 0); d = c.toDataURL("image/png"); }
+    imgCache.set(img, d); return d;
+  }
+  const ctx = {
+    get canvas(){ return { width:W, height:H }; },
+    save(){ stack.push({ ...st, m: st.m.slice() }); },
+    restore(){ if (stack.length) st = stack.pop(); },
+    translate(x,y){ const m = st.m; m[4] += m[0]*x + m[2]*y; m[5] += m[1]*x + m[3]*y; },
+    scale(a,b){ const m = st.m; m[0]*=a; m[1]*=a; m[2]*=b; m[3]*=b; },
+    beginPath(){ path = []; cur = null; start = null; },
+    closePath(){ if (path.length){ path.push("Z"); cur = start ? start.slice() : null; } },
+    moveTo(x,y){ const [a,b] = tp(x,y); moveAbs(a,b); },
+    lineTo(x,y){ const [a,b] = tp(x,y); lineAbs(a,b); },
+    rect(x,y,w,h){ this.moveTo(x,y); this.lineTo(x+w,y); this.lineTo(x+w,y+h); this.lineTo(x,y+h); this.closePath(); },
+    arc(x,y,r,a0,a1,ccw){ const [cx,cy] = tp(x,y); arcAbs(cx, cy, r*sc(), a0, a1, !!ccw); },
+    arcTo(x1,y1,x2,y2,r){
+      const [p1x,p1y] = tp(x1,y1), [p2x,p2y] = tp(x2,y2); r *= sc();
+      if (!cur){ moveAbs(p1x,p1y); return; }
+      const [p0x,p0y] = cur, v1x = p0x-p1x, v1y = p0y-p1y, v2x = p2x-p1x, v2y = p2y-p1y;
+      const l1 = Math.hypot(v1x,v1y), l2 = Math.hypot(v2x,v2y);
+      const ang = Math.acos(Math.max(-1, Math.min(1, (v1x*v2x + v1y*v2y)/(l1*l2 || 1))));
+      if (!r || !l1 || !l2 || Math.abs(Math.sin(ang)) < 1e-9){ lineAbs(p1x,p1y); return; }
+      const d = r/Math.tan(ang/2), t1 = [p1x + v1x/l1*d, p1y + v1y/l1*d], t2 = [p1x + v2x/l2*d, p1y + v2y/l2*d];
+      const cross = v1x*v2y - v1y*v2x;
+      lineAbs(t1[0], t1[1]);
+      path.push(`A${n(r)} ${n(r)} 0 0 ${cross > 0 ? 0 : 1} ${n(t2[0])} ${n(t2[1])}`); cur = t2;
+    },
+    fill(){ emitPath(paint("fill")); },
+    stroke(){ emitPath(paint("stroke")); },
+    fillRect(x,y,w,h){ const keep = [path, cur, start]; this.beginPath(); this.rect(x,y,w,h); this.fill(); [path, cur, start] = keep; },
+    clearRect(){},
+    clip(){
+      const id = "cl" + (++uid);
+      defs.push(`<clipPath id="${id}"${st.clip ? ` clip-path="url(#${st.clip})"` : ""}><path d="${path.join("")}"/></clipPath>`);
+      st.clip = id;
+    },
+    createLinearGradient(x0,y0,x1,y1){
+      const [a,b] = tp(x0,y0), [c,d] = tp(x1,y1), stops = [], id = "gr" + (++uid);
+      const g = { id, addColorStop(o, col){ const k = color(col); stops.push(`<stop offset="${n(o)}" stop-color="${k.v}"${k.o < 1 ? ` stop-opacity="${n(k.o)}"` : ""}/>`); } };
+      defs.push({ toString: () => `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="${n(a)}" y1="${n(b)}" x2="${n(c)}" y2="${n(d)}">${stops.join("")}</linearGradient>` });
+      return g;
+    },
+    measureText(t){ mc.font = st.font; if ("letterSpacing" in mc) mc.letterSpacing = st.letterSpacing; return mc.measureText(t); },
+    drawImage(img, x, y, w, h){
+      if (w == null){ w = img.width; h = img.height; }
+      const m = st.m;
+      lastAttrs = null;
+      body.push(`<image xlink:href="${imgData(img)}" x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" preserveAspectRatio="none" transform="matrix(${m.map(n).join(" ")})"${common()}/>`);
+    },
+    fillText(t,x,y){ text(t,x,y,"fill"); },
+    strokeText(t,x,y){ text(t,x,y,"stroke"); },
+    setLineDash(){},
+  };
+  function text(t, x, y, kind){
+    const f = st.font.match(/^(italic )?(\d+) ([\d.]+)px (.*)$/);
+    const fam = f ? f[4].replace(/"/g, "'") : "sans-serif", first = f ? f[4].match(/"([^"]+)"/) : null;
+    if (first) fontsUsed.add(first[1] + (f[1] ? ":ital" : "") + "@" + f[2]);
+    const anchor = { center:"middle", right:"end", end:"end" }[st.textAlign] || "start";
+    const ls = parseFloat(st.letterSpacing) || 0, m = st.m;
+    lastAttrs = null;
+    body.push(`<text x="${n(x)}" y="${n(y)}" transform="matrix(${m.map(n).join(" ")})" font-family="${esc(fam)}"` +
+      (f ? ` font-size="${n(f[3])}" font-weight="${f[2]}"${f[1] ? ' font-style="italic"' : ""}` : "") +
+      (ls ? ` letter-spacing="${n(ls)}"` : "") + ` text-anchor="${anchor}"` + paint(kind).replace(/stroke-width="[^"]+"/, `stroke-width="${n(st.lineWidth)}"`) +
+      common() + shadowAttr() + ` xml:space="preserve">${esc(t)}</text>`);
+  }
+  ["fillStyle","strokeStyle","lineWidth","lineJoin","globalAlpha","font","textAlign","textBaseline","letterSpacing","shadowColor","shadowBlur","shadowOffsetX","shadowOffsetY"]
+    .forEach(k => Object.defineProperty(ctx, k, { get: () => st[k], set: v => { st[k] = v; } }));
+  ctx.toSVG = () => {
+    const fams = [...new Set([...fontsUsed].map(s => s.split(/[:@]/)[0]))];
+    const css = fams.length ? `<style>@import url("https://fonts.googleapis.com/css2?${fams.map(f => "family=" + encodeURIComponent(f).replace(/%20/g, "+") + ":ital,wght@0,400;0,600;0,700;0,800;1,400;1,700").join("&amp;")}&amp;display=swap");</style>` : "";
+    return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">\n` +
+      `<!-- Eagle Graphics Web Store Banner Studio. Fonts used: ${fams.join(", ") || "none"} (free on Google Fonts). -->\n` +
+      `<defs>${css}${defs.join("")}</defs>\n` + body.join("\n") + `\n</svg>\n`;
+  };
+  ctx.fontsUsed = () => [...new Set([...fontsUsed].map(s => s.split(/[:@]/)[0]))];
+  return ctx;
+}
+
 /* ---------- export ---------- */
 let downloadsP = (window.claude && window.claude.use) ? window.claude.use("downloads").catch(()=>null) : Promise.resolve(null);
 $("exportBtn").addEventListener("click", async () => {
   if (cleared){ setStatus("The banner is blank. Add text or pick a quick style first."); return; }
   setStatus("Preparing image…"); $("fallback").hidden = true;
   await ensureFonts();
-  const off = document.createElement("canvas"); off.width=S.w; off.height=S.h;
-  const ctx = off.getContext("2d");
-  const jpg = S.fmt==="jpg";
-  if (jpg){ ctx.fillStyle="#FFFFFF"; ctx.fillRect(0,0,S.w,S.h); }
-  render(ctx, S.w, S.h);
-  const blob = await new Promise(r => off.toBlob(r, jpg ? "image/jpeg" : "image/png", 0.93));
-  const name = (S.fname || "store-banner").replace(/[^\w\-]+/g,"-").replace(/^-+|-+$/g,"") + (jpg ? ".jpg" : ".png");
+  const jpg = S.fmt==="jpg", svg = S.fmt==="svg";
+  let blob, svgFonts = [];
+  if (svg){
+    const sctx = SvgCtx(S.w, S.h); render(sctx, S.w, S.h);
+    svgFonts = sctx.fontsUsed();
+    blob = new Blob([sctx.toSVG()], {type:"image/svg+xml"});
+  } else {
+    const off = document.createElement("canvas"); off.width=S.w; off.height=S.h;
+    const ctx = off.getContext("2d");
+    if (jpg){ ctx.fillStyle="#FFFFFF"; ctx.fillRect(0,0,S.w,S.h); }
+    render(ctx, S.w, S.h);
+    blob = await new Promise(r => off.toBlob(r, jpg ? "image/jpeg" : "image/png", 0.93));
+  }
+  const name = (S.fname || "store-banner").replace(/[^\w\-]+/g,"-").replace(/^-+|-+$/g,"") + (jpg ? ".jpg" : svg ? ".svg" : ".png");
+  const fontNote = svg && svgFonts.length ? ` Install ${svgFonts.join(", ")} (free on Google Fonts) to edit the text in Illustrator.` : "";
   const dl = await downloadsP;
   if (dl){
-    try { await dl.save({filename:name, data:blob}); setStatus(`Saved ${name} (${S.w} × ${S.h}).`); return; }
+    try { await dl.save({filename:name, data:blob}); setStatus(`Saved ${name} (${S.w} × ${S.h}).` + fontNote); return; }
     catch(err){
       if (err && err.code==="declined"){ setStatus("Download cancelled."); return; }
       if (err && err.code==="rate_limited"){ setStatus("A save prompt is already open. Finish it, then try again."); return; }
@@ -1066,7 +1219,7 @@ $("exportBtn").addEventListener("click", async () => {
       const url = URL.createObjectURL(blob), a = document.createElement("a");
       a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 2000);
-      setStatus(`Downloaded ${name} (${S.w} × ${S.h}).`); return;
+      setStatus(`Downloaded ${name} (${S.w} × ${S.h}).` + fontNote); return;
     } catch (e) { /* fall through to the save-image fallback */ }
   }
   $("fallbackImg").src = URL.createObjectURL(blob); $("fallback").hidden = false;
