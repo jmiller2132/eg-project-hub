@@ -171,3 +171,8 @@ test("real projects.json: nothing role-limited yet, so everyone sees all 16 card
   const f = A.filterProjects(real, ["tenant:eg"]);
   assert.equal(f.sections.flatMap(s => s.items).filter(x => !x.hidden).length, 16);
 });
+
+test("error page links work", async () => {
+  const html = await A.errorPage("x", 400).text();
+  assert.match(html, /href="\/"/); assert.match(html, /href="\/api\/auth\/logout"/); assert.match(html, /href="\/favicon\.svg"/);
+});
