@@ -22,6 +22,9 @@ every commit to `main` deploys to production in about a minute. Owner: Jeff Mill
   - `downloads/`: files people download (CSV templates).
   - `brand/`: logo files used by the Brand Guide.
   - `favicon.*`, `apple-touch-icon.png`: site icons.
+- `middleware.js`, `auth/`, `api/auth/`: Microsoft sign-in. Off until `AUTH_CLIENT_ID` is set in
+  Vercel. `auth/projects.gen.js` is written by `build.py`; don't edit it. Run `npm test` after any
+  change to these files. Setup steps are in `SETUP-MICROSOFT-LOGIN.md`.
 - `src/`: source for pages `build.py` assembles: `order-import`, `code-generator`, `brand-guide`.
   Edit these in `src/`, never their copies in `site/tools/`.
   - `order-core.js` is a verified port of the old GUI_V2.exe logic. Its output matched the original
@@ -49,6 +52,10 @@ every commit to `main` deploys to production in about a minute. Owner: Jeff Mill
    - External apps use their full `https://` URL.
    - `"download": true` for files that should download instead of open.
    - `"comingSoon": true` with no `url` for a placeholder card.
+   - `"roles": ["sales"]` limits the card to people with one of those Microsoft roles (`admin`, `manager`) (see
+     `SETUP-MICROSOFT-LOGIN.md`). Works on a whole section too. A card's own `roles` replace its
+     section's. `"tenant:eg"` / `"tenant:es"` limit it to one company. `admin` sees everything.
+     Only matters once Microsoft sign-in is on; until then everyone sees every card.
    - `"beta": true` adds a Beta label and a "still in the works" note. Use a string instead of
      `true` for a custom note, e.g. `"beta": "Compare against the old program first."` Remove it once
      the tool is proven.
@@ -57,7 +64,8 @@ every commit to `main` deploys to production in about a minute. Owner: Jeff Mill
 ### Hide or remove a tool
 Set `"hidden": true` on its entry to take it off the page but keep it for later. Delete the entry
 (and its file in `site/tools/`) to remove it for good. Hiding does not lock the app: anyone with
-the direct URL can still open it.
+the direct URL can still open it. To actually lock a hosted tool once sign-in is on, give it
+`"roles": ["admin"]` (hidden or not): the sign-in check blocks its URL for everyone else.
 
 ### Add a section
 Add an object to `sections` with `id`, `eyebrow`, `title`, `blurb`, optional `"shaded": true`
