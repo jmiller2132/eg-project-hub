@@ -1,0 +1,9 @@
+{
+  "name": "eg-project-hub",
+  "private": true,
+  "type": "module",
+  "description": "Eagle Graphics Project Hub. Static site in site/, Microsoft sign-in in middleware.js, auth/ and api/auth/.",
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  }
+}
