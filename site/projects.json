@@ -48,7 +48,10 @@
           "description": "Log and track receiving discrepancies against POs.",
           "icon": "alert",
           "url": "https://eg-discrepancy-report.vercel.app/",
-          "tag": "Live"
+          "tag": "Live",
+          "roles": [
+            "admin"
+          ]
         }
       ]
     },
