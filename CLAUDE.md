@@ -76,6 +76,9 @@ Tools usually come from Claude chats or Claude Design. Check each one for:
   ```
 - **Claude-only features:** search for `window.claude`, `sendPrompt`, `window.storage` and links to
   `claude.ai`. These don't work for people without Claude. Tell the user what won't work.
+- **Red "ResizeObserver loop" box:** bundled pages show every browser warning in a red box, and
+  this one is harmless. Add the one-line filter script that follows the title fix in
+  `site/tools/email-templates.html` (it must come before the bundle's own error listener).
 - **Saving through Claude only:** tools built in Claude often save files with
   `window.claude.use("downloads")` and otherwise show "Saving isn't available in this view". On the
   hub that means nothing downloads. Add a normal browser download for when `window.claude` is missing
