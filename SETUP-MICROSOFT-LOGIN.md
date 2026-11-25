@@ -97,7 +97,7 @@ Vercel → `eg-project-hub` → **Settings → Environment Variables**. Add thes
 |-----------------------|----------------------------------------------------------------|
 | `AUTH_CLIENT_ID`      | Application (client) ID from step 2                            |
 | `AUTH_CLIENT_SECRET`  | Secret value from step 2 (mark it Sensitive)                   |
-| `AUTH_TENANTS`        | `eg=FIRST-TENANT-ID,ef=SECOND-TENANT-ID` (short names are up to you) |
+| `AUTH_TENANTS`        | `eg=FIRST-TENANT-ID,es=SECOND-TENANT-ID` (eg = Eagle Graphics and Eagle Fulfillment, es = Eagle Sign) |
 | `AUTH_SECRET`         | A long random string, 40+ characters (mark it Sensitive)       |
 | `AUTH_CANONICAL_HOST` | `hub.egpromo.com` (Production only)                            |
 
@@ -107,7 +107,7 @@ To make `AUTH_SECRET`, run this in PowerShell and paste the result:
 $b = New-Object byte[] 48; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b); [Convert]::ToBase64String($b)
 ```
 
-The short names in `AUTH_TENANTS` become roles too: `"roles": ["tenant:ef"]` shows a card only to
+The short names in `AUTH_TENANTS` become roles too: `"roles": ["tenant:es"]` shows a card only to
 people from that company.
 
 Environment variables only take effect on the next deploy: **Deployments → latest → ⋯ → Redeploy**.

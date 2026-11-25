@@ -6,7 +6,7 @@
  *   AUTH_CLIENT_ID      Application (client) ID of the "Eagle Hub" app registration
  *   AUTH_CLIENT_SECRET  Client secret value from that app registration
  *   AUTH_TENANTS        Allowed Microsoft tenants as alias=tenant-id pairs, comma separated:
- *                         eg=11111111-...,ef=22222222-...
+ *                         eg=11111111-...,es=22222222-...
  *                       The alias becomes a role ("tenant:eg") so cards can be limited to one company.
  *   AUTH_SECRET         Long random string (40+ characters) used to sign the sign-in cookie
  *   AUTH_CANONICAL_HOST Optional, e.g. hub.egpromo.com. Production visits to any other address
@@ -46,7 +46,7 @@ export function configProblems(c) {
   const p = [];
   if (!c.clientSecret) p.push("AUTH_CLIENT_SECRET is not set.");
   if (c.secret.length < 32) p.push("AUTH_SECRET must be at least 32 characters.");
-  if (!Object.keys(c.tenants).length) p.push("AUTH_TENANTS has no tenants (format: eg=tenant-id,ef=tenant-id).");
+  if (!Object.keys(c.tenants).length) p.push("AUTH_TENANTS has no tenants (format: eg=tenant-id,es=tenant-id).");
   return p;
 }
 
@@ -238,7 +238,7 @@ export function errorPage(message, status = 400, setCookieHeader) {
   const headers = new Headers({ "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" });
   if (setCookieHeader) headers.append("Set-Cookie", setCookieHeader);
   const title = status === 403 ? "No Access" : "Sign-In Problem";
-  return new Response(`<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title} | Eagle Graphics</title><link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  return new Response(`<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title} | Eagle Graphics</title><link rel="icon" hres="/favicon.svg" type="image/svg+xml">
 <style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#2a2d2e;font:400 15px/1.7 "Open Sans",Arial,sans-serif;color:#e1e3e4;padding:24px}main{max-width:480px;background:#3a3e40;border:1px solid #53585a;border-radius:4px;padding:32px}h1{margin:0 0 4px;font:800 22px/1.2 "Jost","Century Gothic",sans-serif;text-transform:uppercase;letter-spacing:.02em;color:#fff}.bar{width:48px;height:3px;background:#76bd1d;margin:12px 0 16px}p{margin:0 0 20px}a{display:inline-block;background:#4a7812;color:#fff;text-decoration:none;font:700 12px/1 "Jost",sans-serif;text-transform:uppercase;letter-spacing:.1em;padding:14px 18px;border-radius:3px;margin-right:8px}a.alt{background:transparent;border:1px solid #7d8183}a:hover{background:#365711}</style></head>
-<body><main><h1>${title}</h1><div class="bar"></div><p>${esc(message)}</p><a href="/">Back to the Hub</a><a class="alt" href="/api/auth/logout">Sign Out</a></main></body></html>`, { status, headers });
+<body><main><h1>${title}</h1><div class="bar"></div><p>${esc(message)}</p><a hres="/">Back to the Hub</a><a class="alt" hres="/api/auth/logout">Sign Out</a></main></body></html>`, { status, headers });
 }

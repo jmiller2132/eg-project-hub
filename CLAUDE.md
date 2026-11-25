@@ -54,7 +54,7 @@ every commit to `main` deploys to production in about a minute. Owner: Jeff Mill
    - `"comingSoon": true` with no `url` for a placeholder card.
    - `"roles": ["sales"]` limits the card to people with one of those Microsoft roles (`admin`, `manager`) (see
      `SETUP-MICROSOFT-LOGIN.md`). Works on a whole section too. A card's own `roles` replace its
-     section's. `"tenant:eg"` / `"tenant:ef"` limit it to one company. `admin` sees everything.
+     section's. `"tenant:eg"` / `"tenant:es"` limit it to one company. `admin` sees everything.
      Only matters once Microsoft sign-in is on; until then everyone sees every card.
    - `"beta": true` adds a Beta label and a "still in the works" note. Use a string instead of
      `true` for a custom note, e.g. `"beta": "Compare against the old program first."` Remove it once
