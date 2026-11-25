@@ -29,7 +29,7 @@ hub.egpromo.com automatically.
 
 ## 2. Register the hub with Microsoft (in your main tenant)
 
-Entra admin center (entra.microsoft.com) → **Identity → Applications → App registrations → New registration**
+Entra admin center (entra.microsoft.com) → **Entra ID → App registrations → New registration**
 
 - **Name:** Eagle Graphics Hub
 - **Supported account types:** *Accounts in any organizational directory (Multitenant)*.
@@ -66,7 +66,7 @@ Click Register, then:
 
 ## 3. Decide who can get in
 
-Entra → **Enterprise applications → Eagle Graphics Hub**
+Entra → **Entra ID → Enterprise apps → All applications → Eagle Graphics Hub** (or search "Enterprise apps" in the top bar)
 
 1. **Properties → Assignment required? → Yes → Save.** Without this, anyone in the tenant can sign in.
 2. **Users and groups → Add user/group** → pick people (or groups) → pick a role → Assign.
