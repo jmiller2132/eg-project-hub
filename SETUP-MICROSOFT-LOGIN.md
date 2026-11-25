@@ -52,15 +52,12 @@ Click Register, then:
    - Allowed member types: **Users/Groups**
    - Value: lowercase, no spaces (this is what goes in projects.json)
 
-   Starting set (change to fit):
+   Two roles:
 
-   | Display name | Value   | Sees                                        |
-   |--------------|---------|---------------------------------------------|
-   | Admin        | admin   | Everything, including locked tools          |
-   | Sales        | sales   | Cards marked `"roles": ["sales"]`           |
-   | Art          | art     | Cards marked `"roles": ["art"]`             |
-   | Production   | production | Cards marked `"roles": ["production"]`   |
-   | Manager      | manager | Cards marked `"roles": ["manager"]`         |
+   | Display name | Value   | Sees                                                  |
+   |--------------|---------|-------------------------------------------------------|
+   | Admin        | admin   | Everything, including locked tools                    |
+   | Manager      | manager | The regular hub plus cards marked `"roles": ["manager"]` |
 
    Anyone signed in with no role still sees every card that has no `roles` on it.
 
