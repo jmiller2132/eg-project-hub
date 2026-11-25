@@ -61,12 +61,15 @@ Click Register, then:
 
    Anyone signed in with no role still sees every card that has no `roles` on it.
 
-## 3. Decide who can get in
+## 3. Give out Admin and Manager
 
 Entra → **Entra ID → Enterprise apps → All applications → Eagle Graphics Hub** (or search "Enterprise apps" in the top bar)
 
-1. **Properties → Assignment required? → Yes → Save.** Without this, anyone in the tenant can sign in.
-2. **Users and groups → Add user/group** → pick people (or groups) → pick a role → Assign.
+1. **Properties → Assignment required?** Leave it at **No**. Everyone with a company Microsoft account
+   can sign in and sees the regular hub. New hires get in automatically; people who leave lose access
+   when their account is turned off.
+2. **Users and groups → Add user/group** → pick the people who get **Admin** or **Manager** → pick the
+   role → Assign. Nobody else needs to be added.
    Assigning a whole group needs Entra ID P1 (included in Microsoft 365 Business Premium). Without it,
    assign people one at a time.
 
@@ -80,7 +83,7 @@ https://login.microsoftonline.com/organizations/adminconsent?client_id=YOUR-CLIE
 ```
 
 They approve it. "Eagle Graphics Hub" then shows up in **their** Enterprise applications, and they repeat
-step 3 there (Assignment required, then assign people and roles). The roles from step 2 show up there
+step 3 there (assign their admins and managers). The roles from step 2 show up there
 automatically.
 
 Also copy the second tenant's **Tenant ID** (Entra → Overview).
@@ -139,7 +142,7 @@ A card's own `roles` replace its section's. `admin` always sees everything. Exte
 |------------------------------------------------------|-------------------------------------------------------------|
 | "Sign-in isn't set up correctly yet: ..."            | An environment variable is missing; the page says which.   |
 | "redirect URI mismatch"                              | Add that address's `/api/auth/callback` in step 2.2.        |
-| "haven't been given access"                          | Assign the person in Enterprise applications (step 3).     |
+| "haven't been given access"                          | Someone turned Assignment required on. Set it back to No.  |
 | "administrator needs to approve"                     | Second tenant hasn't done the admin consent link yet.      |
 | "isn't from an Eagle Graphics company"               | Their tenant ID isn't in `AUTH_TENANTS`.                   |
 | "client secret is wrong or expired"                  | Make a new secret (step 2.3), update Vercel, redeploy.     |
