@@ -32,7 +32,7 @@ hub.egpromo.com automatically.
 Entra admin center (entra.microsoft.com) → **Entra ID → App registrations → New registration**
 
 - **Name:** Eagle Graphics Hub
-- **Supported account types:** *Accounts in any organizational directory (Multitenant)*.
+- **Supported account types:** *Multiple Entra ID tenants*.
   This is what lets the second company sign in. The hub itself only lets in the two tenants you
   list in step 4; everyone else gets a "not from an Eagle Graphics company" page.
 - **Redirect URI:** platform **Web**, `https://hub.egpromo.com/api/auth/callback`
