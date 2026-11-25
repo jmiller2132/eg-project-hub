@@ -117,7 +117,7 @@ Environment variables only take effect on the next deploy: **Deployments → lat
 1. Open the preview address for this change in a private window. You should land on Microsoft's
    sign-in, then back on the hub with your name and **Sign Out** in the top right.
 2. Try someone from the second company.
-3. Try someone who isn't assigned. They should see "You haven't been given access to the hub yet."
+3. Try someone with no role. They get in and see the regular hub, without manager or admin tools.
 4. Merge the pull request, then check `https://hub.egpromo.com`.
 
 ## Turning it off
