@@ -166,10 +166,12 @@ test("logout clears the session", () => {
   assert.match(r.headers.get("set-cookie"), /Max-Age=0/);
 });
 
-test("real projects.json: nothing role-limited yet, so everyone sees all 16 cards", async () => {
+test("real projects.json: admin sees every card, others only cards without roles", async () => {
   const { default: real } = await import("../auth/projects.gen.js");
-  const f = A.filterProjects(real, ["tenant:eg"]);
-  assert.equal(f.sections.flatMap(s => s.items).filter(x => !x.hidden).length, 16);
+  const all = real.sections.flatMap(s => s.items.map(x => ({ ...x, need: x.roles || s.roles })));
+  const vis = r => A.filterProjects(real, r).sections.flatMap(s => s.items).length;
+  assert.equal(vis(["admin"]), all.length);
+  assert.equal(vis(["tenant:eg"]), all.filter(x => !x.need).length);
 });
 
 test("error page links work", async () => {
