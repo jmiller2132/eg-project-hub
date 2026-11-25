@@ -12,8 +12,7 @@
           "description": "Turn a bulk order CSV into a ShopWorks import file. Replaces the old GUI_V2 desktop program.",
           "icon": "clip",
           "url": "/tools/order-import.html",
-          "tag": "Web",
-          "beta": "New web version. Compare the first few files against the old program before importing."
+          "tag": "Web"
         },
         {
           "name": "Quote Builder",
@@ -94,8 +93,7 @@
           "description": "Build a packaging dieline from 20 box styles, add artwork, fold it in 3D and export for print.",
           "icon": "box",
           "url": "/tools/box-dieline-studio.html",
-          "tag": "Packaging",
-          "beta": true
+          "tag": "Packaging"
         },
         {
           "name": "Eagle Flyer Builder",
